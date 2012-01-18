@@ -2,10 +2,7 @@ var firstRun = true;
 
 function initDropbox() {
     $("#report").html('<p style=\'font-size: 18px; text-align: left; line-height: 20px;\'> ' + i18n.msgLoading.replace('%s', '<Dropbox home>/Apps/MoneyLog Box/moneylog_data.txt')   + '</p>');
-    readFromDropBox();
-}
-
-function readFromDropBox() {
+    
     $.get('/', { reloading: true }, function(data) {
         $("#editordata").val(data);
         $("#editoropen").css('display', 'inline');
