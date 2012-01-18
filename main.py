@@ -14,8 +14,8 @@ from google.appengine.api import users
 
 env = jinja2.Environment(loader = jinja2.FileSystemLoader('templates'))
 
-APP_KEY = 'rlmh1dqth7ik8yk'
-APP_SECRET = 'ogk5fv5r1xogr73'
+APP_KEY = 'YOUR_KEY'
+APP_SECRET = 'YOUR_SECRET'
 ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured for your app
 
 HOST = 'mlogbox.appspot.com'
