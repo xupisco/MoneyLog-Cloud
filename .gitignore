@@ -1,0 +1,11 @@
+*.pyc
+.DS_Store
+_matrix/
+static/uploads/
+static/_versions/
+static/saraiva/
+.svn
+*.db
+.project
+.pydevproject
+settings.py

@@ -1,0 +1,49 @@
+body {
+	background-color: #fff;
+	overflow: hidden;
+	font-family: Arial, Helvetica;
+	padding: 5px 15px;
+}
+
+a {
+	color: #DD4B39;
+}
+
+p {
+	color: #888;
+	margin: 3px 0;
+}
+
+a:hover {
+	color: #4291df;
+}
+
+#loading {
+	position: absolute;
+	text-align: center;
+	width: 60px;
+	background-color: #750705;
+	color: #fff;
+	font-family: Helvetica;
+	font-size: 12px;
+	padding: 5px;
+	top: 10px;
+	right: 10px;
+	display: none;
+}
+
+h1 {
+	font-size: 300%;
+	font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+	color: black;
+	font-weight: bold;
+	margin-bottom: -31px;
+}
+
+h3 {
+	font-size: 200%;
+	font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+	color: #4291df;
+	font-weight: bold;
+	margin-bottom: 20px;
+}

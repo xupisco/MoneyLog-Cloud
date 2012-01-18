@@ -1,0 +1,29 @@
+application: mlogbox
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: True
+
+handlers:
+- url: /favicon.ico
+  static_files: static/favicon.png
+  upload: static/favicon.png
+
+- url: /css
+  static_dir: static/css
+
+- url: /js
+  static_dir: static/js
+
+- url: /images
+  static_dir: static/images
+
+- url: /icons
+  static_dir: static/icons
+
+- url: .*
+  script: main.app
+
+libraries:
+- name: jinja2
+  version: latest
