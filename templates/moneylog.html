@@ -348,8 +348,11 @@ tr:hover .neg {
 	background-color:#eee; /* bg6 */
 	font-style:italic;
 }
-#report tr.selected {
-	background-color:yellow !important; /* bg_yellow */
+#report tr.selected {  /* not using td to exclude the row number cell */
+	background-color:#FF6 !important; /* bg_yellow_light */
+}
+#report tr.selected:hover td {
+	background-color:#FF0 !important; /* bg_yellow */
 }
 #report .hl {
 	color:#000;            /* fg4 */
@@ -504,10 +507,8 @@ table.chart tr.label {
     <style type="text/css">#tagsArea input { display:inline; }</style>
 <![endif]-->
 
-<!-- MoneyLog Box -->
 <script src="js/jquery-1.7.1.min.js" type="text/javascript" ></script>
 <script src="/js/moneylog_dropbox.js" type="text/javascript"></script>
-<!-- END - MoneyLog Box -->
 
 <script type="text/javascript">
 /*global window: false, localStorage: false */
@@ -556,12 +557,15 @@ var initChartYearly = 1;          // Initial selected item for the yearly chart 
 
 
 // Program structure and files
-var oneFile = true;              // Full app is at moneylog.html single file?
+var oneFile = false;              // Full app is at moneylog.html single file?
 var dataFiles = ['moneylog.txt']; // The paths for the data files (requires oneFile=false)
 
 // localStorage allows editing in-place, saving your data on the browser (like cookies)
-var useLocalStorage = false;     // Turn ON localStorage support?
+var useLocalStorage = false;      // Turn ON localStorage support?
 var localStorageKey = 'moneylogData'; // Keyname for the localStorage database (don't change)
+
+// Dropbox storage
+var useDropboxStorage = true;    // Turn ON Dropbox storage support?
 
 // Note: The dataFile encoding is UTF-8. Change to ISO-8859-1 if accents got mangled.
 
@@ -636,6 +640,7 @@ var i18nDatabase = {
 		errorNoLocalStorage: 'Sorry, your browser does not have localStorage support. %s will not work.',
 		errorRequirements: 'Minimum requirements:',
 		msgLoading: 'Loading %s...',
+		msgSaving: 'Saving...',
 		helpFullScreen: 'Turns ON/OFF the clean mode: only the report is shown, with no toolbars.',
 		helpReports: 'Daily, monthly and yearly reports, with charts, balance and totals.',
 		helpLastMonths: 'See only the latest data, ignoring oldies.',
@@ -704,6 +709,7 @@ var i18nDatabase = {
 		errorNoLocalStorage: 'Ops, seu navegador não tem localStorage. O %s não vai funcionar.',
 		errorRequirements: 'Os requisitos mínimos são:',
 		msgLoading: 'Carregando %s...',
+		msgSaving: 'Salvando...',
 		helpFullScreen: 'Liga/desliga o modo limpo: aparece somente o extrato, sem as barras de ferramentas.',
 		helpReports: 'Extratos diário, mensal e anual, com gráficos, somatório, médias, mínimo, máximo e acumulado.',
 		helpLastMonths: 'Veja somente os dados mais recentes, ignorando os antigos.',
@@ -2370,7 +2376,7 @@ function populateChartColsCombo() {
 
 function populateDataFilesCombo() {
 	var el, i;
-	if (!oneFile && !useLocalStorage) {
+	if (!oneFile && !useLocalStorage && !useDropboxStorage) {
 		el = document.getElementById('datafiles');
 		for (i = 0; i < dataFiles.length; i++) {
 			el.options[i] = new Option(dataFiles[i]);
@@ -2664,13 +2670,19 @@ function valueFilterChanged() {
 /////////////////////////////////////////////////////////////////////
 
 function init() {
-	
+
 	// Load the i18n messages (must be the first)
 	i18n = i18nDatabase.getLanguage(lang);
 	i18n.labelTags = i18n.labelsDetailed[2]; // Tags
 
-	// Online mode uses localStorage
-	isOnline = useLocalStorage;
+	// Dropbox version settings
+	if (useDropboxStorage) {
+		oneFile = true;
+		useLocalStorage = false;
+	}
+
+	// Online mode uses localStorage or Dropbox
+	isOnline = useLocalStorage || useDropboxStorage;
 
 	setCurrentDate();
 	populateMonthsCombo();
@@ -2691,18 +2703,23 @@ function init() {
 	highlightTags = highlightTags.strip().split(/\s+/);
 
 	// Just show the files combo when there are 2 or more files
-	if (oneFile || useLocalStorage || dataFiles.length < 2) {
+	if (oneFile || useLocalStorage || useDropboxStorage || dataFiles.length < 2) {
 		document.getElementById('datafiles').style.display = 'none';
 	}
 
 	// Hide Reload button in oneFile mode. No iframe, so we can't reload.
-	if (oneFile || useLocalStorage) {
+	if (oneFile || useLocalStorage || useDropboxStorage) {
 		document.getElementById('reload').style.visibility = 'hidden';
 	}
 
 	if (isOnline) {
 		appName = 'Moneylog Online';
 		i18n.appUrl = i18n.appUrlOnline;
+
+		if (useDropboxStorage) {
+			appName = 'Moneylog Dropbox';
+			i18n.appUrl = 'http://mlogbox.appspot.com/';
+		}
 
 		// The Edit button only appears in online mode
 		document.getElementById('editoropen').style.display = 'inline';
@@ -2796,7 +2813,7 @@ function init() {
 	if (isOnline) {
 		document.getElementById('editoropen' ).onclick = editorOn;
 		document.getElementById('editorclose').onclick = editorOff;
-		document.getElementById('editorsave' ).onclick = saveLocalData;
+		document.getElementById('editorsave' ).onclick = (useDropboxStorage) ? saveDropboxData : saveLocalData;
 		document.getElementById('editordata' )[(isOpera) ? 'onkeypress' : 'onkeydown'] = insertTab;
 	}
 
@@ -2810,7 +2827,11 @@ function init() {
 
 	// Compose help contents (dirty, but handy)
 	document.getElementById('help').innerHTML = (
-		wrapme('b', linkme(i18n.appUrl, appName) + ': ') + i18n.appDescription +
+		wrapme(
+			'b',
+			linkme(i18n.appUrl, appName) + 
+			((useDropboxStorage) ? ' by ' + linkme('http://twitter.com/xupisco', '@xupisco') : '') +
+			': ') + i18n.appDescription +
 		array2ul([wrapme('b', i18n.labelReports + ': ') + i18n.helpReports]) +
 		array2ul([
 				wrapme('b', i18n.labelLastMonths + ': ') + i18n.helpLastMonths,
@@ -2846,7 +2867,9 @@ function init() {
 	}
 
 	// Everything is ok, time to read/parse/show the user data
-	if (oneFile || useLocalStorage) {
+	if (useDropboxStorage) {
+		initDropbox();
+	} else if (oneFile || useLocalStorage) {
 		readData();
 		parseData();
 		showReport();
@@ -2858,8 +2881,6 @@ function init() {
 
 	// Uncomment this line to focus the search box at init
 	// document.getElementById('filter').focus();
-
-	startDropboxInterface();
 }
 window.onload = init;
 
@@ -3014,11 +3035,10 @@ window.onload = init;
 
 <!-- tudo-em-um / all-in-one -->
 <pre id="data">
+
 # Troque estes dados pelos seus, separados por TAB
 # Repito: separados por TAB, e não espaços em branco
 # A data é no formato ANO-MES-DIA
-
-# Formato: DATA /t VALOR /t TAGS (virgula) | DESCRIÇÃO
 
 2011-09-01	-100	Saldo inicial da conta :(
 2011-09-15	 -74,23	mercado|
