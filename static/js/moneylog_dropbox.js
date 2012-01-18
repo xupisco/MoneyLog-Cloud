@@ -1,15 +1,8 @@
 var firstRun = true;
 
 function initDropbox() {
-    hideUI();
-    resetData();
-    readFromDropBox();
-}
-
-function hideUI() {
-    $("#tagsArea").hide();
-    $("#charts").hide();
     $("#report").html('<p style=\'font-size: 18px; text-align: left; line-height: 20px;\'> ' + i18n.msgLoading.replace('%s', '<Dropbox home>/Apps/MoneyLog Box/moneylog_data.txt')   + '</p>');
+    readFromDropBox();
 }
 
 function readFromDropBox() {
