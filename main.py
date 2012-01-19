@@ -18,7 +18,7 @@ APP_KEY = 'XXX'
 APP_SECRET = 'XXX'
 ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured for your app
 
-HOST = 'mlogbox.appspot.com'
+HOST = 'moneylog-cloud.appspot.com'
 #HOST = 'localhost:8087'
 MONEYLOG_FOLDER = '/MoneyLog Cloud/'
 MONEYLOG_DATA = 'moneylog.txt'
@@ -77,6 +77,7 @@ class Login(CoreHandler):
         }
         self.generate('login.html', data)
 
+
 class Connect(CoreHandler):
     def get(self):
         request_token_key = self.request.get('oauth_token')
@@ -107,13 +108,14 @@ class Update(CoreHandler):
 
         dude = get_client(access_token)
         data = self.request.get('data')
+        filename = self.request.get('filename')
         
         #ml_data = dude.get_file(MONEYLOG_DATA)
 
         temp = tempfile.TemporaryFile()
         temp.write(data.encode('utf-8'))
         temp.seek(0)
-        save = dude.put_file(MONEYLOG_DATA, temp.read(), overwrite=True)
+        save = dude.put_file(filename, temp.read(), overwrite=True)
         temp.close()
 
         self.response.headers["Content-Type"] = "text/plain"
@@ -130,6 +132,7 @@ class Main(CoreHandler):
         
         dude = get_client(access_token)
         reloading = self.request.get('reloading', False)
+        filename = self.request.get('filename', '*')
 
         # Load or create user config
         try:
@@ -140,20 +143,46 @@ class Main(CoreHandler):
             raw_config.close()
             save = dude.put_file(MONEYLOG_CONFIG, ml_config)
 
-        try:
-            ml_data = dude.get_file(MONEYLOG_DATA).read()
-        except:
-            raw_file = open('moneylog_rawdata.txt', 'r')
-            ml_data = raw_file.read()
-            raw_file.close()
-            save = dude.put_file(MONEYLOG_DATA, ml_data)
+        # Read directory
+        ml_dir = dude.metadata('')
+        ml_files = ['*']
+        txt = ''
+
+        for f in ml_dir['contents']:
+            if "mime_type" in f:
+                if f['mime_type'] == "text/plain":
+                    ml_files.append(f['path'][f['path'].rfind("/")+1:])
+
+        if len(ml_files) > 2:
+            ml_files_js = "dataFiles = ['%s']" % "', '".join(ml_files)
+        else:
+            ml_files_js = 'dataFiles = [\'%s\']' % ml_files[1]
+            filename = ml_files[1]
+
+        # Read selected file or all
+        if filename == "*" and len(ml_files) > 2:
+            for f in ml_dir['contents']:
+                if "mime_type" in f:
+                    if f['mime_type'] == "text/plain":
+                        txt += '\n' + dude.get_file(f['path']).read()
+            ml_data = txt
+        else:
+            try:
+                basic_file = MONEYLOG_DATA if filename == "*" else filename
+                ml_data = dude.get_file(basic_file).read()
+            except:
+                raw_file = open('moneylog_rawdata.txt', 'r')
+                ml_data = raw_file.read()
+                raw_file.close()
+                save = dude.put_file(MONEYLOG_DATA, ml_data)
         
-        config_script = "<script type='text/javascript'>\n%s\n</script>" % ml_config.decode("utf-8")
+        config_script = "<script type='text/javascript'>\n%s\n\n%s\n</script>" % (ml_config.decode("utf-8"), ml_files_js)
 
         if not reloading:
             data = {
                 'ml_data': ml_data.decode('utf-8'),
                 'user_config': config_script,
+                'ml_files': ml_files,
             }
             self.generate('moneylog.html', data)
         else:
