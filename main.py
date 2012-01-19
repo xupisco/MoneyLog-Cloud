@@ -156,8 +156,11 @@ class Main(CoreHandler):
         if len(ml_files) > 2:
             ml_files_js = "dataFiles = ['%s']" % "', '".join(ml_files)
         else:
-            ml_files_js = 'dataFiles = [\'%s\']' % ml_files[1]
-            filename = ml_files[1]
+            if len(ml_files) == 1:
+                ml_files_js = 'dataFiles = [\'%s\']' % MONEYLOG_DATA
+            else:
+                ml_files_js = 'dataFiles = [\'%s\']' % ml_files[1]
+                filename = ml_files[1]
 
         # Read selected file or all
         if filename == "*" and len(ml_files) > 2:
