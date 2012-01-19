@@ -20,8 +20,9 @@ ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured f
 
 HOST = 'mlogbox.appspot.com'
 #HOST = 'localhost:8087'
-MONEYLOG_FOLDER = '/MoneyLog Box/'
-MONEYLOG_FILE = 'moneylog_data.txt'
+MONEYLOG_FOLDER = '/MoneyLog Cloud/'
+MONEYLOG_DATA = 'moneylog.txt'
+MONEYLOG_CONFIG = 'js/config.js'
 TOKEN_STORE = {}
 
 def get_session():
@@ -54,7 +55,7 @@ class CoreHandler(webapp2.RequestHandler):
             'user': users.GetCurrentUser(),
             'login_url': users.CreateLoginURL(self.request.uri),
             'logout_url': users.CreateLogoutURL('http://' + self.request.host + '/'),
-            'application_name': 'MoneyLog Box!',
+            'application_name': 'MoneyLog Cloud',
             'debug': self.request.get('debug', False),
         }
     
@@ -107,12 +108,12 @@ class Update(CoreHandler):
         dude = get_client(access_token)
         data = self.request.get('data')
         
-        ml_data = dude.get_file(MONEYLOG_FILE)
+        #ml_data = dude.get_file(MONEYLOG_DATA)
 
         temp = tempfile.TemporaryFile()
         temp.write(data.encode('utf-8'))
         temp.seek(0)
-        save = dude.put_file(MONEYLOG_FILE, temp.read(), overwrite=True)
+        save = dude.put_file(MONEYLOG_DATA, temp.read(), overwrite=True)
         temp.close()
 
         self.response.headers["Content-Type"] = "text/plain"
@@ -130,17 +131,29 @@ class Main(CoreHandler):
         dude = get_client(access_token)
         reloading = self.request.get('reloading', False)
 
+        # Load or create user config
         try:
-            ml_data = dude.get_file(MONEYLOG_FILE).read()
+            ml_config = dude.get_file(MONEYLOG_CONFIG).read()
+        except:
+            raw_config = open('moneylog_config.js', 'r')
+            ml_config = raw_config.read()
+            raw_config.close()
+            save = dude.put_file(MONEYLOG_CONFIG, ml_config)
+
+        try:
+            ml_data = dude.get_file(MONEYLOG_DATA).read()
         except:
             raw_file = open('moneylog_rawdata.txt', 'r')
             ml_data = raw_file.read()
             raw_file.close()
-            save = dude.put_file(MONEYLOG_FILE, ml_data)
+            save = dude.put_file(MONEYLOG_DATA, ml_data)
         
+        config_script = "<script type='text/javascript'>\n%s\n</script>" % ml_config.decode("utf-8")
+
         if not reloading:
             data = {
-                'ml_data': ml_data.decode('utf-8')
+                'ml_data': ml_data.decode('utf-8'),
+                'user_config': config_script,
             }
             self.generate('moneylog.html', data)
         else:
