@@ -218,6 +218,7 @@ tr:hover .neg {
 }
 #tagsArea #operabug {
 	/* Wrapper needed by Opera9. Can't pad #tagsArea at left/right */
+	/* Padding-right will be reset by showHideEditButton() */
 	padding:0 0.5em 0 1em;
 }
 #tagsArea #tagsLabel {
@@ -1502,6 +1503,8 @@ function loadSelectedFile() {
 
 	filePath = getSelectedFile();
 
+	showHideEditButton();
+
 	// We will load a single file or all of them?
 	if (filePath === '*') {
 		waitingToLoad = dataFiles.removePattern('*');
@@ -2669,6 +2672,18 @@ function valueFilterChanged() {
 	showReport();
 }
 
+function showHideEditButton() {
+	if (useLocalStorage || useDropboxStorage && getSelectedFile() !== '*') {
+		// show
+		document.getElementById('editoropen').style.display = 'inline';
+		document.getElementById('operabug').style.paddingRight = i18n.labelEdit.length + 'em';
+	} else {
+		// hide
+		document.getElementById('editoropen').style.display = 'none';
+		document.getElementById('operabug').style.paddingRight = '0.5em';
+	}
+}
+
 
 /////////////////////////////////////////////////////////////////////
 //                             INIT
@@ -2708,7 +2723,7 @@ function init() {
 	highlightTags = highlightTags.strip().split(/\s+/);
 
 	// Just show the files combo when there are 2 or more files
-	if (oneFile || useLocalStorage || useDropboxStorage || dataFiles.length < 2) {
+	if (oneFile || useLocalStorage || dataFiles.removePattern('*').length < 2) {
 		document.getElementById('datafiles').style.display = 'none';
 	}
 
@@ -2728,17 +2743,10 @@ function init() {
 			appName = 'Moneylog Cloud';
 			// Can't use the word Dropbox in app name
 			// https://www.dropbox.com/developers/reference/branding
-			i18n.appUrl = 'http://mlogbox.appspot.com/';
+			i18n.appUrl = 'http://moneylog-cloud.appspot.com';
 		}
 
-		// The Edit button only appears in online mode
-		document.getElementById('editoropen').style.display = 'inline';
-		document.getElementById('operabug').style.paddingRight = i18n.labelEdit.length + 'em';
-
-		// Dropbox: Hide the Edit button for the '*' file
-		if (useDropboxStorage && getSelectedFile() === '*') {
-			document.getElementById('editoropen').style.display = 'none';
-		}
+		showHideEditButton();
 	} else {
 		appName = appName.replace('og ', 'og<br>'); // dirty layout fix
 	}

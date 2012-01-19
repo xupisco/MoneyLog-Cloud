@@ -1,8 +1,9 @@
-function initDropbox() {
+function initDropbox(reloading) {
+    reloading = reloading || false
     $("#report").html('<p style=\'text-align: left;\'> ' + i18n.msgLoading.replace('%s', '<Dropbox home>/Apps/MoneyLog Cloud/' + getSelectedFile())   + '</p>');
     $("#charts").hide();
     
-    $.get('/', { reloading: true, filename: getSelectedFile() }, function(data) {
+    $.get('/', { reloading: reloading, filename: getSelectedFile() }, function(data) {
         $("#editordata").val(data);
         resetData();
         rawData = data;
@@ -26,6 +27,6 @@ function editorSave() {
 }
 
 function loadSelectedFile() {
-    initDropbox();
+    initDropbox(true);
 }
 
