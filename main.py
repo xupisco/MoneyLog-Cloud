@@ -19,7 +19,7 @@ APP_SECRET = 'XXX'
 ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured for your app
 
 HOST = 'moneylog-cloud.appspot.com'
-#HOST = 'localhost:8087'
+HOST = 'localhost:8087'
 MONEYLOG_FOLDER = '/MoneyLog Cloud/'
 MONEYLOG_DATA = 'moneylog.txt'
 MONEYLOG_CONFIG = 'js/config.js'
@@ -95,6 +95,30 @@ class Connect(CoreHandler):
     def post(self):
         pass
 
+
+class QuickAdd(CoreHandler):
+    def post(self):
+        access_token_key = self.get_cookie('access_token_key')
+        access_token = TOKEN_STORE.get(access_token_key)
+        if not access_token:
+            return self.redirect('/login')
+
+        import tempfile
+
+        dude = get_client(access_token)
+        data = self.request.get('data')
+        filename = self.request.get('filename')
+
+        f = dude.get_file(filename).read()
+
+        temp = tempfile.TemporaryFile()
+        temp.write("%s\n%s" % (f, data.encode('utf-8')))
+        temp.seek(0)
+        save = dude.put_file(filename, temp.read(), overwrite=True)
+        temp.close()
+
+        self.response.headers["Content-Type"] = "text/plain"
+        self.response.out.write(json.dumps([{'status': 'success'}]))
 
 
 class Update(CoreHandler):
@@ -195,5 +219,6 @@ class Main(CoreHandler):
 app = webapp2.WSGIApplication([('/', Main),
                                ('/connect', Connect),
                                ('/login', Login),
-                               ('/update', Update)],
+                               ('/update', Update),
+                               ('/quickadd', QuickAdd)],
                               debug=_DEBUG)

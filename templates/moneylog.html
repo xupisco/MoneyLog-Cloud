@@ -115,7 +115,7 @@ tr:hover .neg {
 	top:0;
 	left:0;
 	z-index:9;
-	
+
 	font-size:150%;
 	width:1em;
 	text-align:center;
@@ -130,7 +130,6 @@ tr:hover .neg {
 	top:0;
 	left:0;
 	width:100%;
-	height:8em;            /* y1 */
 }
 #fullscreen,
 #tagSummaryButton,
@@ -149,12 +148,17 @@ tr:hover .neg {
 #toolbar input:hover + label {
 	color:#fff;
 }
-#toolbar .left {
-	padding-left:2em;
-	padding-right:2em;
+#toolbar .toolbarpane.left {
+	float:left;
+	width:30%;
 }
-#toolbar .middle {
-	padding-left:0;
+#toolbar .toolbarpane.middle {
+	float:left;
+	width:40%;
+}
+#toolbar .toolbarpane.right {
+	float:right;
+	width:30%;
 }
 #toolbar #report-nav {
 	margin:1em 0;
@@ -259,7 +263,7 @@ tr:hover .neg {
 	color:#800;            /* fg3 */
 	padding:2em;
 	line-height:120%;
-	
+
 	/* IE7 bug: gap between #toolbar and #help if no border */
 	border-top:1px solid #faa; /* bg3 */
 }
@@ -451,7 +455,7 @@ tr:hover .neg {
 	margin: 0;
 	background-color: #eee; /* bg6 */
 	background-color: #ccc; /* bg6 */
-	overflow: auto;	
+	overflow: auto;
 }
 .popup table {
 	border: 0px solid #444; /* bg2 */
@@ -551,7 +555,7 @@ table.chart tr.label {
 	background-color:#93cbff !important;
 }
 </style>
-<!--[if lte IE 7]> 
+<!--[if lte IE 7]>
     <style type="text/css">#tagsArea input { display:inline; }</style>
 <![endif]-->
 
@@ -616,12 +620,16 @@ var useDropboxStorage = true;    // Turn ON Dropbox storage support?
 // Note: The dataFile encoding is UTF-8. Change to ISO-8859-1 if accents got mangled.
 
 // Data format
+var useBlankFieldSeparator = false; // Use blanks (TABs and spaces) as field separator?
 var dataFieldSeparator = '\t';
 var dataRecordSeparator = /\r?\n/;  // \r\n Windows, \n Linux/Mac
 var dataTagTerminator = '|';
 var dataTagSeparator = ',';
 var commentChar = '#';   // Must be at line start (column 1)
 var dataPatterns = {
+	rowBlankSeparated:
+		// Uses multiple TAB and spaces as field separators
+		/^[ \t]*(\d{4}-\d\d-\d\d)[ \t]+([+\-]?[0-9.,*\/]+)[ \t]+(.*)$/,
 	date:
 		// YYYY-MM-DD
 		/^ *(\d{4}-\d\d-\d\d) *$/,
@@ -1039,37 +1047,38 @@ Array.prototype.removePattern = function (patt, n) { // n = number of removes
 };
 
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-if (!Array.prototype.indexOf) {  
-	Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {	
-		"use strict";  
-		if (this == null) {	 
-			throw new TypeError();	
-		}  
-		var t = Object(this);  
-		var len = t.length >>> 0;  
-		if (len === 0) {  
-			return -1;	
-		}  
-		var n = 0;	
-		if (arguments.length > 0) {	 
-			n = Number(arguments[1]);  
-			if (n != n) { // shortcut for verifying if it's NaN	 
-				n = 0;	
-			} else if (n != 0 && n != Infinity && n != -Infinity) {	 
-				n = (n > 0 || -1) * Math.floor(Math.abs(n));  
-			}  
-		}  
-		if (n >= len) {	 
-			return -1;	
-		}  
-		var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);  
-		for (; k < len; k++) {	
-			if (k in t && t[k] === searchElement) {	 
-				return k;  
-			}  
-		}  
-		return -1;	
-	}  
+if (!Array.prototype.indexOf) {
+	Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+		"use strict";
+		var t, len, n, k;
+		if (this == null) {
+			throw new TypeError();
+		}
+		t = Object(this);
+		len = t.length >>> 0;
+		if (len === 0) {
+			return -1;
+		}
+		n = 0;
+		if (arguments.length > 0) {
+			n = Number(arguments[1]);
+			if (n != n) { // shortcut for verifying if it's NaN
+				n = 0;
+			} else if (n != 0 && n != Infinity && n != -Infinity) {
+				n = (n > 0 || -1) * Math.floor(Math.abs(n));
+			}
+		}
+		if (n >= len) {
+			return -1;
+		}
+		k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+		for (; k < len; k++) {
+			if (k in t && t[k] === searchElement) {
+				return k;
+			}
+		}
+		return -1;
+	}
 }
 RegExp.escape = function (str) {
 	var specials = new RegExp('[.*+?|\\^$()\\[\\]{}\\\\]', 'g');
@@ -1615,7 +1624,7 @@ function readData() {
 }
 
 function parseData() {
-	var i, j, rows, rowDate, rowAmount, rowText, rowTagsDescription, rowTags, rowDescription, recurrentAmount, recValue, recTimes, recOperator, lineno, fields, rowAmountErrorMsg, oldSort;
+	var i, j, rows, rowDate, rowAmount, rowText, rowTagsDescription, rowTags, rowDescription, recurrentAmount, recValue, recTimes, recOperator, lineno, fields, rowAmountErrorMsg, oldSort, trash;
 
 	// Reset the data holder
 	parsedData = [];
@@ -1639,25 +1648,48 @@ function parseData() {
 			continue;
 		}
 
-		// Separate fields
-		fields = rows[i].split(dataFieldSeparator);
+		// New style matching method: regex
+		if (useBlankFieldSeparator) {
 
-		// Error: rows with no separator
-		if (fields.length === 1) {
-			invalidData(
-				lineno,
-				i18n.errorNoFieldSeparator + ' "' + dataFieldSeparator + '"\n\n' + rows[i]
-			);
-			return;
+			fields = rows[i].match(dataPatterns.rowBlankSeparated);
 
-		// Error: too much separators
-		} else if (fields.length - 1 > 2) {
-			invalidData(
-				lineno,
-				i18n.errorTooManySeparators + ' "' + dataFieldSeparator + '"\n\n' + rows[i]
-			);
-			return;
+			if (!fields) {
+				invalidData(lineno, rows[i]);
+				return;  // abort at first error
+			}
+
+			trash = fields.shift();  // field[0] is the full match
+
+		// Old style matching method: split
+		} else {
+
+			// Separate fields
+			fields = rows[i].split(dataFieldSeparator);
+
+			// Error: rows with no separator
+			if (fields.length === 1) {
+				invalidData(
+					lineno,
+					i18n.errorNoFieldSeparator + ' "' + dataFieldSeparator + '"\n\n' + rows[i]
+				);
+				return;  // abort at first error
+
+			// Error: too much separators
+			} else if (fields.length - 1 > 2) {
+				invalidData(
+					lineno,
+					i18n.errorTooManySeparators + ' "' + dataFieldSeparator + '"\n\n' + rows[i]
+				);
+				return;  // abort at first error
+			}
 		}
+
+		//// At this point we have:
+		// fields[0] -> date
+		// fields[1] -> amount
+		// fields[2] -> text (tags + description)
+		//
+		// The contents will be validated in the following lines.
 
 		///////////////////////////////////////////////////////////// Text
 
@@ -2073,7 +2105,7 @@ function updateTagSummary(theData) {
 	// We have tags?
 	if (tagNames.length || noTagSum !== undefined) {
 		tagNames.sort(sortIgnoreCase);
-		
+
 		// Append no-tag data to the end of the table
 		if (noTagSum !== undefined && showEmptyTagInSummary) {
 			tagNames.push(i18n.labelTagEmpty);
@@ -2579,8 +2611,8 @@ function changeReport(el) {
 	newType = el.id;
 
 	// Deactivate old report, activate new
-	document.getElementById(oldType).className = '';
-	el.className = 'active';
+	removeClass(document.getElementById(oldType), 'active');
+	addClass(el, 'active');
 
 	//// Save / restore information
 	//
@@ -2871,7 +2903,7 @@ function init() {
 	document.getElementById('editorsave'         ).title = i18n.helpSave;
 
 	// Mark current report as active (CSS)
-	document.getElementById(reportType).className = 'active';
+	addClass(document.getElementById(reportType), 'active');
 
 	// localStorage browser support check
 	if (useLocalStorage && !window.localStorage) {
@@ -2933,7 +2965,7 @@ function init() {
 	document.getElementById('help').innerHTML = (
 		wrapme(
 			'b',
-			linkme(i18n.appUrl, appName) + 
+			linkme(i18n.appUrl, appName) +
 			((useDropboxStorage) ? ' by ' + linkme('http://twitter.com/xupisco', '@xupisco') : '') +
 			': ') + i18n.appDescription +
 		array2ul([wrapme('b', i18n.labelReports + ': ') + i18n.helpReports]) +
@@ -3014,11 +3046,11 @@ window.onload = init;
 
 <!-- Toolbar -->
 <div id="toolbarwrapper">
-<table id="toolbar">
-<tr>
-<td class="left">
+<div id="toolbar">
+
+<div class="toolbarpane left">
 	<a id="sitelink" href="#">MoneyLog</a>
-	
+
 	<!-- Report Type -->
 	<div id="report-nav">
 		<a
@@ -3026,9 +3058,10 @@ window.onload = init;
 			id="m" href="#"></a><a
 			id="y" href="#"></a>
 	</div>
-	
-</td>
-<td class="middle">
+
+</div>
+
+<div class="toolbarpane middle">
 	<div id="checkboxes">
 		<!-- Last Months -->
 		<input
@@ -3059,9 +3092,10 @@ window.onload = init;
 			id="optmonthly" class="trigger" type="checkbox"><label
 			id="optmonthlylabel" for="optmonthly"></label>
 
-	</div>
-</td>
-<td>
+	</div> <!-- #checkboxes -->
+</div>
+
+<div class="toolbarpane right">
 	<!-- Help -->
 	<a id="helpbutton" class="helplink" href="#">?</a>
 
@@ -3073,7 +3107,7 @@ window.onload = init;
 		<input
 			id="optregex" class="trigger" type="checkbox"><label
 			id="optregexlabel" for="optregex"></label>
-	
+
 		<input
 			id="optnegate" class="trigger" type="checkbox"><label
 			id="optnegatelabel" for="optnegate"></label>
@@ -3085,9 +3119,25 @@ window.onload = init;
 			id="datafiles" size="1"></select>&nbsp;<a
 			id="reload" href="#">®</a>
 	</div>
-</td>
-</tr>
-</table> <!-- #toolbar -->
+</div>
+
+</div> <!-- #toolbar -->
+</div> <!-- #toolbarwrapper -->
+
+<!-- Tags -->
+<div id="tagsArea">
+	<div id="operabug">
+		<div id="tagMultiAll">
+			<input
+				id="tagMultiAllCheck" type="checkbox" class="trigger"><label
+				id="tagMultiAllLabel" for="tagMultiAllCheck"></label>
+		</div>
+		<a id="tagSummaryButton" class="trigger" href="#">∑</a>
+		<span id="tagsLabel"></span>
+		<div id="tagList">
+		</div>
+		<input type="hidden" id="tagCount" value="0">
+	</div> <!-- operabug -->
 </div>
 
 <div id="content">
@@ -3095,22 +3145,6 @@ window.onload = init;
 	<div id="help">
 	</div>
 
-	<!-- Tags -->
-	<div id="tagsArea">
-		<div id="operabug">
-			<div id="tagMultiAll">
-				<input
-					id="tagMultiAllCheck" type="checkbox" class="trigger"><label
-					id="tagMultiAllLabel" for="tagMultiAllCheck"></label>
-			</div>
-			<a id="tagSummaryButton" class="trigger" href="#">∑</a>
-			<span id="tagsLabel"></span>
-			<div id="tagList">
-			</div>
-			<input type="hidden" id="tagCount" value="0">
-		</div> <!-- operabug -->
-	</div>
-	
 	<div id="error">
 	</div>
 
@@ -3178,25 +3212,25 @@ window.onload = init;
 
 # A ordem não importa, é possível deixar juntas as transações periódicas
 
-2011-09-05	500	salario|
-2011-10-05	500	salario|
-2011-11-05	500	salario|
-2011-12-05	500	salario|
-2012-01-05	500	salario|
+2011-09-05	500	salário|
+2011-10-05	500	salário|
+2011-11-05	500	salário|
+2011-12-05	500	salário|
+2012-01-05	500	salário|
 
 2011-09-07	-25,00	luz|
 2011-10-07	-20,00	luz|
 2011-11-07	-29,00	luz|
 2011-12-07	-25,00	luz|
 
-2011-09-07	-20,00	agua|
-2011-10-07	-17,80	agua|
-2011-11-07	-32,37	agua|
-2011-12-07	-30,00	agua|
+2011-09-07	-20,00	água|
+2011-10-07	-17,80	água|
+2011-11-07	-32,37	água|
+2011-12-07	-30,00	água|
 
 # Transações futuras!
 
-2012-07-31	+99,99	salario| Bônus
+2012-07-31	+99,99	salário| Bônus
 
 # Pagamentos e ganhos parcelados: use uma / e o número de meses
 
