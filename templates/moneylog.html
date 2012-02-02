@@ -547,6 +547,61 @@ table.chart tr:hover td {
 }
 </style>
 <style type="text/css">
+/*
+	MoneyLog Cloud theme
+	by Aurelio Jargas
+	http://aurelio.net/moneylog/
+
+	Light blue: #D5EAFB
+	 Dark blue: #2B97E9
+*/
+
+
+/* Dark background for active/special buttons */
+#fullscreen,
+#report th:hover,
+.button.active,
+a.button:active {
+	background-color: #2B97E9;
+}
+
+/* Dark background for selected rows */
+#report tr.selected,
+#report tr.selected:hover td,
+#report tr.selected .neg {
+	background-color: #2B97E9;
+}
+
+/* Dark color for borders */
+#editor-data,
+#rows-summary,
+.button.active,
+a.button:active {
+	border-color: #2B97E9;
+}
+
+/* Light background for selections */
+.hl,
+#tag-cloud-tags input[checked]+span {
+	background-color: #D5EAFB;
+}
+
+/* Light background for totals */
+#report tr.total,
+#rows-summary {
+	background-color: #D5EAFB;
+}
+
+/* Light color for the report borders */
+#report td {
+	border-color: #D5EAFB;
+}
+
+
+/* Dropbox special: interface dark blue for the positive chart bar */
+.posbar {
+	background-color: #2B97E9;
+}
 </style>
 <!--[if lte IE 7]>
     <style type="text/css">#tag-cloud-content input { display:inline; }</style>

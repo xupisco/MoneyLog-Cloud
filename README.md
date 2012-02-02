@@ -2,9 +2,9 @@
 Utilize seu querido MoneyLog de qualquer lugar.
 
 ## For nerds:
-- Appengine
+- Appengine (Python27)
 - Dropbox SDK
-- Python OAUTH lib (by Leah)
+- OAUTH Lib (by Leah)
 
 **Deu fork?** Crie um arquivo conf.py e coloque os IDs do seu app no Dropbox:  
 - DB_APPKEY = 'xxxxxxxx'  
