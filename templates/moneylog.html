@@ -106,6 +106,9 @@ tr.future:hover td {  /* explicit TD to exclude TH */
 #toolbar select {
 	vertical-align:middle;
 }
+#toolbar input {
+	border: 1px solid #bbb;  /* element_border */
+}
 
 /* ---------------------------------------------- Error */
 
@@ -140,6 +143,13 @@ tr.future:hover td {  /* explicit TD to exclude TH */
 }
 #app-name {
 	padding-left: 20px;
+}
+#app-version {
+	padding-top: 10px;
+}
+#app-version a {
+	color: #2B97E9;  /* cloud_blue */
+	text-decoration: underline;
 }
 
 /* ---------------------------------------------- Full screen */
@@ -192,6 +202,7 @@ a.button {
 	text-transform: lowercase;
 	border: 1px solid #bbb;  /* element_border */
 	background-color: white;
+	background-color: #F4F4F4;  /* button_bg */
 }
 .button.active,
 a.button:active {
@@ -264,6 +275,10 @@ a.button.active {
 }
 #filter {
 	width: 100%;
+	border: 1px solid #C9C9C9;
+	background-color: #F4F4F4;  /* button_bg */
+	padding: 3px 0;
+	margin-bottom: 5px;
 }
 #opt-negate {
 	margin-left: 1em;
@@ -382,7 +397,7 @@ tr.total {
 
 /* Rows padding */
 #report td {
-	padding: 7px 10px;
+	padding: 6px 10px;
 }
 #report tr.total td {
 	padding: 1px 10px; /* top/bottom: td - 6px */
@@ -455,7 +470,7 @@ tr.total {
 	margin-bottom: 5px;
 }
 .posbar {
-	background-color: #2B97E9; /* bar1_bg */
+	background-color: #2B97E9; /* bar1_bg cloud_blue */
 }
 .negbar {
 	background-color: #f66;   /* bar2_bg */
@@ -3247,6 +3262,7 @@ window.onload = init;
 				</div>
 			</div>
 
+			<div id="app-version"></div>
 		</div><!-- toolbar-controls -->
 	</div><!-- toolbar-controls-wrapper -->
 </div><!-- #toolbar -->

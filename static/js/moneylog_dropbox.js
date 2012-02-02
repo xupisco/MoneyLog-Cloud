@@ -1,6 +1,10 @@
+var commit_id = '8246241f3b'
+
 function initDropbox(reloading) {
     reloading = reloading || false
     $("#report").html('<p style=\'text-align: left;\'> ' + i18n.msgLoading.replace('%s', '&lt;Dropbox home&gt;/Apps/MoneyLog Cloud/' + getSelectedFile())   + '</p>');
+    $("#app-version").html('commit: <a href="http://github.com/xupisco/MoneyLog-Box" target="_blank">' + commit_id + '</a>');
+
     $("#charts").hide();
     
     $.get('/', { reloading: reloading, filename: getSelectedFile() }, function(data) {
