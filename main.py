@@ -98,31 +98,6 @@ class Connect(CoreHandler):
         pass
 
 
-class QuickAdd(CoreHandler):
-    def post(self):
-        access_token_key = self.get_cookie('access_token_key')
-        access_token = TOKEN_STORE.get(access_token_key)
-        if not access_token:
-            return self.redirect('/login')
-
-        import tempfile
-
-        dude = get_client(access_token)
-        data = self.request.get('data')
-        filename = self.request.get('filename')
-
-        f = dude.get_file(filename).read()
-
-        temp = tempfile.TemporaryFile()
-        temp.write("%s\n%s" % (f, data.encode('utf-8')))
-        temp.seek(0)
-        save = dude.put_file(filename, temp.read(), overwrite=True)
-        temp.close()
-
-        self.response.headers["Content-Type"] = "text/plain"
-        self.response.out.write(json.dumps([{'status': 'success'}]))
-
-
 class Update(CoreHandler):
     def post(self):
         access_token_key = self.get_cookie('access_token_key')
@@ -221,6 +196,5 @@ class Main(CoreHandler):
 app = webapp2.WSGIApplication([('/', Main),
                                ('/connect', Connect),
                                ('/login', Login),
-                               ('/update', Update),
-                               ('/quickadd', QuickAdd)],
+                               ('/update', Update)],
                               debug=_DEBUG)
