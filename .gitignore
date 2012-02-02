@@ -9,3 +9,4 @@ static/saraiva/
 .project
 .pydevproject
 settings.py
+conf.py

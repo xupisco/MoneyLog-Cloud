@@ -547,61 +547,6 @@ table.chart tr:hover td {
 }
 </style>
 <style type="text/css">
-/*
-	MoneyLog Cloud theme
-	by Aurelio Jargas
-	http://aurelio.net/moneylog/
-
-	Light blue: #D5EAFB
-	 Dark blue: #2B97E9
-*/
-
-
-/* Dark background for active/special buttons */
-#fullscreen,
-#report th:hover,
-.button.active,
-a.button:active {
-	background-color: #2B97E9;
-}
-
-/* Dark background for selected rows */
-#report tr.selected,
-#report tr.selected:hover td,
-#report tr.selected .neg {
-	background-color: #2B97E9;
-}
-
-/* Dark color for borders */
-#editor-data,
-#rows-summary,
-.button.active,
-a.button:active {
-	border-color: #2B97E9;
-}
-
-/* Light background for selections */
-.hl,
-#tag-cloud-tags input[checked]+span {
-	background-color: #D5EAFB;
-}
-
-/* Light background for totals */
-#report tr.total,
-#rows-summary {
-	background-color: #D5EAFB;
-}
-
-/* Light color for the report borders */
-#report td {
-	border-color: #D5EAFB;
-}
-
-
-/* Dropbox special: interface dark blue for the positive chart bar */
-.posbar {
-	background-color: #2B97E9;
-}
 </style>
 <!--[if lte IE 7]>
     <style type="text/css">#tag-cloud-content input { display:inline; }</style>
@@ -2867,17 +2812,11 @@ function initAppMode() {
 		case 'one':
 			appName = 'MoneyLog Experience';
 			i18n.appUrl = 'http://aurelio.net/moneylog/moneylog5.html';
-			oneFile = true;
-			useLocalStorage = false;
-			useDropboxStorage = false;
 			break;
 
 		case 'localStorage':
 			appName = 'MoneyLog Browser';
 			i18n.appUrl = i18n.appUrlOnline;
-			useLocalStorage = true;
-			oneFile = false;
-			useDropboxStorage = false;
 			break;
 
 		case 'dropbox':
@@ -2885,18 +2824,12 @@ function initAppMode() {
 			// https://www.dropbox.com/developers/reference/branding
 			appName = 'MoneyLog Cloud';
 			i18n.appUrl = 'http://moneylog-cloud.appspot.com';
-			useDropboxStorage = true;
-			oneFile = false;
-			useLocalStorage = false;
 			break;
 
 		case 'txt':
 			appName = 'MoneyLog TXT';
 			appVersion = '∞';
 			i18n.appUrl = 'http://aurelio.net/moneylog/beta.html';
-			oneFile = false;
-			useLocalStorage = false;
-			useDropboxStorage = false;
 			break;
 
 		default:
@@ -2909,12 +2842,8 @@ function init() {
 	// Load the i18n messages (must be the first)
 	i18n = i18nDatabase.getLanguage(lang);
 
-	// Sanity: solve inconsistences in app mode
-	if (appMode) {
-		// User informed appMode, this is the priority
-		initAppMode();
-	} else {
-		// No appMode set, let's find out in which mode we are
+	// Legacy: discover app mode using obsoleted settings
+	if (!appMode) {
 		if (oneFile) {
 			appMode = 'one';
 		} else if (useLocalStorage) {
@@ -2924,8 +2853,10 @@ function init() {
 		} else {  // local TXT
 			appMode = 'txt';
 		}
-		initAppMode();
 	}
+
+	// Check app mode
+	initAppMode();
 
 	// UI surgery for each mode
 	switch(appMode) {

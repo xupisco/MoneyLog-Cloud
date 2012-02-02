@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 
 # MoneyLog Box app, by Me!
-_DEBUG = True
+_DEBUG = False
 
-import webapp2, urllib
+import webapp2, urllib, json
 import jinja2 # Template engine
+
+import conf
 
 from Cookie import SimpleCookie
 from dropbox import session, client
-import json
 
 from google.appengine.api import users
 
 env = jinja2.Environment(loader = jinja2.FileSystemLoader('templates'))
 
-APP_KEY = 'xxx'
-APP_SECRET = 'xxx'
+APP_KEY = conf.DB_APPKEY
+APP_SECRET = conf.DB_APPSECRET
 ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured for your app
 
-HOST = 'moneylog-cloud.appspot.com'
-#HOST = 'localhost:8087'
+HOST = 'moneylog-cloud.appspot.com' if not _DEBUG else 'localhost:8087'
 MONEYLOG_FOLDER = '/MoneyLog Cloud/'
 MONEYLOG_DATA = 'moneylog.txt'
 MONEYLOG_CONFIG = 'js/config.js'
