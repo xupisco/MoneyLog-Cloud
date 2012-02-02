@@ -15,11 +15,11 @@ function initDropbox(reloading) {
 }
 
 function editorSave() {
-    $("#editor").prepend("<div id='saving' style='right: 130px; position: absolute; color: #F44; line-height: 24px;'>" + i18n.msgSaving + "</div>");
-    $.post('/update', { data: $("#editordata").val(), filename: getSelectedFile() }, function(data) {
+    $("#editor-buttons").prepend("<div id='saving' style='right: 220px; position: absolute; color: #F44; line-height: 50px;'>" + i18n.msgSaving + "</div>");
+    $.post('/update', { data: $("#editor-data").val(), filename: getSelectedFile() }, function(data) {
         $("#saving").hide();
         //readFromDropBox();
-        rawData = $("#editordata").val();
+        rawData = $("#editor-data").val();
         parseData();
         showReport();
         editorOff();

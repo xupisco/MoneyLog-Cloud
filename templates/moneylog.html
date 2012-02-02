@@ -19,6 +19,7 @@ History/Histórico:
 	v3: Oct-Dec 2007
 	v4: Aug 2009
 	online: May 2010
+	cloud (dropbox): Jan 2012
 
 License/Licença:
 	MIT - http://en.wikipedia.org/wiki/MIT_license
@@ -26,7 +27,7 @@ License/Licença:
 -->
 
 <head><title>$$$</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta name="generator" content="TextMate">
 <meta name="author" content="Aurelio Marinho Jargas www.aurelio.net">
 <meta name="keywords" content="Personal Finance, KISS, Simple, HTML, CSS, JavaScript">
@@ -38,7 +39,8 @@ You may change the styles if you know what you're doing.
 -->
 <style type="text/css">
 /*
-	moneylog.css
+	MoneyLog default CSS
+	by Aurelio Jargas
 	http://aurelio.net/moneylog/
 */
 
@@ -49,514 +51,560 @@ table { border-collapse:collapse;border-spacing:0; }
 body { font:12px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small; }
 select,input,button,textarea { font:99% arial,helvetica,clean,sans-serif; }
 table { font-size:inherit;font:100%; }
-th,td { border-style:none;padding:.5em; }
+th,td { border-style:none;padding:0; }
 p,blockquote,ul,ol,dl { margin:1em; }
 ol,ul,dl { margin-left:2em; }
 dl dd { margin-left:1em; }
 
 
-/* ---------------------------------------------- Global settings */
+/* ---------------------------------------------- Structure */
 
 body {
-	color:#555;            /* fg1 */
-	background-color:#fff; /* bg1 */
+	background-color: white;  /* content_bg */
+	color: #333;  /* text_color */
 }
-a {
-	text-decoration:none;
-	font-weight:bold;
+#container {
+	width: 100%;
+	margin: 0 auto;
+	overflow: hidden;
 }
-input {
-	margin-right:0.25em;
+#toolbar {
+	position: fixed;
+	height: 100%;
+	width: 216px;
+	overflow: auto;
 }
+#content {
+	margin-left: 216px;  /* See toggleFullScreen, #toolbar */
+	padding: 30px;
+}
+
+/* ---------------------------------------------- Misc */
+
 label,
 .trigger {
-	cursor:pointer;
-}
-.posbar {
-	background-color:#4D89F9 !important; /* bar1 */
-}
-.negbar {
-	background-color:#f66 !important;   /* bar2 */
+	cursor: pointer;
 }
 .number {
-	text-align:right !important;
-	white-space:nowrap;
+	text-align: right !important;
+	white-space: nowrap;
 }
-.neg {
-	color:#e33;            /* fg_red */
+.neg {  /* Negative numbers */
+	color: #e33;
 }
-tr:hover .neg {
-	color:#f00;
+.hl {  /* Highlighted words */
+	color: black;
+	background-color: silver;  /* _light */
 }
-#tagsArea input,
-#tagsArea label,
+tr:hover td,
+tr.future:hover td {  /* explicit TD to exclude TH */
+	background-color: #eee;  /* hover_bg */
+	color: black;
+}
 #toolbar input,
 #toolbar label,
-#toolbar select,
-#toolbar a {
+#toolbar select {
 	vertical-align:middle;
 }
 
 /* ---------------------------------------------- Error */
+
 #error {
-	display:none;
-	margin:14em 10% 4em 10%;
-	padding:10px;
-	border:3px solid red;
-	background-color:yellow;
-	color:black;
-	line-height:140%;
+	display: none;
+	margin: 5em 10%;
+	padding: 10px;
+	border: 8px solid red;
+	background-color: yellow;
+	color: black;
+	line-height: 180%;
+}
+
+/* ---------------------------------------------- Logo */
+
+#logo-wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+#logo {
+	background-color: #EBEBEB;
+	font-size: 30px;
+	width: 200px;
+	height: 57px;
+	float: left;
+	margin-right: 2px;
+	line-height: 55px;
+}
+#logo a {
+	color: #333;  /* text_color */
+}
+#app-name {
+	padding-left: 20px;
+}
+
+/* ---------------------------------------------- Full screen */
+
+#fullscreen {
+	font-size: 11px;
+	background-color: black;  /* _dark */
+	color: white;
+	width: 14px;
+	float: left;
+	text-align: center;
+	height: 57px;
+	line-height: 55px;
 }
 
 /* ---------------------------------------------- Toolbar */
 
-#fullscreen {
-	position:fixed;
-	top:0;
-	left:0;
-	z-index:9;
+#toolbar a,
+a.button {
+	text-decoration: none;
+}
 
-	font-size:150%;
-	width:1em;
-	text-align:center;
-	background-color:#444; /* bg2 */
+#toolbar hr {
+	clear: both;
+	border: 1px solid #ddd;  /* toolbar_sep */
+	border-width: 1px 0 0 0;
+	margin: 1em 0;
 }
-#toolbar {
-	color:#ddd;            /* fg2 */
-	background-color:#444; /* bg2 */
-	text-align:center;
-	z-index:1;
-	position:fixed;
-	top:0;
-	left:0;
-	width:100%;
+
+#toolbar-controls-wrapper {
+	background-color: #FAFAFA;
+	clear: both;
+	margin-top: 57px;
+	width: 200px;
 }
-#fullscreen,
-#tagSummaryButton,
-#toolbar a {
-	color:#f44;            /* fg2a */
-	font-size:185%;
-	padding:0 4px;
+
+#toolbar-controls {
+	padding: 15px 17px;
 }
-#fullscreen:hover,
-#tagSummaryButton:hover,
-#toolbar a:hover {
-	background-color:#f44; /* fg2a */
-	color:#444;            /* bg2 */
+
+/* ---------------------------------------------- Button */
+
+.button {
+	display: block;
+	margin: 1em 0 0 0;
+	text-align: center;
+	font-weight: normal;
+	font-size: 100%;
+	line-height: 200%;
+	text-transform: lowercase;
+	border: 1px solid #bbb;  /* element_border */
+	background-color: white;
 }
-#toolbar label:hover,
-#toolbar input:hover + label {
-	color:#fff;
+.button.active,
+a.button:active {
+	border-color: black;  /* _dark */
+	background-color: black;  /* _dark */
+	color: white;
 }
-#toolbar .toolbarpane.left {
-	float:left;
-	width:30%;
+a.button {
+	color: #333;  /* text_color */
 }
-#toolbar .toolbarpane.middle {
-	float:left;
-	width:40%;
+a.button.active {
+	color: white;
 }
-#toolbar .toolbarpane.right {
-	float:right;
-	width:30%;
+
+/* ---------------------------------------------- [ boxes ] */
+
+.box-content {
+	background-color: white;
+	border: 1px solid #bbb;  /* element_border */
+	border-top-width: 0;
+	padding: 0.5em 10px;
+	padding: 8px;
+	line-height: 185%;
 }
+
+.box-content select,
+.box-content table {
+	width: 100%;
+}
+.box-options input {
+	display: inline;
+	margin-right: 0.5em;
+}
+
+/* ---------------------------------------------- [file.txt ▼] */
+
+#source-file {
+	width: 100%;
+}
+
+/* ---------------------------------------------- [edit] [reload] */
+
+#source-reload,
+#editor-open {
+	display: inline-block;  /* see showHideEditButton() */
+	width: 78px;
+}
+#source-reload {
+	float: right;
+}
+
+/* ---------------------------------------------- [daily] [monthly] [yearly] */
+
 #toolbar #report-nav {
-	margin:1em 0;
+	text-align: center;
 }
 #toolbar #report-nav a {
-	font-size:110%;
-	border:1px solid #444; /* bg2 */
+	display: inline-block;
+	width: 50px;
+	margin: 0 5px 0 0;
 }
-#toolbar #report-nav a:hover {
-	background-color:#444; /* bg2 */
-	color:#f44;            /* fg2a */
-	border:1px dotted #f44; /* fg2a */
-}
-#toolbar #report-nav a.active {
-	border:1px solid #f44; /* fg2a */
-	outline-style:none; /* Firefox, Camino */
-}
-#toolbar a.helplink {
-	float:right;
-}
-#toolbar #filterbox {
-	float:right;
-	text-align:left;
-}
-#toolbar #valuefilterarg {
-	visibility:hidden;
-}
-#toolbar #datafilesbox {
-	clear:right;
-	float:right;
-	text-align:right; /* IE7 fix */
-	padding:20px 0 0 0;
-}
-#toolbar #checkboxes {
-	text-align:left;
-	vertical-align:middle;
-	line-height:185%; /* to fit selects */
+#toolbar #report-nav #y {
+	margin-right: 0;
 }
 
-/* ---------------------------------------------- Content */
+/* ---------------------------------------------- [search      ]  */
 
-#content {
-	z-index:0;
-	margin-top:8em;        /* y1 */
+#search-content {
+	border-top-width: 1px;
+}
+#filter {
+	width: 100%;
+}
+#opt-negate {
+	margin-left: 1em;
 }
 
-/* ---------------------------------------------- Tags */
+/* ---------------------------------------------- [X] Options */
 
-#tagsArea {
-	display:none;
-	position:fixed;
-	bottom:0;
-	left:0;
-	width:100%;
-	padding:0.5em 0; /* see #operabug */
-	line-height:150%;
+#toolbar label:hover,
+#toolbar input:hover + label {
+/*	font-weight: bold;*/
+}
+.checkbox-option {
+	text-align: left;
+}
+.checkbox-option-extra {
+	display: none;  /* appears when clicked */
+	margin-left: 1em;
+}
+#value-filter-arg {
+	display: none;  /* appears when SELECT item is chosen */
+}
 
-	/* Same colors of #toolbar */
-	color:#ddd;            /* fg2 */
-	background-color:#444; /* bg2 */
+/* ---------------------------------------------- [ tag cloud ] */
+
+#tag-cloud-content {
+	display: none;  /* JS will show if there are tags */
+	text-align: center;
 }
-#tagsArea #operabug {
-	/* Wrapper needed by Opera9. Can't pad #tagsArea at left/right */
-	/* Padding-right will be reset by showHideEditButton() */
-	padding:0 0.5em 0 1em;
+#tag-cloud-tags input+span {
+	padding: 2px 2px;
 }
-#tagsArea #tagsLabel {
-	font-weight:bold;
-	color:#f44;            /* fg2a */
-}
-#tagsArea input+span {
-	padding:1px 2px;
-}
-#tagsArea input[checked]+span { /* highlight selected tags */
-	background:#f44;       /* fg2a */
-	color:#000;            /* fg4 */
-	border:1px solid #000; /* fg4 */
-	padding:1px 1px;
+#tag-cloud-tags input[checked]+span { /* highlight selected tags */
 	/* Note: DON'T use input:checked, it fails in Opera9/IE8 */
+	background: silver;  /* _light */
+	color: black;
+/*	text-decoration: underline;*/
 }
-#tagsArea input {
-	display:none; /* hidden, but still used by JavaScript (exception: IE7 - see CC) */
-	margin:0;
-	padding:0;
+#tag-cloud-tags input {
+	display: none; /* hidden, but used by JavaScript (exception: IE7 - see CC) */
+	margin: 0;
+	padding: 0;
 }
-#tagsArea #tagMultiAll {
-	margin-top:-0.5em;
-}
-#tagsArea #tagMultiAll input {
-	display:inline;
-	margin-right:0.25em;
-}
-#tagsArea #tagList {
-	display:inline;
+#tag-cloud-options {
+	display: none;  /* JS will show */
 }
 
-/* ---------------------------------------------- Help */
+/* ---------------------------------------------- [ tag summary ] */
 
-#help {
-	display:none;
-	background-color:#faa; /* bg3 */
-	color:#800;            /* fg3 */
-	padding:2em;
-	line-height:120%;
-
-	/* IE7 bug: gap between #toolbar and #help if no border */
-	border-top:1px solid #faa; /* bg3 */
-}
-#help a {
-	text-decoration:underline;
-}
-#help ul ul {
-	margin-top:0;
-}
-#help div {
-	display:none; /* All langs hidden, js activate the correct */
-}
-
-/* ---------------------------------------------- Data */
-
-#data,
-#dataFrame {
-	display:none;
-}
-
-/* ---------------------------------------------- Editor */
-
-#editoropen {
-	display:none;
-	position:fixed;
-	bottom:0;
-	right:0;
-	z-index:99;
-}
-#editor {
-	display:none;
-	position:fixed;
-	bottom:0;
-	right:0;
-	left:0;
-	background:#444; /* bg2 */
-	padding:0 10px 5px 10px;
-}
-#editor textarea {
-	width:100%;
-}
-#editor button {
-	float:right;
+#tag-summary-content {
+	display: none;  /* JS will show */
 }
 
 /* ---------------------------------------------- Report */
 
-#report {
-	padding:3em 3em 8em 2em;
-	line-height:100%;
+/* labelNoData */
+#report p {
+	text-align: center;
 }
+
+/* Report table */
 #report table {
-	margin:0 auto;
+	margin: 0 auto;  /* do not use width:100% */
 }
+
+/* Table headings are also buttons */
 #report th {
-	text-align:center;
-	cursor:pointer;
+	text-align: center;
+	cursor: pointer;
+	padding: 0.5em;
 }
 #report th:hover {
-	color:#000;            /* fg4 */
-	background-color:#ddd; /* bg4 */
+	background-color: black;  /* _dark */
+	color: white;
 }
+
+/* Generic cell config */
 #report td {
-	border:1px solid #ddd; /* bd1 */
-	padding:3px 10px;
-	vertical-align:middle;
+	border: 1px solid silver;  /* _light */
+	border-width: 1px 0;
+	vertical-align: middle;
 }
-#report td.row-count {
-	text-align:center;
-	font-size:75%;
-	color:#aaa;            /* fg5 */
-	border-style:none;
-	background-color:#fff; /* bg1 */
+
+/* Column config */
+td.row-count {
+	text-align: center;
+	font-size: 75%;
+	border-style: none !important;
+	background-color: white !important;  /* content_bg */
+	color: silver !important;
 }
-#report td.date {
-	white-space:nowrap;
+td.date {
+	white-space: nowrap;
 }
-#report tr.future td.row-count {
-	font-style:normal;
+
+/* Future */
+tr.future {
+	background-color: #f8f8f8; /* future_bg */
+	font-style: italic;
 }
-#report tr:hover td,
-.popup tr:hover td {
-	background-color:#ddd; /* bg4 */
-	color:#000;            /* fg4 */
+tr.future td.row-count {
+	font-style: normal;
 }
-#report tr.future {
-	background-color:#eee; /* bg6 */
-	font-style:italic;
+
+/* Selected row */
+tr.selected,
+tr.selected:hover td,
+tr.selected .neg {
+	background-color: black;  /* _dark */
+	color: white;
 }
-#report tr.selected {  /* not using td to exclude the row number cell */
-	background-color:#FF6 !important; /* bg_yellow_light */
+
+/* Total row */
+tr.total {
+	background-color: silver;  /* _light */
 }
-#report tr.selected:hover td {
-	background-color:#FF0 !important; /* bg_yellow */
+
+/* Rows padding */
+#report td {
+	padding: 7px 10px;
 }
-#report .hl {
-	color:#000;            /* fg4 */
-	background-color:#faa; /* bg3 */
-}
-#report p { /* labelNoData */
-	text-align:center;
+#report tr.total td {
+	padding: 1px 10px; /* top/bottom: td - 6px */
 }
 
 /* ---------------------------------------------- Report - Daily */
 
 /* Column sorting is not working for Balance, so undo formatting */
 #report table.daily th.balance {
-	cursor:auto;
+	cursor: auto;
 }
 #report table.daily th.balance:hover {
-	color:#555;            /* fg1 */
-	background-color:#fff; /* bg1 */
+	color: #333;  /* text_color */
+	background-color: white;  /* content_bg */
 }
+
+/* Total row tweaks */
 #report table.daily tr.total {
-	background-color:#fee; /* bg5 */
-	text-align:right;
-	font-weight:bold;
-}
-#report table.daily tr.total td {
-	border-style:none;
+	font-weight: bold;
 }
 #report table.daily tr.total table.posneg {
-	float:right;
-	font-size:90%;
-	font-weight:normal;
+	float: right;
+	font-size: 90%;
+	font-weight: normal;
 }
 #report table.daily tr.total table.posneg td {
-	padding:0;
-	white-space:nowrap;
+	padding: 0;
+	white-space: nowrap;
+	border-style: none;
 }
 #report table.daily tr.total td.monthtotal {
-	text-align:left;
-	padding-left:0;
+	text-align: left;
+	padding-left: 0;
 }
 #report table.daily tr.total td.monthtotal .arrow {
-	margin-right:8px;
+	margin-right: 8px;
 }
 
 /* ---------------------------------------------- Report - Monthly/Yearly */
 
 #report table.overview tr.total {
-	background-color:#fee; /* bg5 */
-	font-style:italic;
+	font-style: italic;
 }
 #report td.rowlabel {
-	font-weight:bold;
+	font-weight: bold;
 }
 
 /* ---------------------------------------------- Minibars inside report table */
 
 #report table td.minibar {
-	border-style:none !important;
+	border-style: none !important;
 }
 #report table div.minibar {
-	float:left;
+	float: left;
 }
 #report table td.minibar .label {
-	float:left;
-	font-size:75%;
-	color:white !important;
-}
-
-/* ---------------------------------------------- Tag summary */
-
-#tagSummary {
-	display: none;
-	position: fixed;
-	left: 0.5em;
-	bottom: 2.5em;  /* padding 0.5*2 + font-size:150% */
-	max-height: 40%; /* for huge tag lists */
-}
-#tagSummaryButton {
-	font-size: 130%;
-	font-weight: bold;
-	margin-right: .5em;
-}
-
-/* ---------------------------------------------- Rows summary */
-
-#rowsSummary {
-	position: fixed;
-	left: 0;
-	bottom: 50%;
-}
-
-/* ---------------------------------------------- Popup */
-
-.popup {
-	margin: 0;
-	background-color: #eee; /* bg6 */
-	background-color: #ccc; /* bg6 */
-	overflow: auto;
-}
-.popup table {
-	border: 0px solid #444; /* bg2 */
-}
-.popup td {
-	border-width: 0;
-	padding: 3px 8px;
+	float: left;
+	font-size: 75%;
+	color: white !important;
 }
 
 /* ---------------------------------------------- Charts */
 
 #charts {
-	display:none;
-	margin-top:-4em;
-	padding-bottom:10em;
-	text-align:center;
+	display: none;  /* JS will show */
+	text-align: center;
+	margin-top: 4em;
 }
-#charts #chartcol {
-	margin-bottom:5px;
+#chart-data {
+	margin-bottom: 5px;
+}
+.posbar {
+	background-color: #2B97E9; /* bar1_bg */
+}
+.negbar {
+	background-color: #f66;   /* bar2_bg */
 }
 table.chart {
-	border:1px solid #ddd; /* bd1 */
-	margin:0 auto;
-	padding:10px;
+	margin: 0 auto;
+	border: 1px solid #bbb;  /* element_border */
+	border-collapse: separate;
+	border-spacing: 7px;  /* space between bars and also border */
 }
 table.chart td.bar {
-	text-align:center;
-	vertical-align:bottom;
+	text-align: center;
+	vertical-align: bottom;
 }
 table.chart td.bar div.bar {
-	width:35px;
-	margin:0 auto;
+	width: 35px;  /* must fit 4 digits for the year, i.e. 2012 */
+	margin: 0 auto;
 }
 table.chart td.bar .label {
-	font-size:11px;
-	color:#444;            /* fg7 */
-	font-style:italic;
+	font-size: 11px;
+	font-style: italic;
 }
 table.chart tr.label {
-	text-align:center;
-	font-size:10px;
-	line-height:100%;
-	color:#444;            /* fg7 */
+	font-size: 10px;
+	line-height: 100%;
+	text-align: center;
+}
+table.chart tr:hover td {
+	background-color: white;  /* content_bg */
 }
 
+/* ---------------------------------------------- Rows summary */
 
-/* Minimum compatibility for IE5.5, IE6 */
-#content { _margin-top:0; }
+#rows-summary {
+	display: none;  /* JS will show */
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	padding: 5px;
+	border: 8px solid black;  /* _dark */
+	background-color: silver;  /* _light */
+}
+#rows-summary td {
+	padding: 4px 10px;
+}
 
+/* ---------------------------------------------- Editor */
 
+/* The editor */
+#editor {  /* fill full window, hiding app interface */
+	display: none;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: white;  /* content_bg */
+}
+#editor-data {  /* position:fixed so we can set textarea height:~100% */
+	position: fixed;
+	top: 30px;
+	right: 30px;
+	bottom: 70px;  /* space for the buttons */
+	left: 30px;
+	border: 8px solid black;  /* _dark */
+	padding: 15px;
+	outline-width: 0;  /* disable focus ring */
+}
+#editor-buttons {
+	position: fixed;
+	right: 30px;
+	bottom: 30px;
+}
+#editor-close,
+#editor-save {
+	display: inline-block;
+	width: 100px;
+}
+#editor-close {
+	margin-right: 3px;
+}
 
+/* ---------------------------------------------- Data */
+
+/* Always hidden */
+#data,
+#data-frame {
+	display: none !important;
+}
 </style>
 <style type="text/css">
 /*
 	MoneyLog Cloud theme
+	by Aurelio Jargas
 	http://aurelio.net/moneylog/
+
+	Light blue: #D5EAFB
+	 Dark blue: #2B97E9
 */
 
-/* Toolbar links - fg2a */
-#fullscreen, #tagSummaryButton, #toolbar a {
-	color:#93cbff;
-}
-#fullscreen:hover, #tagSummaryButton:hover, #toolbar a:hover {
-	background-color:#93cbff;
-}
-#toolbar #report-nav a:hover {
-	color:#93cbff; border-color:#93cbff;
-}
-#toolbar #report-nav a.active {
-	border-color:#93cbff;
-}
-#tagsArea #tagsLabel {
-	color:#93cbff;
-}
-#tagsArea input[checked]+span {
-	background-color:#93cbff;
+
+/* Dark background for active/special buttons */
+#fullscreen,
+#report th:hover,
+.button.active,
+a.button:active {
+	background-color: #2B97E9;
 }
 
-/* Help - bg3 */
-#help {
-	background-color:#edf6ff; border-color:#edf6ff; color:#103860;
-}
-#report .hl {
-	background-color:#edf6ff;
-}
-
-/* Total Row - bg5 (using bg3) */
-#report table.daily tr.total {
-	background-color:#edf6ff;
-}
-#report table.overview tr.total {
-	background-color:#edf6ff;
+/* Dark background for selected rows */
+#report tr.selected,
+#report tr.selected:hover td,
+#report tr.selected .neg {
+	background-color: #2B97E9;
 }
 
-/* Chart - bar1 (using fg2a) */
+/* Dark color for borders */
+#editor-data,
+#rows-summary,
+.button.active,
+a.button:active {
+	border-color: #2B97E9;
+}
+
+/* Light background for selections */
+.hl,
+#tag-cloud-tags input[checked]+span {
+	background-color: #D5EAFB;
+}
+
+/* Light background for totals */
+#report tr.total,
+#rows-summary {
+	background-color: #D5EAFB;
+}
+
+/* Light color for the report borders */
+#report td {
+	border-color: #D5EAFB;
+}
+
+
+/* Dropbox special: interface dark blue for the positive chart bar */
 .posbar {
-	background-color:#93cbff !important;
+	background-color: #2B97E9;
 }
 </style>
 <!--[if lte IE 7]>
-    <style type="text/css">#tagsArea input { display:inline; }</style>
+    <style type="text/css">#tag-cloud-content input { display:inline; }</style>
 <![endif]-->
 
 <script type="text/javascript">
@@ -604,18 +652,16 @@ var initChartDaily = 3;           // Initial selected item for the daily chart [
 var initChartMonthly = 1;         // Initial selected item for the monthly chart [1-4]
 var initChartYearly = 1;          // Initial selected item for the yearly chart [1-4]
 
-
 // Program structure and files
-var oneFile = false;              // Full app is at moneylog.html single file?
-var dataFiles = ['moneylog.txt']; // The paths for the data files (requires oneFile=false)
+var appMode = 'dropbox';              // txt, one, dropbox, localStorage
+                                  // [txt] Read user data from local TXT files
+                                  // [one] Full app is at moneylog.html single file
+                                  // [dropbox] Read data from TXT files in a Dropbox account
+                                  // [localStorage] Edit data in-place, saving to the browser
+var dataFiles = ['moneylog.txt']; // The paths for the data files
 var dataFilesDefault = '';        // Default selected file at init when using multiple TXT
+var localStorageKey = 'moneylogData'; // Keyname for the localStorage database
 
-// localStorage allows editing in-place, saving your data on the browser (like cookies)
-var useLocalStorage = false;      // Turn ON localStorage support?
-var localStorageKey = 'moneylogData'; // Keyname for the localStorage database (don't change)
-
-// Dropbox storage
-var useDropboxStorage = true;    // Turn ON Dropbox storage support?
 
 // Note: The dataFile encoding is UTF-8. Change to ISO-8859-1 if accents got mangled.
 
@@ -654,7 +700,6 @@ var i18nDatabase = {
 		appUrl: 'http://aurelio.net/soft/moneylog/',
 		appUrlOnline: 'http://aurelio.net/soft/moneylog/online/',
 		appDescription: 'Track your finances the practical way. Think simple!',
-		labelFullScreen: 'Dot',
 		labelReports: 'Reports',
 		labelDaily: 'daily',
 		labelMonthly: 'monthly',
@@ -665,13 +710,16 @@ var i18nDatabase = {
 		labelNegative: 'negative',
 		labelGreaterThan: 'greater than',
 		labelLessThan: 'less than',
-		labelFuture: 'Show Future Data',
-		labelMonthPartials: 'Show Monthly Partials',
-		labelFilter: 'Search field',
+		labelFuture: 'Future Data',
+		labelMonthPartials: 'Monthly Partials',
+		// labelFilter: 'Search field',
 		labelRegex: 'regex',
 		labelNegate: 'negate',
-		labelHelp: 'Question mark',
+		// labelHelp: 'Question mark',
 		labelReload: 'Reload',
+		labelViewOptions: 'View',
+		labelTagCloud: 'Tag Cloud',
+		labelTagSummary: 'Tag Summary',
 		labelNoData: 'No data.',
 		labelsDetailed: ['Date', 'Amount', 'Tags', 'Description', 'Balance'],
 		labelsOverview: ['Period', 'Incoming', 'Expense', 'Partial', 'Balance'],
@@ -696,7 +744,7 @@ var i18nDatabase = {
 		errorRequirements: 'Minimum requirements:',
 		msgLoading: 'Loading %s...',
 		msgSaving: 'Saving...',
-		helpFullScreen: 'Turns ON/OFF the clean mode: only the report is shown, with no toolbars.',
+		helpFullScreen: 'Turns ON/OFF the Full Screen mode: only the report is shown, with no toolbar.',
 		helpReports: 'Daily, monthly and yearly reports, with charts, balance and totals.',
 		helpLastMonths: 'See only the latest data, ignoring oldies.',
 		helpValueFilter: 'See only positive or negative values, or greater/lesser than some value.',
@@ -705,17 +753,19 @@ var i18nDatabase = {
 		helpFilter: 'Filter the reports in real time, as you type.',
 		helpRegex: 'Use regular expressions on the search field.',
 		helpNegate: 'Remove the search results from the report.',
-		helpHelp: 'Show/hide the help text.',
+		// helpHelp: 'Show/hide the help text.',
 		helpReload: 'Reload only the data, not the full page. This button only appears when using an external TXT file for data.',
-		helpTags: 'Choose the desired tags for the report: food, health, education, trip, …',
+		// helpTags: 'Choose the desired tags for the report: food, health, education, trip, …',
 		helpTagGroup: 'Show only the entries that have all the selected tags.',
-		helpTagSummary: 'Show/hide the tag summary box.',
+		helpTagSummary: 'Show/hide the tag summary.',
+		helpTagCloud: 'Show/hide the tag cloud.',
 		helpEdit: 'Open the editor, for you to add/remove/edit your data.',
 		helpClose: 'Close the editor (without saving!)',
-		helpSave: 'Save your data.',
-		helpTip: 'Tip: On the reports, click the column header to sort the results. Click again for reverse sorting.',
-		helpInstall: 'Instructions:	Save this page, use a plain text editor to add your own transactions and open it on the browser.',
-		helpTranslator: ''
+		helpSave: 'Save your data.'
+
+		// helpTip: 'Tip: On the reports, click the column header to sort the results. Click again for reverse sorting.',
+		// helpInstall: 'Instructions: Save this page, use a plain text editor to add your own transactions and open it on the browser.',
+		// helpTranslator: ''
 	},
 	pt: {
 		dateFormat: 'd/m/Y',
@@ -724,7 +774,6 @@ var i18nDatabase = {
 		appUrl: 'http://aurelio.net/moneylog/beta.html',
 		appUrlOnline: 'http://aurelio.net/moneylog/online/',
 		appDescription: 'Acompanhe suas finanças de maneira simples e prática. Descomplique!',
-		labelFullScreen: 'Bolinha',
 		labelReports: 'Extratos',
 		labelDaily: 'diário',
 		labelMonthly: 'mensal',
@@ -735,13 +784,16 @@ var i18nDatabase = {
 		labelNegative: 'negativo',
 		labelGreaterThan: 'maior que',
 		labelLessThan: 'menor que',
-		labelFuture: 'Mostrar Lançamentos Futuros',
-		labelMonthPartials: 'Mostrar Parciais Mensais',
-		labelFilter: 'Caixa de pesquisa',
+		labelFuture: 'Lançamentos Futuros',
+		labelMonthPartials: 'Parciais Mensais',
+		// labelFilter: 'Caixa de pesquisa',
 		labelRegex: 'regex',
 		labelNegate: 'excluir',
-		labelHelp: 'Interrogação',
+		// labelHelp: 'Ajuda',
 		labelReload: 'Recarregar',
+		labelViewOptions: 'Visualizar',
+		labelTagCloud: 'Tags',
+		labelTagSummary: 'Somatório de tags',
 		labelNoData: 'Nenhum lançamento.',
 		labelsDetailed: ['Data', 'Valor', 'Tags', 'Descrição', 'Acumulado'],
 		labelsOverview: ['Período', 'Ganhos', 'Gastos', 'Saldo', 'Acumulado'],
@@ -765,7 +817,7 @@ var i18nDatabase = {
 		errorRequirements: 'Os requisitos mínimos são:',
 		msgLoading: 'Carregando %s...',
 		msgSaving: 'Salvando...',
-		helpFullScreen: 'Liga/desliga o modo limpo: aparece somente o extrato, sem as barras de ferramentas.',
+		helpFullScreen: 'Liga/desliga o modo tela cheia: aparece somente o extrato, sem a barra de ferramentas.',
 		helpReports: 'Extratos diário, mensal e anual, com gráficos, somatório, médias, mínimo, máximo e acumulado.',
 		helpLastMonths: 'Veja somente os dados mais recentes, ignorando os antigos.',
 		helpValueFilter: 'Veja somente valores positivos, negativos ou maiores/menores que um valor específico.',
@@ -774,23 +826,24 @@ var i18nDatabase = {
 		helpFilter: 'Filtra os relatórios em tempo real, de acordo com o que você digita.',
 		helpRegex: 'Usa expressões regulares na caixa de pesquisa.',
 		helpNegate: 'Inverte o filtro, escondendo as transações pesquisadas.',
-		helpHelp: 'Mostra e esconde o texto de ajuda.',
+		// helpHelp: 'Mostra e esconde o texto de ajuda.',
 		helpReload: 'Recarrega somente os dados (só aparece quando se utiliza arquivo TXT externo).',
-		helpTags: 'Escolha que tipo de transações você quer ver: alimentação, saúde, educação, viagem, etc.',
+		// helpTags: 'Escolha que tipo de transações você quer ver: alimentação, saúde, educação, viagem, etc.',
 		helpTagGroup: 'Mostra lançamentos que possuem todas as tags selecionadas (deve haver 2+ selecionadas).',
-		helpTagSummary: 'Mostra e esconde a caixa com o somatório das tags.',
+		helpTagSummary: 'Mostra e esconde o somatório das tags.',
+		helpTagCloud: 'Mostra e esconde a nuvem de tags.',
 		helpEdit: 'Abre o editor de lançamentos, para você incluir/remover/alterar os dados do extrato.',
 		helpClose: 'Fecha o editor de lançamentos (apenas fecha, não salva o texto!).',
-		helpSave: 'Salva os lançamentos que você alterou.',
-		helpTip: 'Dica:	Nos relatórios, clique no título da coluna para mudar a ordenação. Clicando novamente a ordem é invertida.',
-		helpInstall: 'Instruções: Salve esta página, use um editor de textos para colocar seus lançamentos e abra no navegador. Para instruções detalhadas e várias outras dicas de uso, leia o FAQ: http://aurelio.net/moneylog/faq/'
+		helpSave: 'Salva os lançamentos que você alterou.'
+
+		// helpTip: 'Dica:	Nos relatórios, clique no título da coluna para mudar a ordenação. Clicando novamente a ordem é invertida.',
+		// helpInstall: 'Instruções: Salve esta página, use um editor de textos para colocar seus lançamentos e abra no navegador. Para instruções detalhadas e várias outras dicas de uso, leia o FAQ: http://aurelio.net/moneylog/faq/'
 	},
 	ca: {
 		centsSeparator: ',',
 		thousandSeparator: '.',
 		dateFormat: 'd-m-y',
 		appDescription: 'Seguiu les vostres finances de manera pràctica. De forma simple!',
-		labelFullScreen: '',
 		labelReports: 'Informes',
 		labelDaily: 'diari',
 		labelMonthly: 'mensual',
@@ -803,10 +856,9 @@ var i18nDatabase = {
 		labelLessThan: 'més petit que',
 		labelFuture: 'Mostra les dades futures',
 		labelMonthPartials: 'Mostra els Parcials Mensuals',
-		labelFilter: 'Camp de cerca',
+		// labelFilter: 'Camp de cerca',
 		labelRegex: 'regex',
 		labelNegate: 'nega-ho',
-		labelHelp: "Signe d'interrogació",
 		labelReload: 'Carrega',
 		labelNoData: 'No hi ha dades.',
 		labelsDetailed: ['Data', 'Import', 'Etiquetes', 'Descripció', 'Balanç'],
@@ -824,7 +876,6 @@ var i18nDatabase = {
 		errorInvalidDate: 'La data no és vàlida:',
 		errorInvalidAmount: "L'import no és vàlid:",
 		msgLoading: "S'està carregant %s...",
-		helpFullScreen: '',
 		helpReports: 'Informes: diari, mensual i anual, amb gràfics, balanç i totals.',
 		helpLastMonths: 'Mostra només les dades més recents, omet les antigues.',
 		helpValueFilter: 'Mostra només els valors positius o negatius, o major / menor que un cert valor.',
@@ -833,17 +884,14 @@ var i18nDatabase = {
 		helpFilter: 'Filtre dels informes en temps real, a mesura que escriu.',
 		helpRegex: 'Utilitza expressions regulars en el camp de cerca.',
 		helpNegate: "Eliminar els resultats de cerca de l'informe.",
-		helpHelp: "'Mostra / oculta aquest text d'ajuda.",
+		// helpHelp: "'Mostra / oculta aquest text d'ajuda.",
 		helpReload: 'Actualitza només les dades, no la pàgina sencera. Aquest botó només apareix quan es fa servir un arxiu TXT de dades extern.',
-		helpTags: "Escolliu el que voleu etiquetes per a l'informe: alimentació, salut, educació, viatges, …",
-		helpTagGroup: 'Mostra només les entrades que tenen totes les etiquetes triades.',
-		helpTagSummary: '',
-		helpEdit: '',
-		helpClose: '',
-		helpSave: '',
-		helpTip: 'Consell: En els informes, feu clic a la capçalera de columna per ordenar els resultats. Feu clic de nou per a la classificació inversa.',
-		helpInstall: 'Instruccions: Deseu aquesta pàgina, utilitzeu un editor de text per afegir les vostres transaccions i obriu-ho al navegador.',
-		helpTranslator: 'Traducció: Paco Rivière, http://pacoriviere.cat'
+		// helpTags: "Escolliu el que voleu etiquetes per a l'informe: alimentació, salut, educació, viatges, …",
+		helpTagGroup: 'Mostra només les entrades que tenen totes les etiquetes triades.'
+
+		// helpTip: 'Consell: En els informes, feu clic a la capçalera de columna per ordenar els resultats. Feu clic de nou per a la classificació inversa.',
+		// helpInstall: 'Instruccions: Deseu aquesta pàgina, utilitzeu un editor de text per afegir les vostres transaccions i obriu-ho al navegador.',
+		// helpTranslator: 'Traducció: Paco Rivière, http://pacoriviere.cat'
 	},
 	es: {
 		dateFormat: 'd/m/Y',
@@ -851,7 +899,6 @@ var i18nDatabase = {
 		thousandSeparator: '.',
 		appUrl: 'http://aurelio.net/moneylog/beta.html',
 		appDescription: 'Controle sus finanzas de forma práctica. Simple!',
-		labelFullScreen: 'Punto',
 		labelReports: 'Reportes',
 		labelDaily: 'diario',
 		labelMonthly: 'mensual',
@@ -864,10 +911,9 @@ var i18nDatabase = {
 		labelLessThan: 'menores a',
 		labelFuture: 'Mostrar movimientos futuros',
 		labelMonthPartials: 'Mostrar parcial mensual',
-		labelFilter: 'Caja de búsqueda',
+		// labelFilter: 'Caja de búsqueda',
 		labelRegex: 'regex',
 		labelNegate: 'negar',
-		labelHelp: 'Signo de interrogación',
 		labelReload: 'Recargar',
 		labelNoData: 'Sin movimientos.',
 		labelsDetailed: ['Fecha', 'Monto', 'Concepto', 'Descripción', 'Balance'],
@@ -885,7 +931,6 @@ var i18nDatabase = {
 		errorInvalidDate: 'Fecha invalida:',
 		errorInvalidAmount: 'Cantidad invalida:',
 		msgLoading: 'Cargando %s...',
-		helpFullScreen: 'Mostrar/Esconder encabezado y pie de página.',
 		helpReports: 'Reporte diario, mensual o anual, con gráficas, promedios, balances y totales.',
 		helpLastMonths: 'Vea solo la información mas actual, escondiendo la información antigua.',
 		helpValueFilter: 'Vea solo los montos positivos o los negativos, o los "mayores a" o los "menores a" cualquier valor dado.',
@@ -894,17 +939,17 @@ var i18nDatabase = {
 		helpFilter: 'Evalue los reportes en tiempo real a medida que los va tipeando.',
 		helpRegex: 'Use expresiones regulares en la caja de búsqueda.',
 		helpNegate: 'Invierte el criterio de búsqueda.',
-		helpHelp: 'Mostrar/Esconder texto de ayuda.',
+		// helpHelp: 'Mostrar/Esconder texto de ayuda.',
 		helpReload: 'Recargar solo la información y no la página entera. Este botón solo aparecerá cuando se este utilizando un archivo TXT externo para almacenar la información.',
-		helpTags: 'Seleccione que tipo de conceptos desea ver en el reporte: comida, salud, educación, viajes, …',
+		// helpTags: 'Seleccione que tipo de conceptos desea ver en el reporte: comida, salud, educación, viajes, …',
 		helpTagGroup: 'Mostrar solo los movimientos rotulados con los conceptos seleccionados (debe seleccionar al menos 2 conceptos).',
-		helpTagSummary: '',
 		helpEdit: 'Abre el editor de movimientos para incluir/eliminar/editar los datos de un extracto.',
 		helpClose: 'Cierra el editor de movimientos (solo cierra, no guarda los cambios!).',
-		helpSave: 'Guarda las movimientos editados.',
-		helpTip: 'Consejo:	Haga click en los títulos de las columnas del reporte para ordenar la información de menor a mayor. Haga click nuevamente para mostrar la información en el orden inverso.',
-		helpInstall: 'Instrucciones: Guarde esta página, use un editor de texto simple para volcar sus movimientos y luego abrala en su navegador.',
-		helpTranslator: 'Traducción: Gonzalo Nemmi'
+		helpSave: 'Guarda las movimientos editados.'
+
+		// helpTip: 'Consejo:	Haga click en los títulos de las columnas del reporte para ordenar la información de menor a mayor. Haga click nuevamente para mostrar la información en el orden inverso.',
+		// helpInstall: 'Instrucciones: Guarde esta página, use un editor de texto simple para volcar sus movimientos y luego abrala en su navegador.',
+		// helpTranslator: 'Traducción: Gonzalo Nemmi'
 	},
 	getLanguage: function (lang) {
 		var phrase, defaultLang = this.defaultLanguage;
@@ -930,13 +975,12 @@ var i18nDatabase = {
 
 
 // Global vars
-var appName = 'MoneyLog Experience ∞';
+var appVersion = '5b';
+var appName = '';
 var sortColIndex = 0;
 var sortColRev = false;
 var oldSortColIndex;
 var oldSortColRev;
-var oldValueFilterArgShow;
-var oldTagSummary;
 var currentDate;
 var highlightRegex;
 var i18n;
@@ -948,7 +992,6 @@ var selectedRowsData = [];
 var multiRawData = '';
 var isFullScreen = false;
 var isOpera = (window.opera) ? true : false;
-var isOnline = false;
 
 // The iframe loading occurs in parallel with the main execution, we need to know when it's done
 var iframeIsLoaded = true;
@@ -1477,20 +1520,32 @@ function getDetailedReportColumnContents(tr_element, column_index) {
 /////////////////////////////////////////////////////////////////////
 
 function editorOn() {
-	// show editor, hide Edit button
+
+	// Load the current data to the editor
+	// Note: already loaded when localStorage
+	if (appMode !== 'localStorage') {
+		document.getElementById('editor-data').value = rawData;
+	}
+
+	// Hide content to avoid scroll bars
+	document.getElementById('content').style.display = 'none';
+
+	// Show editor
 	document.getElementById('editor').style.display = 'block';
-	document.getElementById('editoropen').style.display = 'none';
 }
 function editorOff() {
-	// hide editor, show Edit button
+
+	// Hide editor
 	document.getElementById('editor').style.display = 'none';
-	document.getElementById('editoropen').style.display = 'inline';
+
+	// Restore content
+	document.getElementById('content').style.display = 'block';
 }
 function editorSave() {
 	saveLocalData();
 }
 function saveLocalData() {
-	localStorage.setItem(localStorageKey, document.getElementById('editordata').value);
+	localStorage.setItem(localStorageKey, document.getElementById('editor-data').value);
 	// reload report
 	resetData();
 	readData();
@@ -1502,7 +1557,7 @@ function loadLocalData() {
 	if (!localStorage.getItem(localStorageKey) || localStorage.getItem(localStorageKey).strip() === "") {
 		localStorage.setItem(localStorageKey, document.getElementById('data').innerHTML);
 	}
-	document.getElementById('editordata').value = localStorage.getItem(localStorageKey);
+	document.getElementById('editor-data').value = localStorage.getItem(localStorageKey);
 }
 // Allows to insert TABs inside textarea
 // Opera bug: needs to be attached to onkeypress instead onkeydown
@@ -1555,7 +1610,7 @@ function loadDataFile(filePath) {
 	document.getElementById('report').innerHTML = i18n.msgLoading.replace('%s', filePath);
 	resetData();
 	iframeIsLoaded = false;
-	document.getElementById('dataFrame').src = filePath;
+	document.getElementById('data-frame').src = filePath;
 	// This triggers the onLoad iframe event, handled by iframeLoaded()
 }
 
@@ -1581,7 +1636,7 @@ function loadWaitingDataFiles() {
 	}
 }
 function getSelectedFile() {
-	return dataFiles[document.getElementById('datafiles').selectedIndex];
+	return dataFiles[document.getElementById('source-file').selectedIndex];
 	// Note: IE7/8 fail at <select>.value, so we must use selectedIndex
 }
 function loadSelectedFile() {
@@ -1611,14 +1666,14 @@ function readData() {
 	var iframeDoc;
 
 	// Read raw data from localStorage, #data (<PRE>) or from external dataFile (<IFRAME><PRE>)
-	if (useLocalStorage) {
+	if (appMode === 'localStorage') {
 		loadLocalData();
-		rawData = document.getElementById('editordata').value;
-	} else if (oneFile || useDropboxStorage) {
+		rawData = document.getElementById('editor-data').value;
+	} else if (appMode === 'one' || appMode === 'dropbox') {
 		rawData = document.getElementById('data').innerHTML;
 	} else {
 		// Note: Firefox/Camino won't read if the TXT file is in a parent folder.
-		iframeDoc = document.getElementById('dataFrame').contentWindow.document;
+		iframeDoc = document.getElementById('data-frame').contentWindow.document;
 		rawData = iframeDoc.getElementsByTagName('pre')[0].innerHTML;
 	}
 }
@@ -1827,22 +1882,22 @@ function filterData() {
 	firstDate = 0;
 	filteredData = [];
 
-	if (document.getElementById('optlastmonths').checked && reportType !== 'y') {
-		firstDate = getPastMonth(document.getElementById('lastmonths').value - 1);
+	if (document.getElementById('opt-last-months').checked && reportType !== 'y') {
+		firstDate = getPastMonth(document.getElementById('last-months').value - 1);
 	}
 
 	// Show future works for both views
-	showFuture = document.getElementById('optfuture').checked;
+	showFuture = document.getElementById('opt-future').checked;
 
 	// Get filters data for the detailed report
 	if (reportType === 'd') {
 		filter = document.getElementById('filter').value;
-		isRegex = document.getElementById('optregex').checked;
-		isNegated = document.getElementById('optnegate').checked;
+		isRegex = document.getElementById('opt-regex').checked;
+		isNegated = document.getElementById('opt-negate').checked;
 
-		if (document.getElementById('optvaluefilter').checked) {
-			valueFilter = document.getElementById('valuefilter').value;
-			valueFilterArg = document.getElementById('valuefilterarg').value || 0;
+		if (document.getElementById('opt-value-filter').checked) {
+			valueFilter = document.getElementById('value-filter').value;
+			valueFilterArg = document.getElementById('value-filter-arg').value || 0;
 		}
 
 		// Hack: Value filtering on the search box!
@@ -1919,18 +1974,18 @@ function applyTags(theData) {
 	// This function composes the full tag menu and
 	// also filters theData if some tag is selected
 
-	var i, j, rowTags, thisTag, tagMatched, tagName, tagId, checked, tagCount, tagElement, tagsMenu, selectedTags, filteredData, tagMultiAll;
+	var i, j, rowTags, thisTag, tagMatched, tagName, tagId, checked, tagCount, tagElement, tagsMenu, selectedTags, filteredData, tagMustGroup;
 
 	tagsMenu = [];
 	selectedTags = [];
 	filteredData = [];
 
 	// Get multiple selection mode (true=AND, false=OR)
-	tagMultiAll = document.getElementById('tagMultiAllCheck').checked;
+	tagMustGroup = document.getElementById('tag-cloud-opt-group').checked;
 
 	// Get currently selected tags (from interface)
 	try {
-		tagCount = document.getElementById('tagCount').value;
+		tagCount = document.getElementById('tag-cloud-count').value;
 		for (i = 1; i <= tagCount; i++) {
 			tagElement = document.getElementById('tag_' + i);
 			if (tagElement && tagElement.checked) {
@@ -1962,8 +2017,8 @@ function applyTags(theData) {
 					(thisTag === i18n.labelTagEmpty && rowTags.length === 0));
 					// Tip: space means no tag
 
-				if (tagMatched && (!tagMultiAll)) { break; } // OR
-				if (!tagMatched && (tagMultiAll)) { break; } // AND
+				if (tagMatched && (!tagMustGroup)) { break; } // OR
+				if (!tagMatched && (tagMustGroup)) { break; } // AND
 			}
 			if (tagMatched) {
 				filteredData.push(theData[i]);
@@ -1988,7 +2043,7 @@ function applyTags(theData) {
 		tagsMenu.push(i18n.labelTagEmpty);
 
 		// Save the total tag count
-		document.getElementById('tagCount').value = tagsMenu.length;
+		document.getElementById('tag-cloud-count').value = tagsMenu.length;
 
 		// Add one checkbox for each tag
 		for (i = 0; i < tagsMenu.length; i++) {
@@ -2010,13 +2065,10 @@ function applyTags(theData) {
 	}
 
 	// Save the tags menu (or make it empty)
-	document.getElementById('tagList').innerHTML = tagsMenu;
+	document.getElementById('tag-cloud-tags').innerHTML = tagsMenu;
 
-	// Show the tags menu if we have at least one tag (except Full Screen)
-	document.getElementById('tagsArea').style.display = (tagsMenu.length > 0 && !isFullScreen) ? 'block' : 'none';
-
-	// The '+' checkbox is only shown if we have multiple selected tags
-	document.getElementById('tagMultiAll').style.display = (selectedTags.length > 1) ? 'block' : 'none';
+	// The group checkbox is only shown if we have multiple selected tags
+	document.getElementById('tag-cloud-options').style.display = (selectedTags.length > 1) ? 'block' : 'none';
 
 	// Tag filter was active?
 	if (selectedTags.length > 0) {
@@ -2032,13 +2084,14 @@ function applyTags(theData) {
 /////////////////////////////////////////////////////////////////////
 
 function updateSelectedRowsSummary() {
-	var i, data, arr, table, label, value;
+	var el, i, data, arr, table, label, value;
 
+	el = document.getElementById('rows-summary');
 	data = selectedRowsData;
 	arr = [];
 	table = [];
 
-	if (data.length > 0) {
+	if (data.length > 1) {  // Summary for 2 or more rows
 
 		// Calculate
 		arr.push([i18n.labelTotal,   prettyFloat(data.sum())]);
@@ -2060,9 +2113,13 @@ function updateSelectedRowsSummary() {
 			);
 		}
 		table.push('<\/table>');
-	}
 
-	document.getElementById('rowsSummary').innerHTML = table.join('\n');
+		el.innerHTML = table.join('\n');
+		el.style.display = 'block';
+
+	} else {
+		el.style.display = 'none';
+	}
 }
 
 function updateTagSummary(theData) {
@@ -2129,10 +2186,7 @@ function updateTagSummary(theData) {
 
 	// Save results to the respective DIV
 	results = results.join('\n');
-	document.getElementById('tagSummary').innerHTML = results;
-
-	// Position tag summary right above the tagbar, which has variable height
-	document.getElementById('tagSummary').style.bottom = document.getElementById('tagsArea').offsetHeight + 'px';
+	document.getElementById('tag-summary-content').innerHTML = results;
 }
 
 function showOverview() {
@@ -2277,7 +2331,7 @@ function showOverview() {
 			chartLabels = [];
 
 			// Get all values for the selected column
-			chartCol = document.getElementById('chartcol').value || 1;
+			chartCol = document.getElementById('chart-data').value || 1;
 			for (i = 0; i < overviewData.length; i++) {
 				chartValues.push(overviewData[i][chartCol]);
 				chartLabels.push(overviewData[i][0]);  // month or year
@@ -2285,7 +2339,7 @@ function showOverview() {
 
 			// Get chart and show it
 			chart = drawChart(chartValues, chartLabels);
-			document.getElementById('chart').innerHTML = chart;
+			document.getElementById('chart-content').innerHTML = chart;
 			document.getElementById('charts').style.display = 'block';
 		} else {
 			document.getElementById('charts').style.display = 'none';
@@ -2309,7 +2363,7 @@ function showDetailed() {
 	chartLabels = [];
 	selectedRowsData = [];
 
-	monthPartials = document.getElementById('optmonthly');
+	monthPartials = document.getElementById('opt-monthly');
 	theData = applyTags(filterData());
 
 	if (theData.length > 0) {
@@ -2446,14 +2500,14 @@ function showDetailed() {
 
 			// Get all values for the selected column
 			chartValuesSelected = [];
-			chartCol = document.getElementById('chartcol').value || 1;
+			chartCol = document.getElementById('chart-data').value || 1;
 			for (i = 0; i < chartValues.length; i++) {
 				chartValuesSelected.push(chartValues[i][chartCol]);
 			}
 
 			// Get chart and show it
 			chart = drawChart(chartValuesSelected, chartLabels);
-			document.getElementById('chart').innerHTML = chart;
+			document.getElementById('chart-content').innerHTML = chart;
 			document.getElementById('charts').style.display = 'block';
 		} else {
 			document.getElementById('charts').style.display = 'none';
@@ -2486,7 +2540,7 @@ function showReport() {
 
 function populateChartColsCombo() {
 	var el, i;
-	el = document.getElementById('chartcol');
+	el = document.getElementById('chart-data');
 	for (i = 0; i < i18n.labelsOverview.length; i++) {
 		if (i === 0) {
 			continue; // ignore date column
@@ -2497,8 +2551,8 @@ function populateChartColsCombo() {
 
 function populateDataFilesCombo() {
 	var el, i;
-	if (!oneFile && !useLocalStorage) {
-		el = document.getElementById('datafiles');
+	if (appMode === 'txt' || appMode === 'dropbox') {
+		el = document.getElementById('source-file');
 		for (i = 0; i < dataFiles.length; i++) {
 			el.options[i] = new Option(dataFiles[i]);
 		}
@@ -2507,7 +2561,7 @@ function populateDataFilesCombo() {
 
 function populateMonthsCombo() {
 	var el, label, i;
-	el = document.getElementById('lastmonths');
+	el = document.getElementById('last-months');
 	label = i18n.labelMonths[0];
 	for (i = 1; i <= maxLastMonths; i++) {
 		if (i > 1) {
@@ -2520,7 +2574,7 @@ function populateMonthsCombo() {
 
 function populateValueFilterCombo() {
 	var el;
-	el = document.getElementById('valuefilter');
+	el = document.getElementById('value-filter');
 	el.options[0] = new Option('+ ' + i18n.labelPositive, '+');
 	el.options[1] = new Option('- ' + i18n.labelNegative, '-');
 	el.options[2] = new Option('> ' + i18n.labelGreaterThan, '>');
@@ -2543,36 +2597,36 @@ function updateToolbar() {
 
 	// Daily
 	if (reportType === 'd') {
-		add = ['tagsArea'];
-		remove = ['charts'];
 		unhide = [
-			'filterbox',
-			'optmonthly', 'optmonthlylabel',
-			'optvaluefilter', 'optvaluefilterlabel', 'valuefilter',
-			'optlastmonths', 'optlastmonthslabel', 'lastmonths'
+			'search-box',
+			'opt-monthly', 'opt-monthly-label',
+			'opt-value-filter', 'opt-value-filter-label', 'opt-value-filter-extra',
+			'opt-last-months', 'opt-last-months-label', 'opt-last-months-extra',
+			'tag-cloud-box',
+			'tag-summary-box'
 		];
 	// Monthly
 	} else if (reportType === 'm') {
-		add = ['charts'];
-		remove = ['tagsArea'];
 		hide = [
-			'filterbox',
-			'optmonthly', 'optmonthlylabel',
-			'optvaluefilter', 'optvaluefilterlabel', 'valuefilter'
+			'search-box',
+			'opt-monthly', 'opt-monthly-label',
+			'opt-value-filter', 'opt-value-filter-label', 'opt-value-filter-extra',
+			'tag-cloud-box',
+			'tag-summary-box'
 		];
 		unhide = [
-			'optlastmonths', 'optlastmonthslabel', 'lastmonths'
+			'opt-last-months', 'opt-last-months-label', 'opt-last-months-extra',
 		];
 	// Yearly
 	} else if (reportType === 'y') {
-		add = ['charts'];
-		remove = ['tagsArea'];
 		hide = [
-			'filterbox',
-			'optmonthly', 'optmonthlylabel',
-			'optvaluefilter', 'optvaluefilterlabel', 'valuefilter',
+			'search-box',
+			'opt-monthly', 'opt-monthly-label',
+			'opt-value-filter', 'opt-value-filter-label', 'opt-value-filter-extra',
 			// Recent *months* doesn't make sense in yearly report
-			'optlastmonths', 'optlastmonthslabel', 'lastmonths'
+			'opt-last-months', 'opt-last-months-label', 'opt-last-months-extra',
+			'tag-cloud-box',
+			'tag-summary-box'
 		];
 	}
 
@@ -2618,10 +2672,6 @@ function changeReport(el) {
 	//
 	// From Daily to Monthly/Yearly
 	if (oldType === 'd' && newType !== 'd') {
-		oldValueFilterArgShow = document.getElementById('valuefilterarg').style.visibility;
-		document.getElementById('valuefilterarg').style.visibility = 'hidden';
-		oldTagSummary = document.getElementById('tagSummary').style.display;
-		document.getElementById('tagSummary').style.display = 'none';
 		oldSortColIndex = sortColIndex;
 		oldSortColRev = sortColRev;
 		sortColIndex = 0; // Default by date
@@ -2629,8 +2679,6 @@ function changeReport(el) {
 	//
 	// From Monthly/Yearly to Daily
 	} else if (newType === 'd' && oldType !== 'd') {
-		document.getElementById('valuefilterarg').style.visibility = oldValueFilterArgShow;
-		document.getElementById('tagSummary').style.display = oldTagSummary;
 		sortColIndex = oldSortColIndex || 0;
 		sortColRev = oldSortColRev || false;
 	}
@@ -2678,41 +2726,27 @@ function iframeLoaded(el) {
 }
 
 function lastMonthsChanged() {
-	document.getElementById('optlastmonths').checked = true;
+	document.getElementById('opt-last-months').checked = true;
 	overviewData = [];
 	showReport();
 }
 
 function toggleFullScreen() {
-	var toolbar, tagbar, content, tagsummary;
+	var toolbar, logo, content;
 
-	toolbar = document.getElementById('toolbarwrapper');
-	tagbar = document.getElementById('tagsArea');
+	toolbar = document.getElementById('toolbar-controls-wrapper');
+	logo = document.getElementById('logo');
 	content = document.getElementById('content');
-	tagsummary = document.getElementById('tagSummary');
-
-	// Note:
-	// This toolbar wrapper is needed because #toolbar is a table (not a div).
-	// When doing the display:block on it, the table cells don't expand to full width.
-	// So we need this silly DIV wrapper so things work as expected.
-	// The only browser who got it right without the wrapper was... IE7/8 (surprise!)
 
 	if (isFullScreen) {
 		toolbar.style.display = 'block';
-		if (reportType === 'd') {
-			tagbar.style.display = 'block';
-			tagsummary.style.display = oldTagSummary || 'none';
-		}
-		content.style.marginTop = '8em';
+		logo.style.display = 'block';
+		content.style.marginLeft = '216px';  // #toolbar width
 		isFullScreen = false;
 	} else {
 		toolbar.style.display = 'none';
-		tagbar.style.display = 'none';
-		content.style.marginTop = 0;
-		if (reportType === 'd') {
-			oldTagSummary = tagsummary.style.display;
-			tagsummary.style.display = 'none';
-		}
+		logo.style.display = 'none';
+		content.style.marginLeft = 0;
 		isFullScreen = true;
 	}
 }
@@ -2721,25 +2755,53 @@ function toggleFuture() {
 	showReport();
 }
 
-function toggleHelp() {
-	var el = document.getElementById('help');
-	el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+function toggleToolbarBox(header_id, content_id) {
+	// Handle toolbar box header clicking: show/hide contents
+	var header, content;
+	header = document.getElementById(header_id);
+	content = document.getElementById(content_id);
+	if (content.style.display === 'block') {
+		content.style.display = 'none';
+		removeClass(header, 'active');
+	} else {
+		content.style.display = 'block';
+		addClass(header, 'active');
+	}
 	return false; // cancel default link action
 }
-
+function toggleViewOptions() {
+	return toggleToolbarBox('view-options-header', 'view-options-content');
+}
+function toggleTagCloud() {
+	return toggleToolbarBox('tag-cloud-header', 'tag-cloud-content');
+}
 function toggleTagSummary() {
-	var el = document.getElementById('tagSummary');
-	el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-	return false; // cancel default link action
+	return toggleToolbarBox('tag-summary-header', 'tag-summary-content');
 }
 
 function toggleLastMonths() {
+
+	// show/hide extra options
+	var extra = document.getElementById('opt-last-months-extra');
+	extra.style.display = (this.checked) ? 'block' : 'none';
+
+	// reload report
 	overviewData = [];
 	showReport();
 }
 
+function toggleValueFilter() {
+
+	// show/hide extra options
+	var extra = document.getElementById('opt-value-filter-extra');
+	extra.style.display = (this.checked) ? 'block' : 'none';
+
+	// reload report
+	showReport();
+}
+
 function toggleMonthly() {
-	if (document.getElementById('optmonthly').checked === true) {
+	if (document.getElementById('opt-monthly').checked === true) {
 		sortColIndex = 0;
 		sortColRev = false;
 	}
@@ -2773,27 +2835,24 @@ function valueFilterChanged() {
 	overviewData = [];
 
 	// autocheck checkbox
-	document.getElementById('optvaluefilter').checked = true;
+	document.getElementById('opt-value-filter').checked = true;
 
 	// show/hide the filter argument textbox
-	if (document.getElementById('valuefilter').value.match(/[+\-]/)) {
-		document.getElementById('valuefilterarg').style.visibility = 'hidden';
+	if (document.getElementById('value-filter').value.match(/[+\-]/)) {
+		document.getElementById('value-filter-arg').style.display = 'none';
 	} else {
-		document.getElementById('valuefilterarg').style.visibility = 'visible';
+		document.getElementById('value-filter-arg').style.display = 'inline';
 	}
 
 	showReport();
 }
 
 function showHideEditButton() {
-	if (useLocalStorage || useDropboxStorage && getSelectedFile() !== '*') {
-		// show
-		document.getElementById('editoropen').style.display = 'inline';
-		document.getElementById('operabug').style.paddingRight = i18n.labelEdit.length + 'em';
-	} else {
-		// hide
-		document.getElementById('editoropen').style.display = 'none';
-		document.getElementById('operabug').style.paddingRight = '0.5em';
+	var el;
+	if (appMode === 'dropbox') {
+		// Hide Edit button when current file is '*'
+		el = document.getElementById('editor-open');
+		el.style.visibility = (getSelectedFile() === '*') ? 'hidden' : 'visible';
 	}
 }
 
@@ -2802,21 +2861,99 @@ function showHideEditButton() {
 //                             INIT
 /////////////////////////////////////////////////////////////////////
 
+function initAppMode() {
+	switch(appMode) {
+
+		case 'one':
+			appName = 'MoneyLog Experience';
+			i18n.appUrl = 'http://aurelio.net/moneylog/moneylog5.html';
+			oneFile = true;
+			useLocalStorage = false;
+			useDropboxStorage = false;
+			break;
+
+		case 'localStorage':
+			appName = 'MoneyLog Browser';
+			i18n.appUrl = i18n.appUrlOnline;
+			useLocalStorage = true;
+			oneFile = false;
+			useDropboxStorage = false;
+			break;
+
+		case 'dropbox':
+			// Can't use the word Dropbox in app name
+			// https://www.dropbox.com/developers/reference/branding
+			appName = 'MoneyLog Cloud';
+			i18n.appUrl = 'http://moneylog-cloud.appspot.com';
+			useDropboxStorage = true;
+			oneFile = false;
+			useLocalStorage = false;
+			break;
+
+		case 'txt':
+			appName = 'MoneyLog TXT';
+			appVersion = '∞';
+			i18n.appUrl = 'http://aurelio.net/moneylog/beta.html';
+			oneFile = false;
+			useLocalStorage = false;
+			useDropboxStorage = false;
+			break;
+
+		default:
+			alert('FATAL ERROR: Invalid setting appMode = ' + appMode);
+	}
+}
+
 function init() {
 
 	// Load the i18n messages (must be the first)
 	i18n = i18nDatabase.getLanguage(lang);
-	i18n.labelTags = i18n.labelsDetailed[2]; // Tags
 
-	// Dropbox version settings
-	if (useDropboxStorage) {
-		oneFile = false;
-		useLocalStorage = false;
+	// Sanity: solve inconsistences in app mode
+	if (appMode) {
+		// User informed appMode, this is the priority
+		initAppMode();
+	} else {
+		// No appMode set, let's find out in which mode we are
+		if (oneFile) {
+			appMode = 'one';
+		} else if (useLocalStorage) {
+			appMode = 'localStorage';
+		} else if (useDropboxStorage) {
+			appMode = 'dropbox';
+		} else {  // local TXT
+			appMode = 'txt';
+		}
+		initAppMode();
 	}
 
-	// Online mode uses localStorage or Dropbox
-	isOnline = useLocalStorage || useDropboxStorage;
+	// UI surgery for each mode
+	switch(appMode) {
+		case 'one':
+			// Remove all file-related options
+			document.getElementById('source-file-box').style.display = 'none';
+			document.getElementById('toolbar-sep-1').style.display = 'none';
+			break;
 
+		case 'localStorage':
+			// Hide Reload button and files combo. Not needed.
+			document.getElementById('source-reload').style.display = 'none';
+			document.getElementById('source-file').style.display = 'none';
+			// Stretch Edit button
+			document.getElementById('editor-open').style.width = '100%';
+			document.getElementById('editor-open').style.marginTop = 0;
+			break;
+
+		case 'dropbox':
+			showHideEditButton();
+			break;
+
+		case 'txt':
+			// Hide Edit button. Not functional.
+			document.getElementById('editor-open').style.visibility = 'hidden';
+	}
+
+	// Prepare UI elements
 	setCurrentDate();
 	populateMonthsCombo();
 	populateDataFilesCombo();
@@ -2835,79 +2972,52 @@ function init() {
 	// Split highlight string into words
 	highlightTags = highlightTags.strip().split(/\s+/);
 
-	// Just show the files combo when there are 2 or more files
-	if (oneFile || useLocalStorage || dataFiles.removePattern('*').length < 2) {
-		document.getElementById('datafiles').style.display = 'none';
-	}
-
-	// Hide Reload button in oneFile mode. No iframe, so we can't reload.
-	// Hide Reload button in localStorage mode. Not needed.
-	// Dropbox mode: reloads files from the remote server.
-	// Multi-files mode: realoads local files.
-	if (oneFile || useLocalStorage) {
-		document.getElementById('reload').style.visibility = 'hidden';
-	}
-
-	if (isOnline) {
-		appName = 'MoneyLog Online';
-		i18n.appUrl = i18n.appUrlOnline;
-
-		if (useDropboxStorage) {
-			appName = 'MoneyLog Cloud';
-			// Can't use the word Dropbox in app name
-			// https://www.dropbox.com/developers/reference/branding
-			i18n.appUrl = 'http://moneylog-cloud.appspot.com';
-		}
-
-		showHideEditButton();
-	} else {
-		appName = appName.replace('og ', 'og<br>'); // dirty layout fix
-	}
-
 	// Set interface labels
-	document.getElementById('sitelink'           ).innerHTML = appName;
-	document.getElementById('d'                  ).innerHTML = i18n.labelDaily;
-	document.getElementById('m'                  ).innerHTML = i18n.labelMonthly;
-	document.getElementById('y'                  ).innerHTML = i18n.labelYearly;
-	document.getElementById('optlastmonthslabel' ).innerHTML = i18n.labelLastMonths + ':';
-	document.getElementById('optvaluefilterlabel').innerHTML = i18n.labelValueFilter + ':';
-	document.getElementById('optfuturelabel'     ).innerHTML = i18n.labelFuture;
-	document.getElementById('optmonthlylabel'    ).innerHTML = i18n.labelMonthPartials;
-	document.getElementById('optregexlabel'      ).innerHTML = i18n.labelRegex;
-	document.getElementById('optnegatelabel'     ).innerHTML = i18n.labelNegate;
-	document.getElementById('tagsLabel'          ).innerHTML = i18n.labelTags + ':';
-	document.getElementById('tagMultiAllLabel'   ).innerHTML = i18n.labelTagGroup;
-	document.getElementById('editoropen'         ).innerHTML = i18n.labelEdit;
-	document.getElementById('editorclose'        ).innerHTML = i18n.labelClose;
-	document.getElementById('editorsave'         ).innerHTML = i18n.labelSave;
+	document.getElementById('d'                        ).innerHTML = i18n.labelDaily;
+	document.getElementById('m'                        ).innerHTML = i18n.labelMonthly;
+	document.getElementById('y'                        ).innerHTML = i18n.labelYearly;
+	document.getElementById('opt-last-months-label'    ).innerHTML = i18n.labelLastMonths + ':';
+	document.getElementById('opt-value-filter-label'   ).innerHTML = i18n.labelValueFilter + ':';
+	document.getElementById('opt-future-label'         ).innerHTML = i18n.labelFuture;
+	document.getElementById('opt-monthly-label'        ).innerHTML = i18n.labelMonthPartials;
+	document.getElementById('opt-regex-label'          ).innerHTML = i18n.labelRegex;
+	document.getElementById('opt-negate-label'         ).innerHTML = i18n.labelNegate;
+	document.getElementById('tag-cloud-opt-group-label').innerHTML = i18n.labelTagGroup;
+	document.getElementById('source-reload'            ).innerHTML = i18n.labelReload;
+	document.getElementById('editor-open'              ).innerHTML = i18n.labelEdit;
+	document.getElementById('editor-close'             ).innerHTML = i18n.labelClose;
+	document.getElementById('editor-save'              ).innerHTML = i18n.labelSave;
+	document.getElementById('view-options-header'      ).innerHTML = i18n.labelViewOptions;
+	document.getElementById('tag-cloud-header'         ).innerHTML = i18n.labelTagCloud;
+	document.getElementById('tag-summary-header'       ).innerHTML = i18n.labelTagSummary;
 
 	// Set interface tooltips
-	document.getElementById('fullscreen'         ).title = i18n.helpFullScreen;
-	document.getElementById('sitelink'           ).href  = i18n.appUrl;
-	document.getElementById('sitelink'           ).title = i18n.appDescription;
-	document.getElementById('report-nav'         ).title = i18n.helpReports;
-	document.getElementById('optlastmonthslabel' ).title = i18n.helpLastMonths;
-	document.getElementById('optvaluefilterlabel').title = i18n.helpValueFilter;
-	document.getElementById('optfuturelabel'     ).title = i18n.helpFuture;
-	document.getElementById('optmonthlylabel'    ).title = i18n.helpMonthPartials;
-	document.getElementById('filter'             ).title = i18n.helpFilter;
-	document.getElementById('optregexlabel'      ).title = i18n.helpRegex;
-	document.getElementById('optnegatelabel'     ).title = i18n.helpNegate;
-	document.getElementById('helpbutton'         ).title = i18n.helpHelp;
-	document.getElementById('reload'             ).title = i18n.helpReload;
-	document.getElementById('tagsLabel'          ).title = i18n.helpTags;
-	document.getElementById('tagMultiAllLabel'   ).title = i18n.helpTagGroup;
-	document.getElementById('tagSummaryButton'   ).title = i18n.helpTagSummary;
-	document.getElementById('editoropen'         ).title = i18n.helpEdit;
-	document.getElementById('editorclose'        ).title = i18n.helpClose;
-	document.getElementById('editorsave'         ).title = i18n.helpSave;
+	document.getElementById('fullscreen'               ).title = i18n.helpFullScreen;
+	document.getElementById('sitelink'                 ).href  = i18n.appUrl;
+	document.getElementById('sitelink'                 ).title = i18n.appDescription;
+	document.getElementById('report-nav'               ).title = i18n.helpReports;
+	document.getElementById('opt-last-months-label'    ).title = i18n.helpLastMonths;
+	document.getElementById('opt-value-filter-label'   ).title = i18n.helpValueFilter;
+	document.getElementById('opt-future-label'         ).title = i18n.helpFuture;
+	document.getElementById('opt-monthly-label'        ).title = i18n.helpMonthPartials;
+	document.getElementById('filter'                   ).title = i18n.helpFilter;
+	document.getElementById('opt-regex-label'          ).title = i18n.helpRegex;
+	document.getElementById('opt-negate-label'         ).title = i18n.helpNegate;
+	document.getElementById('source-reload'            ).title = i18n.helpReload;
+	document.getElementById('tag-cloud-opt-group-label').title = i18n.helpTagGroup;
+	document.getElementById('view-options-header'      ).title = i18n.helpViewoptions;
+	document.getElementById('tag-cloud-header'         ).title = i18n.helpTagCloud;
+	document.getElementById('tag-summary-header'       ).title = i18n.helpTagSummary;
+	document.getElementById('editor-open'              ).title = i18n.helpEdit;
+	document.getElementById('editor-close'             ).title = i18n.helpClose;
+	document.getElementById('editor-save'              ).title = i18n.helpSave;
 
 	// Mark current report as active (CSS)
 	addClass(document.getElementById(reportType), 'active');
 
 	// localStorage browser support check
-	if (useLocalStorage && !window.localStorage) {
-		document.getElementById('editoropen').style.display = 'none'; // hide button
+	if (appMode === 'localStorage' && !window.localStorage) {
+		document.getElementById('editor-open').style.display = 'none'; // hide button
 		showError(
 			i18n.errorNoLocalStorage.replace('%s', appName),
 			'<p>' + i18n.errorRequirements +
@@ -2918,84 +3028,54 @@ function init() {
 
 	// Set initial chart type for the reports (before event handlers)
 	if (reportType === 'd') {
-		document.getElementById('chartcol').value = initChartDaily;
+		document.getElementById('chart-data').value = initChartDaily;
 	} else if (reportType === 'm') {
-		document.getElementById('chartcol').value = initChartMonthly;
+		document.getElementById('chart-data').value = initChartMonthly;
 	} else {
-		document.getElementById('chartcol').value = initChartYearly;
+		document.getElementById('chart-data').value = initChartYearly;
 	}
 
 	// Add event handlers
-	document.getElementById('fullscreen'      ).onclick  = toggleFullScreen;
-	document.getElementById('d'               ).onclick  = changeReport;
-	document.getElementById('m'               ).onclick  = changeReport;
-	document.getElementById('y'               ).onclick  = changeReport;
-	document.getElementById('optlastmonths'   ).onclick  = toggleLastMonths;
-	document.getElementById('lastmonths'      ).onchange = lastMonthsChanged;
-	document.getElementById('optvaluefilter'  ).onclick  = showReport;
-	document.getElementById('valuefilter'     ).onchange = valueFilterChanged;
-	document.getElementById('valuefilterarg'  ).onkeyup  = showReport;
-	document.getElementById('optfuture'       ).onclick  = toggleFuture;
-	document.getElementById('optmonthly'      ).onclick  = toggleMonthly;
-	document.getElementById('helpbutton'      ).onclick  = toggleHelp;
-	document.getElementById('filter'          ).onkeyup  = showReport;
-	document.getElementById('optregex'        ).onclick  = showReport;
-	document.getElementById('optnegate'       ).onclick  = showReport;
-	document.getElementById('datafiles'       ).onchange = loadSelectedFile;
-	document.getElementById('reload'          ).onclick  = loadSelectedFile;
-	document.getElementById('tagMultiAllCheck').onclick  = showReport;
-	document.getElementById('chartcol'        ).onchange = showReport;
-	document.getElementById('tagSummaryButton').onclick  = toggleTagSummary;
-	if (isOnline) {
-		document.getElementById('editoropen' ).onclick = editorOn;
-		document.getElementById('editorclose').onclick = editorOff;
-		document.getElementById('editorsave' ).onclick = editorSave;
-		document.getElementById('editordata' )[(isOpera) ? 'onkeypress' : 'onkeydown'] = insertTab;
-	}
+	document.getElementById('fullscreen'         ).onclick  = toggleFullScreen;
+	document.getElementById('d'                  ).onclick  = changeReport;
+	document.getElementById('m'                  ).onclick  = changeReport;
+	document.getElementById('y'                  ).onclick  = changeReport;
+	document.getElementById('opt-last-months'    ).onclick  = toggleLastMonths;
+	document.getElementById('last-months'        ).onchange = lastMonthsChanged;
+	document.getElementById('opt-value-filter'   ).onclick  = toggleValueFilter;
+	document.getElementById('value-filter'       ).onchange = valueFilterChanged;
+	document.getElementById('value-filter-arg'   ).onkeyup  = showReport;
+	document.getElementById('opt-future'         ).onclick  = toggleFuture;
+	document.getElementById('opt-monthly'        ).onclick  = toggleMonthly;
+	document.getElementById('filter'             ).onkeyup  = showReport;
+	document.getElementById('opt-regex'          ).onclick  = showReport;
+	document.getElementById('opt-negate'         ).onclick  = showReport;
+	document.getElementById('source-file'        ).onchange = loadSelectedFile;
+	document.getElementById('source-reload'      ).onclick  = loadSelectedFile;
+	document.getElementById('tag-cloud-opt-group').onclick  = showReport;
+	document.getElementById('chart-data'         ).onchange = showReport;
+	document.getElementById('view-options-header').onclick  = toggleViewOptions;
+	document.getElementById('tag-cloud-header'   ).onclick  = toggleTagCloud;
+	document.getElementById('tag-summary-header' ).onclick  = toggleTagSummary;
+	document.getElementById('editor-open'        ).onclick  = editorOn;
+	document.getElementById('editor-close'       ).onclick  = editorOff;
+	document.getElementById('editor-save'        ).onclick  = editorSave;
+	document.getElementById('editor-data')[(isOpera) ? 'onkeypress' : 'onkeydown'] = insertTab;
 
 	// Apply user defaults (this code must be after event handlers adding)
-	if (defaultLastMonths)    { document.getElementById('optlastmonths').checked = true; }
-	if (defaultMonthPartials) { document.getElementById('optmonthly'   ).checked = true; }
-	if (defaultFuture)        { document.getElementById('optfuture'    ).checked = true; }
-	if (defaultRegex)         { document.getElementById('optregex'     ).checked = true; }
-	if (defaultNegate)        { document.getElementById('optnegate'    ).checked = true; }
+	if (defaultMonthPartials) { document.getElementById('opt-monthly').checked = true; }
+	if (defaultFuture)        { document.getElementById('opt-future' ).checked = true; }
+	if (defaultRegex)         { document.getElementById('opt-regex'  ).checked = true; }
+	if (defaultNegate)        { document.getElementById('opt-negate' ).checked = true; }
+	if (defaultLastMonths) {
+		document.getElementById('opt-last-months').checked = true;
+		document.getElementById('opt-last-months-extra').style.display = 'block';
+	}
 	document.getElementById('filter').value = defaultSearch;
 
-	// Compose help contents (dirty, but handy)
-	document.getElementById('help').innerHTML = (
-		wrapme(
-			'b',
-			linkme(i18n.appUrl, appName) +
-			((useDropboxStorage) ? ' by ' + linkme('http://twitter.com/xupisco', '@xupisco') : '') +
-			': ') + i18n.appDescription +
-		array2ul([wrapme('b', i18n.labelReports + ': ') + i18n.helpReports]) +
-		array2ul([
-				wrapme('b', i18n.labelLastMonths + ': ') + i18n.helpLastMonths,
-				wrapme('b', i18n.labelValueFilter + ': ') + i18n.helpValueFilter,
-				wrapme('b', i18n.labelFuture + ': ') + i18n.helpFuture,
-				wrapme('b', i18n.labelMonthPartials + ': ') + i18n.helpMonthPartials
-			]) +
-		array2ul([
-				wrapme('b', i18n.labelFullScreen + ': ') + i18n.helpFullScreen,
-				wrapme('b', i18n.labelHelp + ': ') + i18n.helpHelp,
-				wrapme('b', '®: ') + i18n.helpReload,
-				wrapme('b', i18n.labelFilter + ': ') + i18n.helpFilter +
-					array2ul([
-						wrapme('b', i18n.labelRegex + ': ') + i18n.helpRegex,
-						wrapme('b', i18n.labelNegate + ': ') + i18n.helpNegate
-					])
-			]) +
-		array2ul([
-				wrapme('b', i18n.labelTags + ': ') + i18n.helpTags +
-					array2ul([
-						wrapme('b', i18n.labelTagGroup + ': ') + i18n.helpTagGroup,
-						wrapme('b', '∑: ') + i18n.helpTagSummary
-					])
-			]) +
-		wrapme('p', i18n.helpTip) +
-		((oneFile) ? wrapme('p', i18n.helpInstall) : '') +
-		wrapme('p', i18n.helpTranslator.replace(/(http:.*)/, '<a href="$1">$1<\/a>'))
-	);
+	// Always show these toolbar boxes opened at init
+	toggleTagCloud();
+	toggleViewOptions();
 
 	// User choose other default report, let's update the toolbar accordingly
 	if (reportType !== 'd') {
@@ -3005,25 +3085,25 @@ function init() {
 	// Set the default file to load when using multiple files: dataFilesDefault or first
 	if (dataFiles.length > 1) {
 		if (dataFilesDefault && dataFiles.indexOf(dataFilesDefault) !== -1) {
-			document.getElementById('datafiles').selectedIndex = dataFiles.indexOf(dataFilesDefault);
+			document.getElementById('source-file').selectedIndex = dataFiles.indexOf(dataFilesDefault);
 		} else {
-			document.getElementById('datafiles').selectedIndex = 0;
+			document.getElementById('source-file').selectedIndex = 0;
 		}
 	}
 
 	// Everything is ok, time to read/parse/show the user data
-	if (useDropboxStorage) {
-		if (typeof initDropbox === "undefined") {
+	if (appMode === 'dropbox') {
+		if (typeof initDropbox === 'undefined') {
 			showError(i18n.errorNoDropboxSupport.replace('%s', appName), '');
 			return; // abort
 		} else {
 			initDropbox();
 		}
-	} else if (oneFile || useLocalStorage) {
+	} else if (appMode === 'one' || appMode === 'localStorage') {
 		readData();
 		parseData();
 		showReport();
-	} else {
+	} else {  // txt
 		loadSelectedFile();
 	}
 
@@ -3041,109 +3121,157 @@ window.onload = init;
 </head>
 
 <body>
-
-<span id="fullscreen" class="trigger">&bull;</span>
+<div id="container">
 
 <!-- Toolbar -->
-<div id="toolbarwrapper">
 <div id="toolbar">
 
-<div class="toolbarpane left">
-	<a id="sitelink" href="#">MoneyLog</a>
-
-	<!-- Report Type -->
-	<div id="report-nav">
-		<a
-			id="d" href="#"></a><a
-			id="m" href="#"></a><a
-			id="y" href="#"></a>
-	</div>
-
-</div>
-
-<div class="toolbarpane middle">
-	<div id="checkboxes">
-		<!-- Last Months -->
-		<input
-			id="optlastmonths" class="trigger" type="checkbox"><label
-			id="optlastmonthslabel" for="optlastmonths"></label>
-		<select
-			id="lastmonths" size="1"></select>
-		<br>
-
-		<!-- Value Filter -->
-		<input
-			id="optvaluefilter" class="trigger" type="checkbox"><label
-			id="optvaluefilterlabel" for="optvaluefilter"></label>
-		<select
-			id="valuefilter" size="1">
-		</select><input
-			id="valuefilterarg" size="3" type="text">
-		<br>
-
-		<!-- Future -->
-		<input
-			id="optfuture" class="trigger" type="checkbox"><label
-			id="optfuturelabel" for="optfuture"></label>
-			<br>
-
-		<!-- Monthly -->
-		<input
-			id="optmonthly" class="trigger" type="checkbox"><label
-			id="optmonthlylabel" for="optmonthly"></label>
-
-	</div> <!-- #checkboxes -->
-</div>
-
-<div class="toolbarpane right">
-	<!-- Help -->
-	<a id="helpbutton" class="helplink" href="#">?</a>
-
-	<!-- Search -->
-	<div id="filterbox">
-		<!-- Note: Not using <form> to avoid action on Enter pressing -->
-		<input id="filter" size="17" type="text">
-		<br>
-		<input
-			id="optregex" class="trigger" type="checkbox"><label
-			id="optregexlabel" for="optregex"></label>
-
-		<input
-			id="optnegate" class="trigger" type="checkbox"><label
-			id="optnegatelabel" for="optnegate"></label>
-	</div>
-
-	<!-- Data Files -->
-	<div id="datafilesbox">
-		<select
-			id="datafiles" size="1"></select>&nbsp;<a
-			id="reload" href="#">®</a>
-	</div>
-</div>
-
-</div> <!-- #toolbar -->
-</div> <!-- #toolbarwrapper -->
-
-<!-- Tags -->
-<div id="tagsArea">
-	<div id="operabug">
-		<div id="tagMultiAll">
-			<input
-				id="tagMultiAllCheck" type="checkbox" class="trigger"><label
-				id="tagMultiAllLabel" for="tagMultiAllCheck"></label>
+	<div id="logo-wrapper">
+		<div id="logo">
+			<div id="app-name"><a id="sitelink" href="#">MoneyLog</a></div>
 		</div>
-		<a id="tagSummaryButton" class="trigger" href="#">∑</a>
-		<span id="tagsLabel"></span>
-		<div id="tagList">
-		</div>
-		<input type="hidden" id="tagCount" value="0">
-	</div> <!-- operabug -->
-</div>
+
+		<div id="fullscreen" class="trigger">||</div>
+	</div>
+
+	<div id="toolbar-controls-wrapper">
+		<div id="toolbar-controls">
+
+			<!-- Data Files -->
+			<div id="source-file-box">
+				<select
+					id="source-file" size="1"></select>
+				<a
+				 	id="editor-open" class="button" href="#"></a><a
+					id="source-reload" class="button" href="#"></a>
+			</div>
+
+			<hr id="toolbar-sep-1" />
+
+			<!-- Report Type -->
+			<div id="report-nav">
+				<a
+					id="d" class="button" href="#"></a><a
+					id="m" class="button" href="#"></a><a
+					id="y" class="button" href="#"></a>
+			</div>
+
+			<hr id="toolbar-sep-2" />
+
+			<!-- Search -->
+			<div id="search-box" class="toolbar-box">
+				<div id="search-content" class="box-content">
+					<!-- Note: Not using <form> to avoid action on Enter pressing -->
+					<input id="filter" type="text">
+					<div class="checkbox-option">
+						<input
+							id="opt-regex" class="trigger" type="checkbox">
+						<label
+							id="opt-regex-label" for="opt-regex"></label>
+
+						<input
+							id="opt-negate" class="trigger" type="checkbox">
+						<label
+						 	id="opt-negate-label" for="opt-negate"></label>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- View -->
+			<div id="view-options-box" class="toolbar-box">
+				<a id="view-options-header" class="button" href="#"></a>
+				<div id="view-options-content" class="box-content">
+
+					<!-- Monthly -->
+					<div class="checkbox-option">
+						<input
+							id="opt-monthly" class="trigger" type="checkbox">
+						<label
+							id="opt-monthly-label" for="opt-monthly"></label>
+					</div>
+
+					<!-- Future -->
+					<div class="checkbox-option">
+						<input
+							id="opt-future" class="trigger" type="checkbox">
+						<label
+							id="opt-future-label" for="opt-future"></label>
+					</div>
+
+					<!-- Last Months -->
+					<div class="checkbox-option">
+						<input
+							id="opt-last-months" class="trigger" type="checkbox">
+						<label
+							id="opt-last-months-label" for="opt-last-months"></label>
+
+						<div id="opt-last-months-extra" class="checkbox-option-extra">
+							<select
+								id="last-months" size="1"></select>
+						</div>
+					</div>
+
+					<!-- Value Filter -->
+					<div class="checkbox-option">
+						<input
+							id="opt-value-filter" class="trigger" type="checkbox">
+						<label
+							id="opt-value-filter-label" for="opt-value-filter"></label>
+
+						<div id="opt-value-filter-extra" class="checkbox-option-extra">
+							<select
+								id="value-filter" size="1">
+							</select><input
+								id="value-filter-arg" size="3" type="text">
+						</div>
+					</div>
+
+				</div><!-- view-options-content -->
+			</div><!-- view-options-box -->
+
+
+			<!-- Tag Cloud -->
+			<div id="tag-cloud-box" class="toolbar-box">
+				<a id="tag-cloud-header" class="button" href="#"></a>
+				<div id="tag-cloud-content" class="box-content">
+
+					<div id="tag-cloud-tags">
+					</div>
+
+					<div id="tag-cloud-options" class="box-options">
+						<hr />
+						<div class="checkbox-option">
+							<input
+								id="tag-cloud-opt-group" type="checkbox" class="trigger">
+							<label
+								id="tag-cloud-opt-group-label" for="tag-cloud-opt-group"></label>
+						</div>
+					</div>
+
+					<input type="hidden" id="tag-cloud-count" value="0">
+				</div>
+			</div>
+
+
+			<!-- Tag Summary -->
+			<div id="tag-summary-box" class="toolbar-box">
+				<a id="tag-summary-header" class="button" href="#"></a>
+				<div id="tag-summary-content" class="box-content">
+				</div>
+			</div>
+
+		</div><!-- toolbar-controls -->
+	</div><!-- toolbar-controls-wrapper -->
+</div><!-- #toolbar -->
+
 
 <div id="content">
 
-	<div id="help">
-	</div>
+	<noscript>
+		<p>Sorry. No JavaScript detected, it won't work.</p>
+		<p>Ops! Seu navegador está sem JavaScript, sem ele não vai funcionar.</p>
+	</noscript>
 
 	<div id="error">
 	</div>
@@ -3152,44 +3280,37 @@ window.onload = init;
 	<div id="report">
 	</div>
 
-	<!-- Tag Summary -->
-	<div id="tagSummary" class="popup">
+	<!-- Chart -->
+	<div id="charts">
+		<select id="chart-data" size="1"></select>
+		<div id="chart-content"></div>
 	</div>
 
 	<!-- Rows Summary -->
-	<div id="rowsSummary" class="popup">
+	<div id="rows-summary">
 	</div>
 
-	<!-- Chart -->
-	<div id="charts">
-		<select id="chartcol" size="1"></select>
-		<div id="chart"></div>
+</div><!-- #content -->
+
+
+<!-- Editor -->
+<div id="editor">
+	<textarea rows="25" id="editor-data"></textarea>
+	<div id="editor-buttons">
+		<a id="editor-close" class="button active" href="#"></a>
+		<a id="editor-save" class="button active" href="#"></a>
 	</div>
+</div>
 
-	<noscript>
-		<p>Sorry. No JavaScript detected, it won't work.</p>
-		<p>Ops! Seu navegador está sem JavaScript, sem ele não vai funcionar.</p>
-	</noscript>
 
-</div> <!-- #content -->
-
-<!-- modular -->
-<iframe id="dataFrame" onload="iframeLoaded(this)">
+<!-- Data - local TXT mode -->
+<iframe id="data-frame" onload="iframeLoaded(this)">
 	<p>Sorry. No iframes support detected, please use the all-in-one version.</p>
 	<p>Ops! Seu navegador não entende iframes. Use a versão tudo-em-um.</p>
 </iframe>
 
-<!-- Editor -->
-<button id="editoropen"></button>
-<div id="editor">
-	<button id="editorclose"></button>
-	<button id="editorsave"></button>
-	<textarea rows="10" id="editordata"></textarea>
-</div>
-
-<!-- tudo-em-um / all-in-one -->
+<!-- Data - all-in-one mode -->
 <pre id="data">
-
 # Troque estes dados pelos seus, separados por TAB
 # Repito: separados por TAB, e não espaços em branco
 # A data é no formato ANO-MES-DIA
@@ -3241,4 +3362,8 @@ window.onload = init;
 
 2011-09-05	-200*6	aluguel| Aluguel da casa (seis meses)
 2011-09-10	 100*4	presente| O Zé vai me dar 100 pilas por mês até o fim do ano
-</pre></body></html>
+</pre>
+
+</div><!-- #container -->
+</body>
+</html>

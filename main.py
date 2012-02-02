@@ -14,12 +14,12 @@ from google.appengine.api import users
 
 env = jinja2.Environment(loader = jinja2.FileSystemLoader('templates'))
 
-APP_KEY = 'XXX'
-APP_SECRET = 'XXX'
+APP_KEY = 'xxx'
+APP_SECRET = 'xxx'
 ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured for your app
 
 HOST = 'moneylog-cloud.appspot.com'
-HOST = 'localhost:8087'
+#HOST = 'localhost:8087'
 MONEYLOG_FOLDER = '/MoneyLog Cloud/'
 MONEYLOG_DATA = 'moneylog.txt'
 MONEYLOG_CONFIG = 'js/config.js'
