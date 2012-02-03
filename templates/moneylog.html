@@ -71,11 +71,11 @@ body {
 #toolbar {
 	position: fixed;
 	height: 100%;
-	width: 216px;
+	width: 217px;
 	overflow: auto;
 }
 #content {
-	margin-left: 216px;  /* See toggleFullScreen, #toolbar */
+	margin-left: 217px;  /* See toggleFullScreen, #toolbar */
 	padding: 30px;
 }
 
@@ -130,19 +130,26 @@ tr.future:hover td {  /* explicit TD to exclude TH */
 	left: 0;
 }
 #logo {
-	background-color: #EBEBEB;
-	font-size: 30px;
-	width: 200px;
-	height: 57px;
 	float: left;
-	margin-right: 2px;
-	line-height: 55px;
+	background-color: #EBEBEB;
+	width: 201px;
+	height: 57px;
+	margin: 0;
 }
 #logo a {
 	color: #333;  /* text_color */
 }
 #app-name {
-	padding-left: 20px;
+	font-size: 30px;
+	line-height: 30px;
+	padding: 5px 0 0 20px;
+}
+#app-flavor {
+	font-size: 15px;
+	line-height: 15px;
+	padding: 2px 0 0 130px;
+	text-transform: lowercase;
+	color: black;  /* _dark */
 }
 #app-version {
 	padding-top: 10px;
@@ -158,7 +165,7 @@ tr.future:hover td {  /* explicit TD to exclude TH */
 	font-size: 11px;
 	background-color: black;  /* _dark */
 	color: white;
-	width: 14px;
+	width: 15px;  /* same as scrollbar width */
 	float: left;
 	text-align: center;
 	height: 57px;
@@ -581,6 +588,10 @@ table.chart tr:hover td {
 */
 
 
+#app-flavor {
+	color: #2B97E9;
+}
+
 /* Dark background for active/special buttons */
 #fullscreen,
 #report th:hover,
@@ -622,7 +633,7 @@ a.button:active {
 }
 
 
-/* Dropbox special: interface dark blue for the positive chart bar */
+/* Special: interface dark blue for the positive chart bar */
 .posbar {
 	background-color: #2B97E9;
 }
@@ -1009,7 +1020,8 @@ var i18nDatabase = {
 
 // Global vars
 var appVersion = '5b';
-var appName = '';
+var appName = 'MoneyLog';
+var appFlavor = '';
 var sortColIndex = 0;
 var sortColRev = false;
 var oldSortColIndex;
@@ -2779,7 +2791,7 @@ function toggleFullScreen() {
 	if (isFullScreen) {
 		toolbar.style.display = 'block';
 		logo.style.display = 'block';
-		content.style.marginLeft = '216px';  // #toolbar width
+		content.style.marginLeft = '217px';  // #toolbar width
 		isFullScreen = false;
 	} else {
 		toolbar.style.display = 'none';
@@ -2903,24 +2915,24 @@ function initAppMode() {
 	switch(appMode) {
 
 		case 'one':
-			appName = 'MoneyLog Experience';
+			appFlavor = 'Portable';
 			i18n.appUrl = 'http://aurelio.net/moneylog/moneylog5.html';
 			break;
 
 		case 'localStorage':
-			appName = 'MoneyLog Browser';
+			appFlavor = 'Browser';
 			i18n.appUrl = i18n.appUrlOnline;
 			break;
 
 		case 'dropbox':
 			// Can't use the word Dropbox in app name
 			// https://www.dropbox.com/developers/reference/branding
-			appName = 'MoneyLog Cloud';
+			appFlavor = 'Cloud';
 			i18n.appUrl = 'http://moneylog-cloud.appspot.com';
 			break;
 
 		case 'txt':
-			appName = 'MoneyLog TXT';
+			appFlavor = 'TXT';
 			appVersion = '∞';
 			i18n.appUrl = 'http://aurelio.net/moneylog/beta.html';
 			break;
@@ -3000,6 +3012,7 @@ function init() {
 	highlightTags = highlightTags.strip().split(/\s+/);
 
 	// Set interface labels
+	document.getElementById('app-flavor'               ).innerHTML = appFlavor;
 	document.getElementById('d'                        ).innerHTML = i18n.labelDaily;
 	document.getElementById('m'                        ).innerHTML = i18n.labelMonthly;
 	document.getElementById('y'                        ).innerHTML = i18n.labelYearly;
@@ -3157,6 +3170,7 @@ window.onload = init;
 	<div id="logo-wrapper">
 		<div id="logo">
 			<div id="app-name"><a id="sitelink" href="#">MoneyLog</a></div>
+			<div id="app-flavor"></div>
 		</div>
 
 		<div id="fullscreen" class="trigger">||</div>
