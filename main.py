@@ -146,6 +146,12 @@ class Main(CoreHandler):
             raw_config.close()
             save = dude.put_file(MONEYLOG_CONFIG, ml_config)
 
+        # Data folder exists?
+        try:
+            dude.file_create_folder(MONEYLOG_DATA_FOLDER)
+        except:
+            pass
+
         # Read data directory
         ml_dir = dude.metadata(MONEYLOG_DATA_FOLDER)
         ml_files = ['*']
@@ -177,11 +183,6 @@ class Main(CoreHandler):
                 basic_file = MONEYLOG_DATA if filename == "*" else filename
                 ml_data = dude.get_file(MONEYLOG_DATA_FOLDER + basic_file).read()
             except:
-                try:
-                    dude.file_create_folder(MONEYLOG_DATA_FOLDER)
-                except:
-                    pass
-
                 raw_file = open('samples/moneylog_rawdata.txt', 'r')
                 ml_data = raw_file.read()
                 raw_file.close()
