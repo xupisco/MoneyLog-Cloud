@@ -23,8 +23,10 @@ ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured f
 
 HOST = 'moneylog-cloud.appspot.com' if not _DEBUG else 'localhost:8087'
 MONEYLOG_FOLDER = '/MoneyLog Cloud/'
+MONEYLOG_DATA_FOLDER = 'txt/'
+MONEYLOG_PLUGINS_FOLDER = 'plugins/'
 MONEYLOG_DATA = 'moneylog.txt'
-MONEYLOG_CONFIG = 'js/config.js'
+MONEYLOG_CONFIG = 'config.js'
 TOKEN_STORE = {}
 
 def get_session():
@@ -139,13 +141,13 @@ class Main(CoreHandler):
         try:
             ml_config = dude.get_file(MONEYLOG_CONFIG).read()
         except:
-            raw_config = open('moneylog_config.js', 'r')
+            raw_config = open('samples/moneylog_config.js', 'r')
             ml_config = raw_config.read()
             raw_config.close()
             save = dude.put_file(MONEYLOG_CONFIG, ml_config)
 
-        # Read directory
-        ml_dir = dude.metadata('')
+        # Read data directory
+        ml_dir = dude.metadata(MONEYLOG_DATA_FOLDER)
         ml_files = ['*']
         txt = ''
 
@@ -173,14 +175,41 @@ class Main(CoreHandler):
         else:
             try:
                 basic_file = MONEYLOG_DATA if filename == "*" else filename
-                ml_data = dude.get_file(basic_file).read()
+                ml_data = dude.get_file(MONEYLOG_DATA_FOLDER + basic_file).read()
             except:
-                raw_file = open('moneylog_rawdata.txt', 'r')
+                try:
+                    dude.file_create_folder(MONEYLOG_DATA_FOLDER)
+                except:
+                    pass
+
+                raw_file = open('samples/moneylog_rawdata.txt', 'r')
                 ml_data = raw_file.read()
                 raw_file.close()
-                save = dude.put_file(MONEYLOG_DATA, ml_data)
+                save = dude.put_file(MONEYLOG_DATA_FOLDER + MONEYLOG_DATA, ml_data)
         
-        config_script = "<script type='text/javascript'>\n%s\n\n%s\n</script>" % (ml_config.decode("utf-8"), ml_files_js)
+        
+        # Read plugins directory
+        # First, try to create the folder and a sample plugin
+        try:
+            dude.file_create_folder(MONEYLOG_PLUGINS_FOLDER)
+            raw_plugin = open('samples/moneylog_plugin.js', 'r')
+            plugin_sample = raw_plugin.read()
+            raw_plugin.close()
+            save = dude.put_file(MONEYLOG_PLUGINS_FOLDER + 'sample_plugin.js', plugin_sample)
+        except:
+            pass
+
+        mlp_dir = dude.metadata(MONEYLOG_PLUGINS_FOLDER)
+        mlp_files = ['']
+        plugins = ''
+
+        for f in mlp_dir['contents']:
+            if "mime_type" in f:
+                if f['mime_type'] == "application/javascript":
+                    plugins += '\n\n' + dude.get_file(f['path']).read().decode('utf-8')
+
+
+        config_script = "<script type='text/javascript'>\n%s\n\n%s\n\n// Plugins%s</script>" % (ml_config.decode("utf-8"), ml_files_js, plugins)
 
         if not reloading:
             data = {
