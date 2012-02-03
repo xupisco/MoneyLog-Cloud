@@ -118,7 +118,7 @@ class Update(CoreHandler):
         temp = tempfile.TemporaryFile()
         temp.write(data.encode('utf-8'))
         temp.seek(0)
-        save = dude.put_file(filename, temp.read(), overwrite=True)
+        save = dude.put_file(MONEYLOG_DATA_FOLDER + filename, temp.read(), overwrite=True)
         temp.close()
 
         self.response.headers["Content-Type"] = "text/plain"
