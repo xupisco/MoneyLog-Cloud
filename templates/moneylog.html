@@ -310,8 +310,19 @@ a.button.active {
 	clear: both;
 }
 .checkbox-option-extra {
-	display: none;  /* appears when clicked */
 	margin-left: 1em;
+}
+.auto-hide {
+	display: none;  /* appears when clicked, see toggleCheckboxOptionExtra() */
+}
+.option-disabled {
+	color: #AAAAAA;
+}
+
+/* ---------------------------------------------- [ view ] */
+
+#view-options-content {
+	display: none;  /* JS will show */
 }
 #opt-date-1-month-combo,
 #opt-date-2-month-combo,
@@ -330,9 +341,6 @@ a.button.active {
 }
 #opt-value-filter-number {
 	display: none;  /* appears when SELECT item is chosen */
-}
-.option-disabled {
-	color: #AAAAAA;
 }
 
 /* ---------------------------------------------- [ tag cloud ] */
@@ -713,6 +721,9 @@ var useLegacyDateFilter = false;  // Restore old options: Future Data, Recent On
 var initViewWidgetOpen = true;    // Start app with the View widget opened?
 var initTagCloudOpen = true;      // Start app with the Tag Cloud widget opened?
 var initTagSummaryOpen = false;   // Start app with the Tag Summary widget opened?
+var showViewWidget = true;        // Show View widget in the sidebar?
+var showTagCloud = true;          // Show Tag Cloud widget in the sidebar?
+var showTagSummary = true;        // Show Tag Summary widget in the sidebar?
 
 // Charts
 var showMiniBars = true;          // Show the percentage bars in monthly/yearly reports?
@@ -2998,6 +3009,11 @@ function updateToolbar() {
 	remove = [];
 	hide = [];
 	unhide = [];
+	add_exceptions = [];
+
+	if (!showViewWidget) { add_exceptions.push('view-options-box'); }
+	if (!showTagCloud)   { add_exceptions.push('tag-cloud-box'   ); }
+	if (!showTagSummary) { add_exceptions.push('tag-summary-box' ); }	
 
 	// Daily
 	if (reportType === 'd') {
@@ -3060,7 +3076,9 @@ function updateToolbar() {
 
 	// Show/hide toolbar elements
 	for (i = 0; i < add.length; i++) {
-		document.getElementById(add[i]).style.display = 'block';
+		if (!add_exceptions.hasItem(add[i])) {
+			document.getElementById(add[i]).style.display = 'block';
+		}
 	}
 	for (i = 0; i < remove.length; i++) {
 		document.getElementById(remove[i]).style.display = 'none';
@@ -3228,23 +3246,13 @@ function toggleTagSummary() {
 }
 
 function toggleLastMonths() {
-
-	// show/hide extra options
-	var extra = document.getElementById('opt-last-months-extra');
-	extra.style.display = (this.checked) ? 'block' : 'none';
-
-	// reload report
+	toggleCheckboxOptionExtra(this);
 	overviewData = [];  // clear cache
 	showReport();
 }
 
 function toggleValueFilter() {
-
-	// show/hide extra options
-	var extra = document.getElementById('opt-value-filter-extra');
-	extra.style.display = (this.checked) ? 'block' : 'none';
-
-	// reload report
+	toggleCheckboxOptionExtra(this);
 	showReport();
 }
 
@@ -3254,6 +3262,14 @@ function toggleMonthly() {
 		sortColRev = false;
 	}
 	showReport();
+}
+
+function toggleCheckboxOptionExtra(checkbox) {
+	// Show/hide the "*-extra" DIV with aditional options
+	var extra = document.getElementById(checkbox.id.replace('-check', '-extra'));
+	if (hasClass(extra, 'auto-hide')) {
+		extra.style.display = (checkbox.checked) ? 'block' : 'none';
+	}
 }
 
 function toggleRowHighlight(el) {
@@ -3563,12 +3579,25 @@ function init() {
 		// disable old
 		document.getElementById('opt-last-months-check').checked = false;
 		document.getElementById('opt-future-check').checked = false;
+		// disable auto-hide since now we have only one option who uses it
+		removeClass(document.getElementById('opt-value-filter-extra'), 'auto-hide');
 	}
 
 	// Always show these toolbar boxes opened at init
 	if (initViewWidgetOpen)  { toggleViewOptions(); }
 	if (initTagCloudOpen)    {    toggleTagCloud(); }
 	if (initTagSummaryOpen)  {  toggleTagSummary(); }
+
+	// Maybe hide some widgets?
+	if (!showViewWidget) {
+		document.getElementById('view-options-box').style.display = 'none';
+	}
+	if (!showTagCloud) {
+		document.getElementById('tag-cloud-box').style.display = 'none';
+	}
+	if (!showTagSummary) {
+		document.getElementById('tag-summary-box').style.display = 'none';
+	}
 
 	// User choose other default report, let's update the toolbar accordingly
 	if (reportType !== 'd') {
@@ -3720,7 +3749,7 @@ window.onload = init;
 						<label
 							id="opt-last-months-label" for="opt-last-months-check"></label>
 
-						<div id="opt-last-months-extra" class="checkbox-option-extra">
+						<div id="opt-last-months-extra" class="checkbox-option-extra auto-hide">
 							<select
 								id="opt-last-months-combo" size="1"></select>
 						</div>
@@ -3733,7 +3762,7 @@ window.onload = init;
 						<label
 							id="opt-value-filter-label" for="opt-value-filter-check"></label>
 
-						<div id="opt-value-filter-extra" class="checkbox-option-extra">
+						<div id="opt-value-filter-extra" class="checkbox-option-extra auto-hide">
 							<select
 								id="opt-value-filter-combo" size="1">
 							</select><input
