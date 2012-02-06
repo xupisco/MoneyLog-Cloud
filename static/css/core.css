@@ -1,3 +1,7 @@
+html, body {
+	height: 100%;
+}
+
 body {
 	background-color: #fff;
 	overflow: hidden;
@@ -46,4 +50,76 @@ h3 {
 	color: #4291df;
 	font-weight: bold;
 	margin-bottom: 20px;
+}
+
+#wrapper {
+	display:table;
+}
+
+#login_container {
+	width: 255px;
+	height: 410px;
+	top: 48%;
+	left: 50%;
+	position: absolute;
+	margin-top: -205px;
+	margin-left: -128px;
+}
+
+#login_logo {
+	font-size: 25px;
+	background-color: #EBEBEB;
+	padding: 19px;
+	color: #444;
+}
+
+#login_text {
+	background-color: #fafafa;
+	font-size: 12px;
+	line-height: 16px;
+	padding: 20px;
+	float: left;
+}
+
+a.login_connect {
+	color: white;
+	background-color: #2B97E9;
+	width: 204px;
+	float: left;
+	padding: 6px;
+	text-align: center;
+	text-decoration: none;
+	margin-bottom: 15px;
+}
+
+.login_btn {
+	float: left;
+	margin-right: 9px;
+	padding: 3px;
+	background-color: white;
+	border: 1px solid #DDD;
+	color: #666;
+	text-decoration: none;
+	width: 95px;
+	text-align: center;
+}
+
+.about {
+	font-size: 11px;
+}
+
+.commit {
+	padding-top: 5px;
+	font-size: 11px;
+	float: left;
+}
+
+.line_sep {
+	color: #D8D8D8;
+	background-color: #D8D8D8;
+	height: 1px;
+	border: 0;
+	width: 100%;
+	clear: both;
+	margin: 15px 0;
 }
