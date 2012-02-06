@@ -70,33 +70,33 @@
 // reportType = 'd'             ;// d, m, y (diário, mensal, anual)
 
 
-////// SOMENTE RECENTES
+////// TELA CHEIA
 //
-// maxLastMonths = 12           ;// Quantos meses mostrar no seletor?
-// initLastMonths = 3           ;// Qual será o item selecionado por padrão?
-// defaultLastMonths = false    ;// Iniciar com esta opção já ativada?
-
-
-////// SOMENTE VALORES
-//
-// Nada ainda.
-
-
-////// LANÇAMENTOS FUTUROS
-//
-// defaultFuture = false        ;// Iniciar mostrando lançamentos futuros?
-
-
-////// PARCIAIS MENSAIS
-//
-// defaultMonthPartials = true  ;// Iniciar mostrando as parciais mensais?
+// initFullScreen = false       ;// Iniciar o app já no modo Tela Cheia?
 
 
 ////// BUSCA
 //
 // defaultSearch = ''           ;// Iniciar já pesquisando por este texto
-// defaultRegex = false         ;// Marcar a opção [X] regex?
-// defaultNegate = false        ;// Marcar a opção [X] excluir?
+// checkRegex = false           ;// Marcar a opção [X] regex?
+// checkNegate = false          ;// Marcar a opção [X] excluir?
+
+
+////// PERÍODO - DATA INICIAL E FINAL
+//
+// checkDateFrom = true         ;// Iniciar marcando a opção [X] De:?
+// checkDateUntil = true        ;// Iniciar marcando a opção [X] Até:?
+// initLastMonths = 3           ;// Quantos meses recentes serão mostrados?
+
+
+////// PARCIAIS MENSAIS
+//
+// checkMonthPartials = true    ;// Iniciar mostrando as parciais mensais?
+
+
+////// SOMENTE VALORES
+//
+// Nada ainda.
 
 
 ////// TABELA DO EXTRATO
@@ -106,9 +106,6 @@
 //
 // highlightWords = 'XXX TODO'  ;// Destacar estas palavras na Descrição
 // highlightTags = 'luz água'   ;// Destacar estas tags no extrato
-//
-// showLocaleDate = false       ;// Mostrar datas no formato regional d/m/a?
-// i18nDatabase.pt.dateFormat = 'd.m.Y'  ;// Usar meu próprio formato regional
 
 
 ////// GRÁFICO DE BARRAS
@@ -131,6 +128,23 @@
 ////// TAGS
 //
 // showEmptyTagInSummary = true ;// Mostrar o item VAZIO no somatório de tags?
+
+
+////// FORMATO DA DATA
+//
+// showLocaleDate = false       ;// Mostrar datas no formato regional d/m/a?
+//
+// Você também pode personalizar o formato regional, usando outros separadores,
+// mudar a ordem ou até escolher exatamente quais componentes mostrar. Além
+// de símbolos, você pode usar as seguintes letras:
+//     Y = ano com 4 dígitos           b = nome do mês com 3 letras
+//     y = ano com 2 dígitos           B = nome completo do mês
+//     m = mês
+//     d = dia
+//
+// i18nDatabase.pt.dateFormat = 'd.m.Y'     ;// Personalizar formato dia-mês-ano
+// i18nDatabase.pt.dateFormatMonth = 'B Y'  ;// Personalizar formato mês-ano
+// i18nDatabase.pt.dateFormatYear = 'Y'     ;// Personalizar formato ano
 
 
 ////// ARQUIVOS TXT

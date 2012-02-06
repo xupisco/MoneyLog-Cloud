@@ -293,7 +293,7 @@ a.button.active {
 	padding: 3px 0;
 	margin-bottom: 5px;
 }
-#opt-negate {
+#opt-negate-check {
 	margin-left: 1em;
 }
 
@@ -305,13 +305,32 @@ a.button.active {
 }
 .checkbox-option {
 	text-align: left;
+	clear: both;
 }
 .checkbox-option-extra {
 	display: none;  /* appears when clicked */
 	margin-left: 1em;
 }
-#value-filter-arg {
+#opt-date-1-month-combo,
+#opt-date-2-month-combo,
+#opt-date-1-year-combo,
+#opt-date-2-year-combo {
+	float: right;
+	width: auto;
+}
+#opt-date-1-year-combo,
+#opt-date-2-year-combo {
+	display: none;  /* appears in Yearly report */
+}
+#opt-future-box,
+#opt-last-months-box {
+	display: none;  /* legacy, JS will show */
+}
+#opt-value-filter-number {
 	display: none;  /* appears when SELECT item is chosen */
+}
+.option-disabled {
+	color: #AAAAAA;
 }
 
 /* ---------------------------------------------- [ tag cloud ] */
@@ -367,6 +386,17 @@ a.button.active {
 	color: white;
 }
 
+/* Column sorting is not working for some columns, so undo formatting */
+#report table.daily th.balance,
+#report table.overview th.percent {
+	cursor: auto;
+}
+#report table.daily th.balance:hover,
+#report table.overview th.percent:hover {
+	color: #333;  /* text_color */
+	background-color: white;  /* content_bg */
+}
+
 /* Generic cell config */
 #report td {
 	border: 1px solid silver;  /* _light */
@@ -418,15 +448,6 @@ tr.total {
 
 /* ---------------------------------------------- Report - Daily */
 
-/* Column sorting is not working for Balance, so undo formatting */
-#report table.daily th.balance {
-	cursor: auto;
-}
-#report table.daily th.balance:hover {
-	color: #333;  /* text_color */
-	background-color: white;  /* content_bg */
-}
-
 /* Total row tweaks */
 #report table.daily tr.total {
 	font-weight: bold;
@@ -477,6 +498,9 @@ tr.total {
 	text-align: center;
 	margin-top: 4em;
 }
+#chart-content {
+	overflow: auto;
+}
 #chart-data {
 	margin-bottom: 5px;
 }
@@ -524,8 +548,12 @@ table.chart tr:hover td {
 	border: 8px solid black;  /* _dark */
 	background-color: silver;  /* _light */
 }
-#rows-summary td {
+#rows-summary-content td {
 	padding: 4px 10px;
+}
+#rows-summary-index {
+	width: 100%;
+	margin-bottom: 5px;
 }
 
 /* ---------------------------------------------- Editor */
@@ -662,13 +690,12 @@ a.button:active {
 *********************************************************************/
 // Program interface
 var lang = 'pt';                  // pt:Portuguese, en:English, ca:Catalan, es:Spanish (Argentina)
-var maxLastMonths = 12;           // Number of months on the last months combo
 var initLastMonths = 3;           // Initial value for last months combo
-var defaultLastMonths = false;    // Last months combo inits checked?
-var defaultMonthPartials = true;  // Monthly checkbox inits checked?
-var defaultFuture = false;        // Show future checkbox inits checked?
-var defaultRegex = false;         // Search regex checkbox inits checked?
-var defaultNegate = false;        // Search negate checkbox inits checked?
+var checkDateFrom = true;         // Date filter From: checkbox inits checked?
+var checkDateUntil = true;        // Date filter To: checkbox inits checked?
+var checkMonthPartials = true;    // Monthly checkbox inits checked?
+var checkRegex = false;           // Search regex checkbox inits checked?
+var checkNegate = false;          // Search negate checkbox inits checked?
 var defaultSearch = '';           // Search for this text on init
 var showRowCount = true;          // Show the row numbers at left?
 var monthlyRowCount = true;       // The row numbers are reset each month?
@@ -678,6 +705,7 @@ var reportType = 'd';             // Initial report type: d m y (daily, monthly,
 var showLocaleDate = false;       // Show dates in the regional format? (ie: 12/31/2009)
 var showEmptyTagInSummary = true; // The EMPTY tag sum should appear in Tag Summary?
 var initFullScreen = false;       // Start app in Full Screen mode?
+var useLegacyDateFilter = false;  // Restore old options: Future Data, Recent Only
 
 // Charts
 var showMiniBars = true;          // Show the percentage bars in monthly/yearly reports?
@@ -697,13 +725,19 @@ var dataFilesDefault = '';        // Default selected file at init when using mu
 // MoneyLog Browser config
 var localStorageKey = 'moneylogData'; // Keyname for the localStorage database
 
+
+// Legacy options
+var maxLastMonths = 12;           // Number of months on the last months combo
+var defaultLastMonths = false;    // Last months combo inits checked?
+var defaultFuture = false;        // Show future checkbox inits checked?
+
+
 // The appMode sets the Moneylog flavor:
 // txt          HTML, CSS, JS files are separated. Read user data from local TXT files.
 // one          Full app is in a single moneylog.html file, with user data at the end.
 // dropbox      Runs online, read/save user data from/to TXT files in a Dropbox account.
 // localStorage Read/edit/save user data to the browser. Must always use the same browser.
 var appMode = 'dropbox';
-
 
 // Data format
 var useBlankFieldSeparator = false; // Use blanks (TABs and spaces) as field separator?
@@ -734,9 +768,12 @@ var dataPatterns = {
 var i18nDatabase = {
 	defaultLanguage: 'en',
 	en: {
-		dateFormat: 'm/d/y',
 		centsSeparator: '.',
 		thousandSeparator: ',',
+		dateFormat: 'm/d/y',
+		dateFormatMonth: 'm/Y',
+		dateFormatYear: 'Y',
+		monthNames: ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		appUrl: 'http://aurelio.net/soft/moneylog/',
 		appUrlOnline: 'http://aurelio.net/soft/moneylog/online/',
 		appDescription: 'Track your finances the practical way. Think simple!',
@@ -758,6 +795,9 @@ var i18nDatabase = {
 		// labelHelp: 'Question mark',
 		labelReload: 'Reload',
 		labelViewOptions: 'View',
+		// labelMonthRange: 'Month Range',
+		labelDateFrom: 'From',
+		labelDateUntil: 'Until',
 		labelTagCloud: 'Tag Cloud',
 		labelTagSummary: 'Tag Summary',
 		labelNoData: 'No data.',
@@ -770,7 +810,9 @@ var i18nDatabase = {
 		labelCount: 'Count',
 		labelMonths: ['month', 'months'],
 		labelTagEmpty: 'EMPTY',
+		labelTagNegate: 'Ignore selected tags',
 		labelTagGroup: 'Group selected tags',
+		labelTagReset: 'Reset selection',
 		labelEdit: 'Edit',
 		labelClose: 'Close',
 		labelCancel: 'Cancel',
@@ -797,9 +839,12 @@ var i18nDatabase = {
 		// helpHelp: 'Show/hide the help text.',
 		helpReload: 'Reload only the data, keeping the current view untouched.',
 		// helpTags: 'Choose the desired tags for the report: food, health, education, trip, …',
-		helpTagGroup: 'Show only the entries that have all the selected tags.',
+		helpTagNegate: 'Remove from the report all the rows that match the selected tags.',
+		helpTagGroup: 'Only match if the entry has ALL the selected tags.',
+		helpTagReset: 'Undo all the selections you have made in the Tag Cloud.',
 		helpTagSummary: 'Show/hide the tag summary.',
 		helpTagCloud: 'Show/hide the tag cloud.',
+		// helpMonthRange: 'Show/hide the month range controls.',
 		helpEdit: 'Open the editor, for you to add/remove/edit your data.',
 		helpClose: 'Close the editor (without saving!)',
 		helpCancel: 'Discard changes and close the editor.',
@@ -810,9 +855,12 @@ var i18nDatabase = {
 		// helpTranslator: ''
 	},
 	pt: {
-		dateFormat: 'd/m/Y',
 		centsSeparator: ',',
 		thousandSeparator: '.',
+		dateFormat: 'd/m/Y',
+		dateFormatMonth: 'm/Y',
+		dateFormatYear: 'Y',
+		monthNames: ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
 		appUrl: 'http://aurelio.net/moneylog/beta.html',
 		appUrlOnline: 'http://aurelio.net/moneylog/online/',
 		appDescription: 'Acompanhe suas finanças de maneira simples e prática. Descomplique!',
@@ -834,6 +882,9 @@ var i18nDatabase = {
 		// labelHelp: 'Ajuda',
 		labelReload: 'Recarregar',
 		labelViewOptions: 'Visualizar',
+		// labelMonthRange: 'Meses',
+		labelDateFrom: 'De',
+		labelDateUntil: 'Até',
 		labelTagCloud: 'Tags',
 		labelTagSummary: 'Somatório de tags',
 		labelNoData: 'Nenhum lançamento.',
@@ -846,14 +897,16 @@ var i18nDatabase = {
 		labelCount: 'Linhas',
 		labelMonths: ['mês', 'meses'],
 		labelTagEmpty: 'VAZIO',
-		labelTagGroup: 'Unir as tags escolhidas',
+		labelTagNegate: 'Ignorar estas tags',
+		labelTagGroup: 'Simultaneamente',
+		labelTagReset: 'Desmarcar todas',
 		labelEdit: 'Editar',
 		labelClose: 'Fechar',
 		labelCancel: 'Cancelar',
 		labelSave: 'Salvar',
 		errorInvalidData: 'Lançamento inválido na linha ',
 		errorNoFieldSeparator: 'Separador não encontrado:',
-		errorTooManySeparators: 'Há mais de 2 sepadarores',
+		errorTooManySeparators: 'Há mais de 2 separadores',
 		errorInvalidDate: 'Data inválida:',
 		errorInvalidAmount: 'Valor inválido:',
 		errorNoLocalStorage: 'Ops, seu navegador não tem localStorage. O %s não vai funcionar.',
@@ -872,9 +925,12 @@ var i18nDatabase = {
 		// helpHelp: 'Mostra e esconde o texto de ajuda.',
 		helpReload: 'Recarrega somente os dados, sem perder as opções de visualização.',
 		// helpTags: 'Escolha que tipo de transações você quer ver: alimentação, saúde, educação, viagem, etc.',
-		helpTagGroup: 'Mostra lançamentos que possuem todas as tags selecionadas (deve haver 2+ selecionadas).',
+		helpTagNegate: 'Remove do extrato os lançamentos que possuem as tags selecionadas.',
+		helpTagGroup: 'Cada lançamento deve possuir TODAS as tags selecionadas, simultaneamente.',
+		helpTagReset: 'Desmarca todas as tags que você selecionou, voltando ao estado inicial.',
 		helpTagSummary: 'Mostra e esconde o somatório das tags.',
 		helpTagCloud: 'Mostra e esconde a nuvem de tags.',
+		// helpMonthRange: 'Mostra e esconde o seletor de meses.',
 		helpEdit: 'Abre o editor de lançamentos, para você incluir/remover/alterar os dados do extrato.',
 		helpClose: 'Fecha o editor de lançamentos (apenas fecha, não salva o texto!).',
 		helpCancel: 'Descarta as alterações e fecha o editor sem salvar nada.',
@@ -1026,14 +1082,15 @@ var sortColIndex = 0;
 var sortColRev = false;
 var oldSortColIndex;
 var oldSortColRev;
-var currentDate;
+var dataFirstDate;
+var dataLastDate;
 var highlightRegex;
 var i18n;
 var rawData = '';
 var parsedData = [];
 var overviewData = [];
 var waitingToLoad = [];
-var selectedRowsData = [];
+var selectedRows = [];
 var multiRawData = '';
 var isFullScreen = false;
 var isOpera = (window.opera) ? true : false;
@@ -1221,17 +1278,27 @@ function sortIgnoreCase(a, b) {
 	return 0;
 }
 
-function setCurrentDate() {
+// http://stackoverflow.com/questions/286921/efficiently-replace-all-accented-characters-in-a-string
+// Match 'regex' in 'text', and substitute by 'table' item
+function translateTableForRegex(text, table, regex) {
+	translator = function(match) {
+		return table[match] || match;
+	}
+	return text.replace(regex, translator);
+}
+
+function getCurrentDate() {
 	var z, m, d;
 	z = new Date();
 	m = z.getMonth() + 1;
 	d = z.getDate();
 	m = (m < 10) ? '0' + m : m;
 	d = (d < 10) ? '0' + d : d;
-	currentDate = z.getFullYear() + '-' + m + '-' + d;
+	return z.getFullYear() + '-' + m + '-' + d;
 }
 
 function getPastMonth(months) {
+	// Returns: YYYY-MM-00
 	var z, m, y;
 	z = new Date();
 	m = z.getMonth() + 1 - months; // zero based
@@ -1263,15 +1330,88 @@ function addMonths(yyyymmdd, n) {
 	return y + '-' + m + '-' + d;
 }
 
-function formatDate(date) {
-	var m;
-	m = date.match(/(..(..))-(..)-(..)/); // Y-M-D
+function getYearRange(date1, date2) {
+	// Given two dates, returns array with all the years between them, inclusive.
+	// Dates are strings formatted as YYYY-MM-DD.
+	var y, y1, y2, results = [];
 
-	return i18n.dateFormat.replace(
-		'Y', m[1]).replace(
-		'y', m[2]).replace(
-		'm', m[3]).replace(
-		'd', m[4]);
+	if (date1 > date2) {  // no deal
+		return results;
+	}
+
+	y1 = parseInt(date1.slice(0, 4), 10);
+	y2 = parseInt(date2.slice(0, 4), 10);
+
+	for (y=y1; y <= y2; y++) {  // from year1 to year2, inclusive
+		results.push(y);
+	}
+	return results;
+}
+
+function getMonthRange(date1, date2) {
+	// Given two dates, returns array with all the months between them, inclusive.
+	// Dates are strings formatted as YYYY-MM-DD.
+	var y, y1, y2, m, m1, m2, ini, end, results = [];
+
+	if (date1 > date2) {  // no deal
+		return results;
+	}
+
+	y1 = parseInt(date1.slice(0, 4), 10);
+	y2 = parseInt(date2.slice(0, 4), 10);
+	m1 = parseInt(date1.slice(5, 7), 10);
+	m2 = parseInt(date2.slice(5, 7), 10);
+
+	for (y=y1; y <= y2; y++) {  // from year1 to year2, inclusive
+
+		// First year: start from month1
+		// Last year: end in month2
+		ini = (y === y1) ? m1 : 1;
+		end = (y === y2) ? m2 : 12;
+
+		for (m=ini; m <= end; m++) {  // months loop
+			results.push(y + '-' + ((m < 10) ? '0' + m : m));  // add leading zero
+		}
+	}
+	return results;
+}
+
+function formatDate(date) {
+	// Available tokens (i.e. for 1999-12-31): Y=1999, y=99, m=12, d=31, b=Dec, B=December
+
+	var fmt, table = {};
+
+	if (!showLocaleDate) {
+		return date;  // nothing to do
+	}
+
+	// Valid input: YYYY-MM-DD, YYYY-MM or YYYY
+	switch (date.length) {
+		case 10:
+			fmt = i18n.dateFormat;
+			break;
+		case 7:
+			fmt = i18n.dateFormatMonth;
+			break;
+		case 4:
+			fmt = i18n.dateFormatYear;
+			break;
+		default:
+			return date;  // unknown format
+	}
+
+	// YYYY-MM-DD
+	table.Y = date.slice(0,  4) || 'Y';
+	table.y = date.slice(2,  4) || 'y';
+	table.m = date.slice(5,  7) || 'm';
+	table.d = date.slice(8, 10) || 'd';
+	if (table.m !== 'm') {
+		table.B = i18n.monthNames[parseInt(table.m, 10)];
+		table.b = table.B.slice(0, 3);
+	}
+
+	// Atomic replace to avoid concurrence
+	return translateTableForRegex(fmt, table, /[YymdBb]/g);
 }
 
 function prettyFloat(num, noHtml) {
@@ -1294,21 +1434,45 @@ function prettyFloatUndo(str) {
 
 function prettyBarLabel(n) { // Convert float to short strings: 1k2, 1m2, ...
 	var negative;
+
+	// Remove the signal for easier calculation
 	negative = (n < 0);
 	if (negative) {
 		n = Math.abs(n);
 	}
+
+	// Less than 1,000: discard the cents and make the value integer
 	if (n < 1000) {
-		n = n.toString().replace(/\.(\d).*/, ''); // 123,45 > 123
+		n = n.toString().replace(/\.(\d).*/, ''); // 123.45 > 123
+
+	// From 1,000 to 999,999: discard the cents, then round the last 3 digits to 1 digit
 	} else if (n >= 1000 && n < 1000000) {
-		n = (n / 1000).toString().replace(/\.(\d).*/, 'k$1'); // 1.234,45 > 1k2
+		n = (n / 1000).toString();
+		if (n.indexOf('.') !== -1) {
+			n = n.replace(/\.(\d).*/, 'k$1');     // 1234.45 > 1k2
+		} else {
+			n = n + 'k';                          // 1000 > 1k
+		}
+
+	// From 1,000,000: discard the cents, then round the last 6 digits to 1 digit
 	} else if (n >= 1000000) {
-		n = (n / 1000).toString().replace(/\.(\d).*/, 'm$1'); // 1.234.567,89 > 1m2
+		n = (n / 1000000).toString();
+		if (n.indexOf('.') !== -1) {
+			n = n.replace(/\.(\d).*/, 'm$1');     // 1234567.89 > 1m2
+		} else {
+			n = n + 'm';                          // 1000000 > 1m
+		}
 	}
+
+	// Maybe we have a (undesired) trailing zero?
+	n = n.replace(/([km])0/, '$1'); // 2k0 > 2k
+
+	// Restore signal (if needed)
 	if (negative) {
 		n = '-' + n;
 	}
-	return n.replace(/([km])0/, '$1'); // 2k0 > 2k
+
+	return n;
 }
 
 function array2ul(a) {
@@ -1537,13 +1701,13 @@ function getTotalsRow(total, monthTotal, monthNeg, monthPos) {
 function getOverviewRow(theMonth, monthPos, monthNeg, monthTotal, theTotal, rowCount) {
 	var theRow = [];
 
-	theRow.push((theMonth <= currentDate.slice(0, 7)) ?
+	theRow.push((theMonth <= getCurrentDate().slice(0, 7)) ?
 			'<tr onClick="toggleRowHighlight(this)">' :
 			'<tr onClick="toggleRowHighlight(this)" class="future">');
 	if (showRowCount) {
 		theRow.push('<td class="row-count">' + rowCount + '<\/td>');
 	}
-	theRow.push('<td>' + theMonth + '<\/td>');
+	theRow.push('<td>' + formatDate(theMonth) + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthPos)  + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthNeg)  + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthTotal) + '<\/td>');
@@ -1570,19 +1734,6 @@ function getOverviewTotalsRow(label, n1, n2, n3) {
 	theRow.push('<td><\/td>');
 	theRow.push('<\/tr>');
 	return theRow.join('\n');
-}
-
-function getDetailedReportColumnContents(tr_element, column_index) {
-	// (zero-based) Columns: Row count, Date, Amount, Tags, Description, Balance
-	var td = tr_element.getElementsByTagName('td')[column_index];
-
-	if (column_index === 2) {
-		// Example: <span class="neg">-123,45</span>
-		// Example: <span class="pos">123,45</span>
-		return td.getElementsByTagName('span')[0].firstChild.nodeValue;
-	} else {
-		alert("getDetailedReportColumnContents: Columns other than AMOUNT are not supported yet.");
-	}
 }
 
 
@@ -1618,7 +1769,7 @@ function editorSave() {
 }
 function saveLocalData() {
 	var editButton = document.getElementById('editor-open');
-	
+
 	editButton.innerHTML = i18n.msgSaving;
 	localStorage.setItem(localStorageKey, document.getElementById('editor-data').value);
 	// reload report
@@ -1947,33 +2098,75 @@ function parseData() {
 	sortColIndex = 0;
 	parsedData.sort(sortArray);
 	sortColIndex = oldSort;
+
+	// Save first and last date as globals
+	if (parsedData.length > 0) {
+		dataFirstDate = parsedData[0][0];
+		dataLastDate = parsedData[parsedData.length-1][0];
+	} else {
+		dataFirstDate = dataLastDate = undefined;
+	}
+
+	// Update the date range combo
+	if (reportType === 'y') {
+		populateYearRangeCombo();
+	} else {
+		populateMonthRangeCombo();
+	}
 }
 
 function filterData() {
-	var i, temp, isRegex, isNegated, filter, filterPassed, firstDate, showFuture, filteredData, thisDate, thisValue, thisTags, thisDescription, valueFilter, valueFilterArg;
+	var i, temp, isRegex, isNegated, filter, filterPassed, firstDate, lastDate, showFuture, filteredData, thisDate, thisValue, thisTags, thisDescription, valueFilter, valueFilterArg;
 
 	isRegex = false;
 	isNegated = false;
 	filter = '';
 	firstDate = 0;
+	lastDate = '9999-99-99';
 	filteredData = [];
 
-	if (document.getElementById('opt-last-months').checked && reportType !== 'y') {
-		firstDate = getPastMonth(document.getElementById('last-months').value - 1);
+	// New style date options
+	if (!useLegacyDateFilter) {
+
+		if (document.getElementById('opt-date-1-check').checked) {
+			if (reportType === 'y') {
+				firstDate = document.getElementById('opt-date-1-year-combo').value + '-00-00';
+			} else {
+				firstDate = document.getElementById('opt-date-1-month-combo').value + '-00';
+			}
+		}
+		if (document.getElementById('opt-date-2-check').checked) {
+			if (reportType === 'y') {
+				lastDate = document.getElementById('opt-date-2-year-combo').value + '-99-99';
+			} else {
+				lastDate = document.getElementById('opt-date-2-month-combo').value + '-99';
+			}
+		}
+
+	// Old style date options
+	} else {
+
+		// [X] Recent Only, works for daily/monthly
+		if (document.getElementById('opt-last-months-check').checked && reportType !== 'y') {
+			firstDate = getPastMonth(parseInt(document.getElementById('opt-last-months-combo').value, 10) - 1);
+		}
+		// [X] Future Data, works for all reports
+		showFuture = document.getElementById('opt-future-check').checked;
+		if (!showFuture) {
+			lastDate = getCurrentDate();
+		}
 	}
 
-	// Show future works for both views
-	showFuture = document.getElementById('opt-future').checked;
 
 	// Get filters data for the detailed report
 	if (reportType === 'd') {
 		filter = document.getElementById('filter').value;
-		isRegex = document.getElementById('opt-regex').checked;
-		isNegated = document.getElementById('opt-negate').checked;
+		isRegex = document.getElementById('opt-regex-check').checked;
+		isNegated = document.getElementById('opt-negate-check').checked;
 
-		if (document.getElementById('opt-value-filter').checked) {
-			valueFilter = document.getElementById('value-filter').value;
-			valueFilterArg = document.getElementById('value-filter-arg').value || 0;
+		if (document.getElementById('opt-value-filter-check').checked) {
+			valueFilter = document.getElementById('opt-value-filter-combo').value;
+			valueFilterArg = parseInt(document.getElementById('opt-value-filter-number').value, 10) || 0;
 		}
 
 		// Hack: Value filtering on the search box!
@@ -2006,14 +2199,12 @@ function filterData() {
 
 		///////////////////////////////////////////////////////////// Filters
 
-		// Ignore dates older than "last N months" option (if checked)
+		// Apply date filter
 		if (thisDate < firstDate) {
 			continue;
 		}
-
-		// Ignore future dates
-		if (!showFuture && thisDate > currentDate) {
-			break;
+		if (thisDate > lastDate) {
+			break;  // parsedData is ordered by date, we can safely break here
 		}
 
 		// Apply value filter
@@ -2050,18 +2241,19 @@ function applyTags(theData) {
 	// This function composes the full tag menu and
 	// also filters theData if some tag is selected
 
-	var i, j, rowTags, thisTag, tagMatched, tagName, tagId, checked, tagCount, tagElement, tagsMenu, selectedTags, filteredData, tagMustGroup;
+	var i, j, rowTags, thisTag, tagMatched, tagName, tagId, checked, tagCount, tagElement, tagsMenu, selectedTags, filteredData, tagMustGroup, tagNegate;
 
 	tagsMenu = [];
 	selectedTags = [];
 	filteredData = [];
 
 	// Get multiple selection mode (true=AND, false=OR)
-	tagMustGroup = document.getElementById('tag-cloud-opt-group').checked;
+	tagMustGroup = document.getElementById('tag-cloud-opt-group-check').checked;
+	tagNegate = document.getElementById('tag-cloud-opt-negate-check').checked;
 
 	// Get currently selected tags (from interface)
 	try {
-		tagCount = document.getElementById('tag-cloud-count').value;
+		tagCount = parseInt(document.getElementById('tag-cloud-count').value, 10);
 		for (i = 1; i <= tagCount; i++) {
 			tagElement = document.getElementById('tag_' + i);
 			if (tagElement && tagElement.checked) {
@@ -2096,7 +2288,7 @@ function applyTags(theData) {
 				if (tagMatched && (!tagMustGroup)) { break; } // OR
 				if (!tagMatched && (tagMustGroup)) { break; } // AND
 			}
-			if (tagMatched) {
+			if ((tagMatched && !tagNegate) || (!tagMatched && tagNegate)) {
 				filteredData.push(theData[i]);
 			}
 		}
@@ -2143,8 +2335,14 @@ function applyTags(theData) {
 	// Save the tags menu (or make it empty)
 	document.getElementById('tag-cloud-tags').innerHTML = tagsMenu;
 
-	// The group checkbox is only shown if we have multiple selected tags
-	document.getElementById('tag-cloud-options').style.display = (selectedTags.length > 1) ? 'block' : 'none';
+	// The options box is only shown if we have at least 1 selected tag
+	document.getElementById('tag-cloud-options').style.display = (selectedTags.length > 0) ? 'block' : 'none';
+
+	// The group option is only shown if we have at least 2 selected tags
+	document.getElementById('tag-cloud-opt-group-box').style.display = (selectedTags.length > 1) ? 'block' : 'none';
+
+	// The reset option is only shown if we have at least 3 selected tags
+	document.getElementById('tag-cloud-opt-reset-box').style.display = (selectedTags.length > 2) ? 'block' : 'none';
 
 	// Tag filter was active?
 	if (selectedTags.length > 0) {
@@ -2160,14 +2358,53 @@ function applyTags(theData) {
 /////////////////////////////////////////////////////////////////////
 
 function updateSelectedRowsSummary() {
-	var el, i, data, arr, table, label, value;
+	var i, data, arr, table, label, value, col_nr, col_index;
 
-	el = document.getElementById('rows-summary');
-	data = selectedRowsData;
+	data = [];
 	arr = [];
 	table = [];
 
-	if (data.length > 1) {  // Summary for 2 or more rows
+	if (selectedRows.length > 1) {  // Summary for 2 or more rows
+
+		// Ok. We have a selectedRows array filled with all the selected TR elements.
+		// Now we will scan these elements to extract data and calculate everything.
+
+		// First we need to find out which column we will get of each of this rows.
+		// Diary report: when only have the (2) Amount column to query
+		// Monthly/Yearly: we have (2) Incoming, (3) Expense, (4) Partial
+		//
+		if (reportType === 'd') {
+			col_nr = 2;
+		} else {
+			col_nr = parseInt(document.getElementById('rows-summary-index').value, 10);
+		}
+
+		// The column number is affected by the presence of the row count column
+		if (showRowCount) {
+			col_nr += 1;
+		}
+
+		// We will soon query each TR element for a specific child TD.
+		// Our column count is one-based, but the TR children array is ZERO-based.
+		col_index = col_nr - 1;
+
+		for (i = 0; i < selectedRows.length; i++) {
+			tr_element = selectedRows[i];
+			td_element = tr_element.getElementsByTagName('td')[col_index];
+
+			// Inside the TD, the number is inside a SPAN tag, examples:
+			//     <td class="number"><span class="neg">-123,45</span></td>
+            //     <td class="number"><span class="pos">123,45</span></td>
+            //
+			value = td_element.getElementsByTagName('span')[0].firstChild.nodeValue;
+
+			// The value is a formatted string, we need to convert it to float
+			value = prettyFloatUndo(value);
+
+			data.push(value);
+		}
+
+		// Now the 'data' array is filled. We can proceed to the math.
 
 		// Calculate
 		arr.push([i18n.labelTotal,   prettyFloat(data.sum())]);
@@ -2190,11 +2427,16 @@ function updateSelectedRowsSummary() {
 		}
 		table.push('<\/table>');
 
-		el.innerHTML = table.join('\n');
-		el.style.display = 'block';
+		// Show summary
+		document.getElementById('rows-summary-content').innerHTML = table.join('\n');
+		document.getElementById('rows-summary').style.display = 'block';
+
+		// Hide combo in diary report, since there's only one available column
+		document.getElementById('rows-summary-index').style.display = (reportType === 'd') ? 'none' : 'inline';
 
 	} else {
-		el.style.display = 'none';
+		// No data, hide summary
+		document.getElementById('rows-summary').style.display = 'none';
 	}
 }
 
@@ -2281,7 +2523,7 @@ function showOverview() {
 	thead += '<th onClick="sortCol(3)">' + i18n.labelsOverview[3] + '<\/th>';
 	thead += '<th onClick="sortCol(4)">' + i18n.labelsOverview[4] + '<\/th>';
 	if (showMiniBars) {
-		thead += '<th>%<\/th>';
+		thead += '<th class="percent">%<\/th>';
 	}
 	if (showRowCount) {
 		thead = '<th class="row-count"><\/th>' + thead;
@@ -2397,7 +2639,7 @@ function showOverview() {
 		results = results.join('\n');
 
 		// Always reset Rows Summary when generating reports
-		selectedRowsData = [];
+		selectedRows = [];
 		updateSelectedRowsSummary();
 
 		// Now charts!
@@ -2407,7 +2649,7 @@ function showOverview() {
 			chartLabels = [];
 
 			// Get all values for the selected column
-			chartCol = document.getElementById('chart-data').value || 1;
+			chartCol = parseInt(document.getElementById('chart-data').value, 10) || 1;
 			for (i = 0; i < overviewData.length; i++) {
 				chartValues.push(overviewData[i][chartCol]);
 				chartLabels.push(overviewData[i][0]);  // month or year
@@ -2431,18 +2673,19 @@ function showOverview() {
 }
 
 function showDetailed() {
-	var thead, i, j, k, rowDate, rowAmount, rowTags, rowDescription, monthTotal, monthPos, monthNeg, rowCount, results, monthPartials, theData, sumPos, sumNeg, sumTotal, chart, chartCol, chartLabels, chartValues, chartValuesSelected;
+	var thead, i, j, k, rowDate, rowAmount, rowTags, rowDescription, monthTotal, monthPos, monthNeg, rowCount, results, monthPartials, theData, sumPos, sumNeg, sumTotal, chart, chartCol, chartLabels, chartValues, chartValuesSelected, currentDate;
 
 	sumTotal = sumPos = sumNeg = monthTotal = monthPos = monthNeg = rowCount = 0;
 	results = [];
 	chartValues = [];
 	chartLabels = [];
-	selectedRowsData = [];
 
-	monthPartials = document.getElementById('opt-monthly');
+	monthPartials = document.getElementById('opt-monthly-check');
 	theData = applyTags(filterData());
 
 	if (theData.length > 0) {
+
+		currentDate = getCurrentDate();
 
 		// Data sorting procedures
 		if (sortColIndex !== 0 || sortColRev) {
@@ -2531,12 +2774,7 @@ function showDetailed() {
 				results.push('<td class="row-count">' + (rowCount) + '<\/td>');
 			}
 
-			// Use local date format?
-			if (showLocaleDate) {
-				rowDate = formatDate(rowDate);
-			}
-
-			results.push('<td class="date">'   + rowDate                + '<\/td>');
+			results.push('<td class="date">'   + formatDate(rowDate)    + '<\/td>');
 			results.push('<td class="number">' + prettyFloat(rowAmount) + '<\/td>');
 			results.push('<td class="tags">'   + rowTags.join(', ')     + '<\/td>');
 			results.push('<td>'                + rowDescription         + '<\/td>');
@@ -2567,7 +2805,7 @@ function showDetailed() {
 		updateTagSummary(theData);
 
 		// Always reset Rows Summary when generating reports
-		selectedRowsData = [];
+		selectedRows = [];
 		updateSelectedRowsSummary();
 
 		// Now charts!
@@ -2576,7 +2814,7 @@ function showDetailed() {
 
 			// Get all values for the selected column
 			chartValuesSelected = [];
-			chartCol = document.getElementById('chart-data').value || 1;
+			chartCol = parseInt(document.getElementById('chart-data').value, 10) || 1;
 			for (i = 0; i < chartValues.length; i++) {
 				chartValuesSelected.push(chartValues[i][chartCol]);
 			}
@@ -2615,14 +2853,18 @@ function showReport() {
 /////////////////////////////////////////////////////////////////////
 
 function populateChartColsCombo() {
-	var el, i;
-	el = document.getElementById('chart-data');
-	for (i = 0; i < i18n.labelsOverview.length; i++) {
-		if (i === 0) {
-			continue; // ignore date column
-		}
-		el.options[i - 1] = new Option(i18n.labelsOverview[i], i);
-	}
+	var el = document.getElementById('chart-data');
+	el.options[0] = new Option(i18n.labelsOverview[1], 1);  // Incoming
+	el.options[1] = new Option(i18n.labelsOverview[2], 2);  // Expense
+	el.options[2] = new Option(i18n.labelsOverview[3], 3);  // Partial
+	el.options[3] = new Option(i18n.labelsOverview[4], 4);  // Balance
+}
+
+function populateRowsSummaryCombo() {
+	var el = document.getElementById('rows-summary-index');
+	el.options[0] = new Option(i18n.labelsOverview[1], 2);  // Incoming
+	el.options[1] = new Option(i18n.labelsOverview[2], 3);  // Expense
+	el.options[2] = new Option(i18n.labelsOverview[3], 4);  // Partial
 }
 
 function populateDataFilesCombo() {
@@ -2635,9 +2877,9 @@ function populateDataFilesCombo() {
 	}
 }
 
-function populateMonthsCombo() {
+function populateLastMonthsCombo() {
 	var el, label, i;
-	el = document.getElementById('last-months');
+	el = document.getElementById('opt-last-months-combo');
 	label = i18n.labelMonths[0];
 	for (i = 1; i <= maxLastMonths; i++) {
 		if (i > 1) {
@@ -2648,9 +2890,88 @@ function populateMonthsCombo() {
 	el.selectedIndex = (initLastMonths > 0) ? initLastMonths - 1 : 0;
 }
 
+function populateYearRangeCombo() {
+	var el1, el2, range, i, y, m, thisMonth, pastMonth, index1, index2;
+
+	el1 = document.getElementById('opt-date-1-year-combo');
+	el2 = document.getElementById('opt-date-2-year-combo');
+	range = getYearRange(dataFirstDate, dataLastDate);
+
+	// Save currently selected items, or apply defaults
+	index1 = (el1.selectedIndex !== -1) ? el1.selectedIndex : 0;
+	index2 = (el2.selectedIndex !== -1) ? el2.selectedIndex : range.length - 1;
+
+	// First, make sure the combo is empty
+	el1.options.length = 0;
+	el2.options.length = 0;
+
+	// Both combos will have the same years
+	for (i = 0; i < range.length; i++) {
+		el1.options[i] = new Option(range[i]);
+		el2.options[i] = new Option(range[i]);
+	}
+
+	// Set selected items
+	el1.selectedIndex = index1;
+	el2.selectedIndex = index2;
+}
+
+function populateMonthRangeCombo() {
+	var el1, el2, range, i, y, m, thisMonth, pastMonth, index1, index2;
+
+	el1 = document.getElementById('opt-date-1-month-combo');
+	el2 = document.getElementById('opt-date-2-month-combo');
+	range = getMonthRange(dataFirstDate, dataLastDate);
+	thisMonth = getCurrentDate().slice(0, 7);
+	pastMonth = getPastMonth(initLastMonths - 1).slice(0, 7);
+
+	// Save currently selected items
+	index1 = el1.selectedIndex;
+	index2 = el2.selectedIndex;
+
+	// None selected? So we're at app start up.
+	// Let's choose which items to select by default.
+	if (index1 === -1) {
+		// First combo will respect initLastMonths setting
+		index1 = range.indexOf(pastMonth);
+
+		// If that month is out of range, we'll select the oldest
+		if (index1 === -1) {
+			index1 = 0;
+		}
+	}
+	if (index2 === -1) {
+		// Second combo is set to current month
+		index2 = range.indexOf(thisMonth);
+
+		// If that month is out of range, or user wants future data,
+		// we'll select the newer
+		if (index2 === -1 || defaultFuture) {
+			index2 = range.length - 1;
+		}
+	}
+
+	// First, make sure the combo is empty
+	el1.options.length = 0;
+	el2.options.length = 0;
+
+	// Both combos will have the same months
+	for (i = 0; i < range.length; i++) {
+		y = range[i].slice(0, 4);
+		m = range[i].slice(5, 7);
+		m = i18n.monthNames[m.replace(/^0/, '')].slice(0, 3);  // month short name
+		el1.options[i] = new Option(m + ' ' + y, range[i]);
+		el2.options[i] = new Option(m + ' ' + y, range[i]);
+	}
+
+	// Set selected items
+	el1.selectedIndex = index1;
+	el2.selectedIndex = index2;
+}
+
 function populateValueFilterCombo() {
 	var el;
-	el = document.getElementById('value-filter');
+	el = document.getElementById('opt-value-filter-combo');
 	el.options[0] = new Option('+ ' + i18n.labelPositive, '+');
 	el.options[1] = new Option('- ' + i18n.labelNegative, '-');
 	el.options[2] = new Option('> ' + i18n.labelGreaterThan, '>');
@@ -2664,7 +2985,7 @@ function updateToolbar() {
 	// Monthly/Yearly report hides some controls from the toolbar.
 	//
 	// Some fields are just hidden to preserve the page layout.
-	// Others must be removed to free some space for the report.
+	// Others must be removed to free vertical space.
 
 	add = [];
 	remove = [];
@@ -2675,34 +2996,58 @@ function updateToolbar() {
 	if (reportType === 'd') {
 		unhide = [
 			'search-box',
-			'opt-monthly', 'opt-monthly-label',
-			'opt-value-filter', 'opt-value-filter-label', 'opt-value-filter-extra',
-			'opt-last-months', 'opt-last-months-label', 'opt-last-months-extra',
+			'opt-monthly-box',
+			'opt-value-filter-box',
+			'opt-last-months-box',
 			'tag-cloud-box',
 			'tag-summary-box'
+		];
+		add = [
+			'opt-date-1-month-combo',
+			'opt-date-2-month-combo'
+		];
+		remove = [
+			'opt-date-1-year-combo',
+			'opt-date-2-year-combo'
 		];
 	// Monthly
 	} else if (reportType === 'm') {
 		hide = [
 			'search-box',
-			'opt-monthly', 'opt-monthly-label',
-			'opt-value-filter', 'opt-value-filter-label', 'opt-value-filter-extra',
+			'opt-monthly-box',
+			'opt-value-filter-box',
 			'tag-cloud-box',
 			'tag-summary-box'
 		];
 		unhide = [
-			'opt-last-months', 'opt-last-months-label', 'opt-last-months-extra',
+			'opt-last-months-box',
+		];
+		add = [
+			'opt-date-1-month-combo',
+			'opt-date-2-month-combo'
+		];
+		remove = [
+			'opt-date-1-year-combo',
+			'opt-date-2-year-combo'
 		];
 	// Yearly
 	} else if (reportType === 'y') {
 		hide = [
 			'search-box',
-			'opt-monthly', 'opt-monthly-label',
-			'opt-value-filter', 'opt-value-filter-label', 'opt-value-filter-extra',
+			'opt-monthly-box',
+			'opt-value-filter-box',
 			// Recent *months* doesn't make sense in yearly report
-			'opt-last-months', 'opt-last-months-label', 'opt-last-months-extra',
+			'opt-last-months-box',
 			'tag-cloud-box',
 			'tag-summary-box'
+		];
+		add = [
+			'opt-date-1-year-combo',
+			'opt-date-2-year-combo'
+		];
+		remove = [
+			'opt-date-1-month-combo',
+			'opt-date-2-month-combo'
 		];
 	}
 
@@ -2745,7 +3090,7 @@ function changeReport(el) {
 	addClass(el, 'active');
 
 	//// Save / restore information
-	//
+
 	// From Daily to Monthly/Yearly
 	if (oldType === 'd' && newType !== 'd') {
 		oldSortColIndex = sortColIndex;
@@ -2759,8 +3104,17 @@ function changeReport(el) {
 		sortColRev = oldSortColRev || false;
 	}
 
+	// From Daily/Monthly to Yearly
+	if (newType === 'y' && oldType !== 'y') {
+		populateYearRangeCombo();
+	//
+	// From Yearly to Daily/Monthly
+	} else if (oldType === 'y' && newType !== 'y') {
+		populateMonthRangeCombo();
+	}
+
 	// Always reset Rows Summary when changing reports
-	selectedRowsData = [];
+	selectedRows = [];
 	updateSelectedRowsSummary();
 
 	reportType = newType;
@@ -2802,9 +3156,14 @@ function iframeLoaded(el) {
 }
 
 function lastMonthsChanged() {
-	document.getElementById('opt-last-months').checked = true;
+	document.getElementById('opt-last-months-check').checked = true;
 	overviewData = [];
 	showReport();
+}
+
+function dateRangeComboChanged() {
+	document.getElementById(this.id.replace(/(month|year)-combo/, 'check')).checked = true;
+	toggleDateRange();
 }
 
 function toggleFullScreen() {
@@ -2826,8 +3185,14 @@ function toggleFullScreen() {
 		isFullScreen = true;
 	}
 }
+
 function toggleFuture() {
-	overviewData = [];
+	overviewData = [];  // clear cache
+	showReport();
+}
+
+function toggleDateRange() {
+	overviewData = [];  // clear cache
 	showReport();
 }
 
@@ -2862,7 +3227,7 @@ function toggleLastMonths() {
 	extra.style.display = (this.checked) ? 'block' : 'none';
 
 	// reload report
-	overviewData = [];
+	overviewData = [];  // clear cache
 	showReport();
 }
 
@@ -2877,7 +3242,7 @@ function toggleValueFilter() {
 }
 
 function toggleMonthly() {
-	if (document.getElementById('opt-monthly').checked === true) {
+	if (document.getElementById('opt-monthly-check').checked === true) {
 		sortColIndex = 0;
 		sortColRev = false;
 	}
@@ -2886,21 +3251,17 @@ function toggleMonthly() {
 
 function toggleRowHighlight(el) {
 	// This function is called when user clicks a report row.
-	// Besides the visual highlight, it also updates the summary
-	// for all the selected rows. It will appear when the first
-	// row is clicked.
-
-	// Save this row Amount as float
-	var rowAmount = prettyFloatUndo(getDetailedReportColumnContents(el, 2));
+	// The visual highlight is turned ON by the class 'selected'.
+	// The selected clicked rows are saved to the global holder selectedRows.
 
 	if (hasClass(el, 'selected')) {
-		// Unselect row, remove amount from holder
+		// turn OFF
 		removeClass(el, 'selected');
-		selectedRowsData = selectedRowsData.removePattern(rowAmount, 1);
+		selectedRows = selectedRows.removePattern(el, 1);
 	} else {
-		// Select row, add amount to holder
+		// turn ON
 		addClass(el, 'selected');
-		selectedRowsData.push(rowAmount);
+		selectedRows.push(el);
 	}
 
 	// Refresh the summary
@@ -2911,18 +3272,35 @@ function valueFilterChanged() {
 	overviewData = [];
 
 	// autocheck checkbox
-	document.getElementById('opt-value-filter').checked = true;
+	document.getElementById('opt-value-filter-check').checked = true;
 
 	// show/hide the filter argument textbox
-	if (document.getElementById('value-filter').value.match(/[+\-]/)) {
-		document.getElementById('value-filter-arg').style.display = 'none';
+	if (document.getElementById('opt-value-filter-combo').value.match(/[+\-]/)) {
+		document.getElementById('opt-value-filter-number').style.display = 'none';
 	} else {
-		document.getElementById('value-filter-arg').style.display = 'inline';
+		document.getElementById('opt-value-filter-number').style.display = 'inline';
 	}
 
 	showReport();
 }
 
+function resetTagCloud() {
+	var i, tagcloud, checkboxes;
+
+	tagcloud = document.getElementById('tag-cloud-tags');
+	checkboxes = tagcloud.getElementsByTagName('input');
+
+	for (i = 0; i < checkboxes.length; i++) {
+		checkboxes[i].checked = false;
+		checkboxes[i].removeAttribute('checked');
+		// Note: Since I'm using CSS rule "input[checked]+span", checked=false is not enough.
+	}
+
+	// The calling checkbox acts like a button, with temporary ON state
+	this.checked = false;
+
+	showReport();
+}
 function showHideEditButton() {
 	var el;
 	if (appMode === 'dropbox') {
@@ -3022,10 +3400,10 @@ function init() {
 	document.title = appName + ' ' + appFlavor;
 
 	// Prepare UI elements
-	setCurrentDate();
-	populateMonthsCombo();
+	populateLastMonthsCombo();
 	populateDataFilesCombo();
 	populateChartColsCombo();
+	populateRowsSummaryCombo();
 	populateValueFilterCombo();
 
 	// Sanitize and regexize user words: 'Foo Bar+' turns to 'Foo|Bar\+'
@@ -3051,12 +3429,16 @@ function init() {
 	document.getElementById('opt-monthly-label'        ).innerHTML = i18n.labelMonthPartials;
 	document.getElementById('opt-regex-label'          ).innerHTML = i18n.labelRegex;
 	document.getElementById('opt-negate-label'         ).innerHTML = i18n.labelNegate;
+	document.getElementById('tag-cloud-opt-negate-label').innerHTML = i18n.labelTagNegate;
 	document.getElementById('tag-cloud-opt-group-label').innerHTML = i18n.labelTagGroup;
+	document.getElementById('tag-cloud-opt-reset-label').innerHTML = i18n.labelTagReset;
 	document.getElementById('source-reload'            ).innerHTML = i18n.labelReload;
 	document.getElementById('editor-open'              ).innerHTML = i18n.labelEdit;
 	document.getElementById('editor-close'             ).innerHTML = i18n.labelCancel;
 	document.getElementById('editor-save'              ).innerHTML = i18n.labelSave;
 	document.getElementById('view-options-header'      ).innerHTML = i18n.labelViewOptions;
+	document.getElementById('opt-date-1-label'         ).innerHTML = i18n.labelDateFrom + ':';
+	document.getElementById('opt-date-2-label'         ).innerHTML = i18n.labelDateUntil + ':';
 	document.getElementById('tag-cloud-header'         ).innerHTML = i18n.labelTagCloud;
 	document.getElementById('tag-summary-header'       ).innerHTML = i18n.labelTagSummary;
 
@@ -3073,7 +3455,9 @@ function init() {
 	document.getElementById('opt-regex-label'          ).title = i18n.helpRegex;
 	document.getElementById('opt-negate-label'         ).title = i18n.helpNegate;
 	document.getElementById('source-reload'            ).title = i18n.helpReload;
+	document.getElementById('tag-cloud-opt-negate-label').title = i18n.helpTagNegate;
 	document.getElementById('tag-cloud-opt-group-label').title = i18n.helpTagGroup;
+	document.getElementById('tag-cloud-opt-reset-label').title = i18n.helpTagReset;
 	document.getElementById('view-options-header'      ).title = i18n.helpViewoptions;
 	document.getElementById('tag-cloud-header'         ).title = i18n.helpTagCloud;
 	document.getElementById('tag-summary-header'       ).title = i18n.helpTagSummary;
@@ -3097,51 +3481,82 @@ function init() {
 
 	// Set initial chart type for the reports (before event handlers)
 	if (reportType === 'd') {
-		document.getElementById('chart-data').value = initChartDaily;
+		document.getElementById('chart-data').selectedIndex = initChartDaily - 1;
 	} else if (reportType === 'm') {
-		document.getElementById('chart-data').value = initChartMonthly;
+		document.getElementById('chart-data').selectedIndex = initChartMonthly - 1;
 	} else {
-		document.getElementById('chart-data').value = initChartYearly;
+		document.getElementById('chart-data').selectedIndex = initChartYearly - 1;
 	}
 
 	// Add event handlers
-	document.getElementById('fullscreen'         ).onclick  = toggleFullScreen;
-	document.getElementById('d'                  ).onclick  = changeReport;
-	document.getElementById('m'                  ).onclick  = changeReport;
-	document.getElementById('y'                  ).onclick  = changeReport;
-	document.getElementById('opt-last-months'    ).onclick  = toggleLastMonths;
-	document.getElementById('last-months'        ).onchange = lastMonthsChanged;
-	document.getElementById('opt-value-filter'   ).onclick  = toggleValueFilter;
-	document.getElementById('value-filter'       ).onchange = valueFilterChanged;
-	document.getElementById('value-filter-arg'   ).onkeyup  = showReport;
-	document.getElementById('opt-future'         ).onclick  = toggleFuture;
-	document.getElementById('opt-monthly'        ).onclick  = toggleMonthly;
-	document.getElementById('filter'             ).onkeyup  = showReport;
-	document.getElementById('opt-regex'          ).onclick  = showReport;
-	document.getElementById('opt-negate'         ).onclick  = showReport;
-	document.getElementById('source-file'        ).onchange = loadSelectedFile;
-	document.getElementById('source-reload'      ).onclick  = loadSelectedFile;
-	document.getElementById('tag-cloud-opt-group').onclick  = showReport;
-	document.getElementById('chart-data'         ).onchange = showReport;
-	document.getElementById('view-options-header').onclick  = toggleViewOptions;
-	document.getElementById('tag-cloud-header'   ).onclick  = toggleTagCloud;
-	document.getElementById('tag-summary-header' ).onclick  = toggleTagSummary;
-	document.getElementById('editor-open'        ).onclick  = editorOn;
-	document.getElementById('editor-close'       ).onclick  = editorOff;
-	document.getElementById('editor-save'        ).onclick  = editorSave;
+	document.getElementById('fullscreen'             ).onclick  = toggleFullScreen;
+	document.getElementById('d'                      ).onclick  = changeReport;
+	document.getElementById('m'                      ).onclick  = changeReport;
+	document.getElementById('y'                      ).onclick  = changeReport;
+	document.getElementById('opt-last-months-check'  ).onclick  = toggleLastMonths;
+	document.getElementById('opt-last-months-combo'  ).onchange = lastMonthsChanged;
+	document.getElementById('opt-value-filter-check' ).onclick  = toggleValueFilter;
+	document.getElementById('opt-value-filter-combo' ).onchange = valueFilterChanged;
+	document.getElementById('opt-value-filter-number').onkeyup  = showReport;
+	document.getElementById('opt-future-check'       ).onclick  = toggleFuture;
+	document.getElementById('opt-monthly-check'      ).onclick  = toggleMonthly;
+	document.getElementById('filter'                 ).onkeyup  = showReport;
+	document.getElementById('opt-regex-check'        ).onclick  = showReport;
+	document.getElementById('opt-negate-check'       ).onclick  = showReport;
+	document.getElementById('source-file'            ).onchange = loadSelectedFile;
+	document.getElementById('source-reload'          ).onclick  = loadSelectedFile;
+	document.getElementById('opt-date-1-check'       ).onclick  = toggleDateRange;
+	document.getElementById('opt-date-2-check'       ).onclick  = toggleDateRange;
+	document.getElementById('opt-date-1-month-combo' ).onchange = dateRangeComboChanged;
+	document.getElementById('opt-date-2-month-combo' ).onchange = dateRangeComboChanged;
+	document.getElementById('opt-date-1-year-combo'  ).onchange = dateRangeComboChanged;
+	document.getElementById('opt-date-2-year-combo'  ).onchange = dateRangeComboChanged;
+	document.getElementById('tag-cloud-opt-negate-check').onclick  = showReport;
+	document.getElementById('tag-cloud-opt-group-check' ).onclick  = showReport;
+	document.getElementById('tag-cloud-opt-reset-check' ).onclick  = resetTagCloud;
+	document.getElementById('chart-data'             ).onchange = showReport;
+	document.getElementById('rows-summary-index'     ).onchange = updateSelectedRowsSummary;
+	document.getElementById('view-options-header'    ).onclick  = toggleViewOptions;
+	document.getElementById('tag-cloud-header'       ).onclick  = toggleTagCloud;
+	document.getElementById('tag-summary-header'     ).onclick  = toggleTagSummary;
+	document.getElementById('editor-open'            ).onclick  = editorOn;
+	document.getElementById('editor-close'           ).onclick  = editorOff;
+	document.getElementById('editor-save'            ).onclick  = editorSave;
 	document.getElementById('editor-data')[(isOpera) ? 'onkeypress' : 'onkeydown'] = insertTab;
 
 	// Apply user defaults (this code must be after event handlers adding)
-	if (initFullScreen)       { toggleFullScreen(); }
-	if (defaultMonthPartials) { document.getElementById('opt-monthly').checked = true; }
-	if (defaultFuture)        { document.getElementById('opt-future' ).checked = true; }
-	if (defaultRegex)         { document.getElementById('opt-regex'  ).checked = true; }
-	if (defaultNegate)        { document.getElementById('opt-negate' ).checked = true; }
+	if (initFullScreen)     { toggleFullScreen(); }
+	if (checkRegex)         { document.getElementById('opt-regex-check'  ).checked = true; }
+	if (checkNegate)        { document.getElementById('opt-negate-check' ).checked = true; }
+	if (checkDateFrom)      { document.getElementById('opt-date-1-check' ).checked = true; }
+	if (checkDateUntil)     { document.getElementById('opt-date-2-check' ).checked = true; }
+	if (checkMonthPartials) { document.getElementById('opt-monthly-check').checked = true; }
+	document.getElementById('filter').value = defaultSearch;
+
+	// Apply user defaults - Legacy
+	if (defaultFuture) {
+		document.getElementById('opt-future-check' ).checked = true;
+	}
 	if (defaultLastMonths) {
-		document.getElementById('opt-last-months').checked = true;
+		document.getElementById('opt-last-months-check').checked = true;
 		document.getElementById('opt-last-months-extra').style.display = 'block';
 	}
-	document.getElementById('filter').value = defaultSearch;
+
+	// User wants old style date filters?
+	if (useLegacyDateFilter) {
+		// restore old
+		document.getElementById('opt-future-box').style.display = 'block';
+		document.getElementById('opt-last-months-box').style.display = 'block';
+		// disable new
+		document.getElementById('opt-date-1-box').style.display = 'none';
+		document.getElementById('opt-date-2-box').style.display = 'none';
+		document.getElementById('opt-date-1-check').checked = false;
+		document.getElementById('opt-date-2-check').checked = false;
+	} else {
+		// disable old
+		document.getElementById('opt-last-months-check').checked = false;
+		document.getElementById('opt-future-check').checked = false;
+	}
 
 	// Always show these toolbar boxes opened at init
 	toggleTagCloud();
@@ -3236,14 +3651,14 @@ window.onload = init;
 					<input id="filter" type="text">
 					<div class="checkbox-option">
 						<input
-							id="opt-regex" class="trigger" type="checkbox">
+							id="opt-regex-check" class="trigger" type="checkbox">
 						<label
-							id="opt-regex-label" for="opt-regex"></label>
+							id="opt-regex-label" for="opt-regex-check"></label>
 
 						<input
-							id="opt-negate" class="trigger" type="checkbox">
+							id="opt-negate-check" class="trigger" type="checkbox">
 						<label
-						 	id="opt-negate-label" for="opt-negate"></label>
+						 	id="opt-negate-label" for="opt-negate-check"></label>
 					</div>
 				</div>
 			</div>
@@ -3254,47 +3669,67 @@ window.onload = init;
 				<a id="view-options-header" class="button" href="#"></a>
 				<div id="view-options-content" class="box-content">
 
-					<!-- Monthly -->
-					<div class="checkbox-option">
+					<!-- From: -->
+					<div id="opt-date-1-box" class="checkbox-option">
 						<input
-							id="opt-monthly" class="trigger" type="checkbox">
+							id="opt-date-1-check" class="trigger" type="checkbox">
 						<label
-							id="opt-monthly-label" for="opt-monthly"></label>
+							id="opt-date-1-label" for="opt-date-1-check"></label>
+						<select id="opt-date-1-month-combo"></select>
+						<select id="opt-date-1-year-combo"></select>
+					</div>
+
+					<!-- Until: -->
+					<div id="opt-date-2-box" class="checkbox-option">
+						<input
+							id="opt-date-2-check" class="trigger" type="checkbox">
+						<label
+							id="opt-date-2-label" for="opt-date-2-check"></label>
+						<select id="opt-date-2-month-combo"></select>
+						<select id="opt-date-2-year-combo"></select>
+					</div>
+
+					<!-- Monthly -->
+					<div id="opt-monthly-box" class="checkbox-option">
+						<input
+							id="opt-monthly-check" class="trigger" type="checkbox">
+						<label
+							id="opt-monthly-label" for="opt-monthly-check"></label>
 					</div>
 
 					<!-- Future -->
-					<div class="checkbox-option">
+					<div id="opt-future-box" class="checkbox-option">
 						<input
-							id="opt-future" class="trigger" type="checkbox">
+							id="opt-future-check" class="trigger" type="checkbox">
 						<label
-							id="opt-future-label" for="opt-future"></label>
+							id="opt-future-label" for="opt-future-check"></label>
 					</div>
 
 					<!-- Last Months -->
-					<div class="checkbox-option">
+					<div id="opt-last-months-box" class="checkbox-option">
 						<input
-							id="opt-last-months" class="trigger" type="checkbox">
+							id="opt-last-months-check" class="trigger" type="checkbox">
 						<label
-							id="opt-last-months-label" for="opt-last-months"></label>
+							id="opt-last-months-label" for="opt-last-months-check"></label>
 
 						<div id="opt-last-months-extra" class="checkbox-option-extra">
 							<select
-								id="last-months" size="1"></select>
+								id="opt-last-months-combo" size="1"></select>
 						</div>
 					</div>
 
 					<!-- Value Filter -->
-					<div class="checkbox-option">
+					<div id="opt-value-filter-box" class="checkbox-option">
 						<input
-							id="opt-value-filter" class="trigger" type="checkbox">
+							id="opt-value-filter-check" class="trigger" type="checkbox">
 						<label
-							id="opt-value-filter-label" for="opt-value-filter"></label>
+							id="opt-value-filter-label" for="opt-value-filter-check"></label>
 
 						<div id="opt-value-filter-extra" class="checkbox-option-extra">
 							<select
-								id="value-filter" size="1">
+								id="opt-value-filter-combo" size="1">
 							</select><input
-								id="value-filter-arg" size="3" type="text">
+								id="opt-value-filter-number" size="3" type="text">
 						</div>
 					</div>
 
@@ -3312,11 +3747,23 @@ window.onload = init;
 
 					<div id="tag-cloud-options" class="box-options">
 						<hr />
-						<div class="checkbox-option">
+						<div id="tag-cloud-opt-negate-box" class="checkbox-option">
 							<input
-								id="tag-cloud-opt-group" type="checkbox" class="trigger">
+								id="tag-cloud-opt-negate-check" type="checkbox" class="trigger">
 							<label
-								id="tag-cloud-opt-group-label" for="tag-cloud-opt-group"></label>
+								id="tag-cloud-opt-negate-label" for="tag-cloud-opt-negate-check"></label>
+						</div>
+						<div id="tag-cloud-opt-group-box" class="checkbox-option">
+							<input
+								id="tag-cloud-opt-group-check" type="checkbox" class="trigger">
+							<label
+								id="tag-cloud-opt-group-label" for="tag-cloud-opt-group-check"></label>
+						</div>
+						<div id="tag-cloud-opt-reset-box" class="checkbox-option">
+							<input
+								id="tag-cloud-opt-reset-check" type="checkbox" class="trigger">
+							<label
+								id="tag-cloud-opt-reset-label" for="tag-cloud-opt-reset-check"></label>
 						</div>
 					</div>
 
@@ -3360,6 +3807,8 @@ window.onload = init;
 
 	<!-- Rows Summary -->
 	<div id="rows-summary">
+		<select id="rows-summary-index" size="1"></select>
+		<div id="rows-summary-content"></div>
 	</div>
 
 </div><!-- #content -->
