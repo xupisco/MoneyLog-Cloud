@@ -58,12 +58,7 @@ h3 {
 
 #login_container {
 	width: 255px;
-	height: 410px;
-	top: 48%;
-	left: 50%;
-	position: absolute;
-	margin-top: -205px;
-	margin-left: -128px;
+	margin: 0 auto;
 }
 
 #login_logo {
@@ -109,7 +104,7 @@ a.login_connect {
 }
 
 .commit {
-	padding-top: 5px;
+	padding: 5px 0;
 	font-size: 11px;
 	float: left;
 }
