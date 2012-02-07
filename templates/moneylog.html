@@ -715,7 +715,7 @@ var reportType = 'd';             // Initial report type: d m y (daily, monthly,
 var showLocaleDate = false;       // Show dates in the regional format? (ie: 12/31/2009)
 var showEmptyTagInSummary = true; // The EMPTY tag sum should appear in Tag Summary?
 var initFullScreen = false;       // Start app in Full Screen mode?
-var useLegacyDateFilter = false;  // Restore old options: Future Data, Recent Only
+var initMonthsOffsetFrom = -2;    // From: month will be N months from now
 
 // Widgets
 var initViewWidgetOpen = true;    // Start app with the View widget opened?
@@ -745,6 +745,7 @@ var localStorageKey = 'moneylogData'; // Keyname for the localStorage database
 
 
 // Legacy options
+var useLegacyDateFilter = false;  // Restore old options: Future Data, Recent Only
 var maxLastMonths = 12;           // Number of months on the last months combo
 var defaultLastMonths = false;    // Last months combo inits checked?
 var defaultFuture = false;        // Show future checkbox inits checked?
@@ -1248,6 +1249,79 @@ RegExp.escape = function (str) {
 	return str.replace(specials, '\\$&');
 };
 
+// Date helpers
+Date.prototype.getYearML = function () {  // Returns as string
+	return this.getFullYear().toString();
+}
+Date.prototype.getMonthML = function () {  // Returns as string and zero padded 
+	var m = this.getMonth() + 1;  // zero based
+	return (m < 10) ? '0' + m : m.toString();
+}
+Date.prototype.getDateML = function () {  // Returns as string and zero padded 
+	var d = this.getDate();
+	return (d < 10) ? '0' + d : d.toString();
+}
+Date.prototype.getFullMonthML = function () {  // Returns "YYYY-MM"
+	return this.getYearML() + '-' + this.getMonthML();
+}
+Date.prototype.getMonthName = function () {
+	return i18n.monthNames[this.getMonth() + 1];  // zero based
+}
+Date.prototype.getMonthShortName = function () {
+	return this.getMonthName().slice(0, 3);
+}
+Date.prototype.fromML = function (str) {  // str: YYYY-MM-DD
+	this.setFullYear(
+		parseInt(str.slice(0,  4), 10),
+		parseInt(str.slice(5,  7), 10) - 1,  // month is zero-based
+		parseInt(str.slice(8, 10), 10) || 1);
+}
+Date.prototype.toML = function () {  // Returns "YYYY-MM-DD"
+	return this.getYearML() + '-' + this.getMonthML() + '-' + this.getDateML();
+}
+Date.prototype.format = function (fmt) {
+	// Available tokens (i.e. for 1999-12-31):
+	// Y=1999, y=99, m=12, d=31, b=Dec, B=December
+
+	var d = this;
+	// http://code.google.com/p/datejs/source/browse/trunk/src/core.js?spec=svn197&r=194#810
+	return fmt.replace(
+			/(\\)?[YymdBb]/g,
+			function (m) {
+				// Ignore escaped chars as \Y, \b, ...
+				if (m.charAt(0) === '\\') {
+					return m.replace('\\', '');
+				}
+				switch (m) {
+					case 'Y':
+						return d.getYearML() || 'Y';
+					case 'y':
+						return d.getYearML().slice(2, 4) || 'y';
+					case 'm':
+						return d.getMonthML() || 'm';
+					case 'd':
+						return d.getDateML() || 'd';
+					case 'B':
+						return d.getMonthName() || 'B';
+					case 'b':
+						return d.getMonthShortName() || 'b';
+					default:
+						return m;
+				}
+			}
+		);
+}
+Date.prototype.setMonthOffset = function (n) {  // negative n is ok
+	// Beware: 2010-01-31 + 1 = 2010-03-03
+	// Set day to 1 to make month-related operations
+	this.setMonth(this.getMonth() + (n || 0));
+}
+String.prototype.toDate = function () {
+	var z = new Date();
+	z.fromML(this);
+	return z;
+}
+
 
 /////////////////////////////////////////////////////////////////////
 //                              TOOLS
@@ -1297,46 +1371,24 @@ function sortIgnoreCase(a, b) {
 }
 
 function getCurrentDate() {
-	var z, m, d;
-	z = new Date();
-	m = z.getMonth() + 1;
-	d = z.getDate();
-	m = (m < 10) ? '0' + m : m;
-	d = (d < 10) ? '0' + d : d;
-	return z.getFullYear() + '-' + m + '-' + d;
+	return new Date().toML();
 }
 
 function getPastMonth(months) {
+	// months=0 means current month
 	// Returns: YYYY-MM-00
-	var z, m, y;
-	z = new Date();
-	m = z.getMonth() + 1 - months; // zero based
-	y = z.getFullYear();
-	if (m < 1) { // past year
-		m = 12 + m;
-		y = y - 1;
-	}
-	m = (m < 10) ? '0' + m : m;
-	return y + '-' + m + '-' + '00';
+	return formatDate(addMonths(getCurrentDate(), -months), 'Y-m-00');
 }
 
 function addMonths(yyyymmdd, n) {
-	var y, m, d;
-	yyyymmdd = yyyymmdd.replace(/-/g, '');
-	y = parseInt(yyyymmdd.slice(0, 4), 10);
-	m = parseInt(yyyymmdd.slice(4, 6), 10);
-	d = yyyymmdd.slice(6, 8);
-	m = m + n;
-	if (m > 12) {
-		y = y + Math.floor(m / 12);
-		m = m % 12;
-		if (m === 0) { // Exception for n=24, n=36, ...
-			m = 12;
-			y = y - 1;
-		}
-	}
-	m = (m < 10) ? '0' + m : m;
-	return y + '-' + m + '-' + d;
+	// It's all about months, not taking days into account.
+	// addMonths("2010-01-31", 1)  -> "2010-02-31"
+	// addMonths("2010-01-31", -2) -> "2009-11-31"
+
+	var z = yyyymmdd.toDate();
+	z.setDate(1);  // set day 1st
+	z.setMonthOffset(n);  // add
+	return z.toML().slice(0, 8) + yyyymmdd.slice(8, 10);  // restore original day
 }
 
 function getYearRange(date1, date2) {
@@ -1348,8 +1400,8 @@ function getYearRange(date1, date2) {
 		return results;
 	}
 
-	y1 = parseInt(date1.slice(0, 4), 10);
-	y2 = parseInt(date2.slice(0, 4), 10);
+	y1 = date1.toDate().getFullYear();
+	y2 = date2.toDate().getFullYear();
 
 	for (y=y1; y <= y2; y++) {  // from year1 to year2, inclusive
 		results.push(y);
@@ -1366,10 +1418,14 @@ function getMonthRange(date1, date2) {
 		return results;
 	}
 
-	y1 = parseInt(date1.slice(0, 4), 10);
-	y2 = parseInt(date2.slice(0, 4), 10);
-	m1 = parseInt(date1.slice(5, 7), 10);
-	m2 = parseInt(date2.slice(5, 7), 10);
+	// str to Date
+	date1 = date1.toDate();
+	date2 = date2.toDate();
+
+	y1 = date1.getFullYear();
+	y2 = date2.getFullYear();
+	m1 = date1.getMonth() + 1;  // zero based
+	m2 = date2.getMonth() + 1;
 
 	for (y=y1; y <= y2; y++) {  // from year1 to year2, inclusive
 
@@ -1385,58 +1441,27 @@ function getMonthRange(date1, date2) {
 	return results;
 }
 
-function formatDate(date) {
-	// Available tokens (i.e. for 1999-12-31): Y=1999, y=99, m=12, d=31, b=Dec, B=December
+function formatDate(date, fmt) {
+	// date: YYYY-MM-DD, fmt: see Date.prototype.format()
+	return date.toDate().format(fmt);
+}
 
-	var fmt;
-
+function formatReportDate(date) {
+	// This key controls if the report date should be formatted
 	if (!showLocaleDate) {
 		return date;  // nothing to do
 	}
 
-	// Valid input: YYYY-MM-DD, YYYY-MM or YYYY
 	switch (date.length) {
-		case 10:
-			fmt = i18n.dateFormat;
-			break;
-		case 7:
-			fmt = i18n.dateFormatMonth;
-			break;
-		case 4:
-			fmt = i18n.dateFormatYear;
-			break;
-		default:
-			return date;  // unknown format
+		case 10:  // YYYY-MM-DD
+			return formatDate(date, i18n.dateFormat);
+		case 7:  // YYYY-MM
+			return formatDate(date + '-01', i18n.dateFormatMonth);
+		case 4:  // YYYY
+			return formatDate(date + '-01-01', i18n.dateFormatYear);
+		default:  // unknown format
+			return date;
 	}
-
-	// Atomic replace to avoid concurrence
-	// http://code.google.com/p/datejs/source/browse/trunk/src/core.js?spec=svn197&r=194#810
-	return fmt.replace(
-			/(\\)?[YymdBb]/g,
-			function (m) {
-				// Ignore escaped chars as \Y, \b, ...
-				if (m.charAt(0) === '\\') {
-					return m.replace('\\', '');
-				}
-				// Valid input: YYYY-MM-DD, YYYY-MM or YYYY
-				switch (m) {
-					case 'Y':
-						return date.slice(0,  4) || 'Y';
-					case 'y':
-						return date.slice(2,  4) || 'y';
-					case 'm':
-						return date.slice(5,  7) || 'm';
-					case 'd':
-						return date.slice(8, 10) || 'd';
-					case 'B':
-						return i18n.monthNames[parseInt(date.slice(5, 7), 10)] || 'B';
-					case 'b':
-						return i18n.monthNames[parseInt(date.slice(5, 7), 10)].slice(0, 3) || 'b';
-					default:
-						return m;
-				}
-			}
-		);
 }
 
 function prettyFloat(num, noHtml) {
@@ -1732,7 +1757,7 @@ function getOverviewRow(theMonth, monthPos, monthNeg, monthTotal, theTotal, rowC
 	if (showRowCount) {
 		theRow.push('<td class="row-count">' + rowCount + '<\/td>');
 	}
-	theRow.push('<td>' + formatDate(theMonth) + '<\/td>');
+	theRow.push('<td>' + formatReportDate(theMonth) + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthPos)  + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthNeg)  + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthTotal) + '<\/td>');
@@ -2173,7 +2198,7 @@ function filterData() {
 
 		// [X] Recent Only, works for daily/monthly
 		if (document.getElementById('opt-last-months-check').checked && reportType !== 'y') {
-			firstDate = getPastMonth(parseInt(document.getElementById('opt-last-months-combo').value, 10) - 1);
+			firstDate = getPastMonth(parseInt(document.getElementById('opt-last-months-combo').value, 10) - 1);  // 1 = current
 		}
 		// [X] Future Data, works for all reports
 		showFuture = document.getElementById('opt-future-check').checked;
@@ -2799,11 +2824,11 @@ function showDetailed() {
 				results.push('<td class="row-count">' + (rowCount) + '<\/td>');
 			}
 
-			results.push('<td class="date">'   + formatDate(rowDate)    + '<\/td>');
-			results.push('<td class="number">' + prettyFloat(rowAmount) + '<\/td>');
-			results.push('<td class="tags">'   + rowTags.join(', ')     + '<\/td>');
-			results.push('<td>'                + rowDescription         + '<\/td>');
-			results.push('<td class="number">' + prettyFloat(sumTotal)  + '<\/td>');
+			results.push('<td class="date">'   + formatReportDate(rowDate) + '<\/td>');
+			results.push('<td class="number">' + prettyFloat(rowAmount)    + '<\/td>');
+			results.push('<td class="tags">'   + rowTags.join(', ')        + '<\/td>');
+			results.push('<td>'                + rowDescription            + '<\/td>');
+			results.push('<td class="number">' + prettyFloat(sumTotal)     + '<\/td>');
 			results.push('<\/tr>');
 
 		}
@@ -2916,7 +2941,7 @@ function populateLastMonthsCombo() {
 }
 
 function populateYearRangeCombo() {
-	var el1, el2, range, i, y, m, thisMonth, pastMonth, index1, index2;
+	var el1, el2, range, i, index1, index2;
 
 	el1 = document.getElementById('opt-date-1-year-combo');
 	el2 = document.getElementById('opt-date-2-year-combo');
@@ -2942,13 +2967,12 @@ function populateYearRangeCombo() {
 }
 
 function populateMonthRangeCombo() {
-	var el1, el2, range, i, y, m, thisMonth, pastMonth, index1, index2;
+	var el1, el2, range, i, y, m, thisMonth, firstMonth, index1, index2;
 
 	el1 = document.getElementById('opt-date-1-month-combo');
 	el2 = document.getElementById('opt-date-2-month-combo');
 	range = getMonthRange(dataFirstDate, dataLastDate);
-	thisMonth = getCurrentDate().slice(0, 7);
-	pastMonth = getPastMonth(initLastMonths - 1).slice(0, 7);
+	thisMonth = getCurrentDate().toDate().format('Y-m');
 
 	// Save currently selected items
 	index1 = el1.selectedIndex;
@@ -2957,10 +2981,15 @@ function populateMonthRangeCombo() {
 	// None selected? So we're at app start up.
 	// Let's choose which items to select by default.
 	if (index1 === -1) {
-		// First combo will respect initLastMonths setting
-		index1 = range.indexOf(pastMonth);
 
-		// If that month is out of range, we'll select the oldest
+		// Get user defaults
+		if (typeof initMonthsOffsetFrom === 'number') {
+			firstMonth = addMonths(getCurrentDate(), initMonthsOffsetFrom);
+			firstMonth = firstMonth.toDate().format('Y-m');
+			index1 = range.indexOf(firstMonth);
+		}
+
+		// If unset or the month is out of range, we'll select the oldest
 		if (index1 === -1) {
 			index1 = 0;
 		}
@@ -3896,7 +3925,7 @@ window.onload = init;
 # Repito: separados por TAB, e não espaços em branco
 # A data é no formato ANO-MES-DIA
 
-2011-09-01	-100	Saldo inicial da conta :(
+2011-09-01	-10000	Saldo inicial da conta :(
 2011-09-15	 -74,23	mercado|
 2011-09-15	  -1,99	nerd| Prestação do mouse 10/12
 2011-09-23	 -39,90	presente, livro| Livro "Horóscopo dos Duendes"
