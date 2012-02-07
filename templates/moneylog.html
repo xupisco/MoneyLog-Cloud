@@ -698,24 +698,30 @@ a.button:active {
 * needs, here is the place to customize this script.
 *
 *********************************************************************/
-// Program interface
+
 var lang = 'pt';                  // pt:Portuguese, en:English, ca:Catalan, es:Spanish (Argentina)
-var initLastMonths = 3;           // Initial value for last months combo
-var checkDateFrom = true;         // Date filter From: checkbox inits checked?
-var checkDateUntil = true;        // Date filter To: checkbox inits checked?
+var reportType = 'd';             // Initial report type: d m y (daily, monthly, yearly)
+var initFullScreen = false;       // Start app in Full Screen mode?
 var checkMonthPartials = true;    // Monthly checkbox inits checked?
-var checkRegex = false;           // Search regex checkbox inits checked?
-var checkNegate = false;          // Search negate checkbox inits checked?
-var defaultSearch = '';           // Search for this text on init
 var showRowCount = true;          // Show the row numbers at left?
 var monthlyRowCount = true;       // The row numbers are reset each month?
 var highlightWords = '';          // The words you may want to highlight (ie: 'XXX TODO')
 var highlightTags = '';           // The tags you may want to highlight (ie: 'work kids')
-var reportType = 'd';             // Initial report type: d m y (daily, monthly, yearly)
-var showLocaleDate = false;       // Show dates in the regional format? (ie: 12/31/2009)
 var showEmptyTagInSummary = true; // The EMPTY tag sum should appear in Tag Summary?
-var initFullScreen = false;       // Start app in Full Screen mode?
-var initMonthsOffsetFrom = -2;    // From: month will be N months from now
+
+// Search
+var defaultSearch = '';           // Search for this text on init
+var checkRegex = false;           // Search regex checkbox inits checked?
+var checkNegate = false;          // Search negate checkbox inits checked?
+
+// Date
+var showLocaleDate = true;        // Show dates in the regional format? (ie: 12/31/2009)
+var checkDateFrom = true;         // Date filter From: checkbox inits checked?
+var checkDateUntil = true;        // Date filter To: checkbox inits checked?
+var initMonthOffsetFrom = -2;     // From: month will be N months from now
+var initMonthOffsetUntil = 0;     // To:   month will be N months from now
+var initYearOffsetFrom;           // From: year will be N years from now (default OFF)
+var initYearOffsetUntil;          // To:   year will be N years from now (default OFF)
 
 // Widgets
 var initViewWidgetOpen = true;    // Start app with the View widget opened?
@@ -747,6 +753,7 @@ var localStorageKey = 'moneylogData'; // Keyname for the localStorage database
 // Legacy options
 var useLegacyDateFilter = false;  // Restore old options: Future Data, Recent Only
 var maxLastMonths = 12;           // Number of months on the last months combo
+var initLastMonths = 3;           // Initial value for last months combo
 var defaultLastMonths = false;    // Last months combo inits checked?
 var defaultFuture = false;        // Show future checkbox inits checked?
 
@@ -1404,7 +1411,7 @@ function getYearRange(date1, date2) {
 	y2 = date2.toDate().getFullYear();
 
 	for (y=y1; y <= y2; y++) {  // from year1 to year2, inclusive
-		results.push(y);
+		results.push(y.toString());
 	}
 	return results;
 }
@@ -2157,12 +2164,9 @@ function parseData() {
 		dataFirstDate = dataLastDate = undefined;
 	}
 
-	// Update the date range combo
-	if (reportType === 'y') {
-		populateYearRangeCombo();
-	} else {
-		populateMonthRangeCombo();
-	}
+	// Update the date range combos
+	populateDateRangeCombos('m');
+	populateDateRangeCombos('y');
 }
 
 function filterData() {
@@ -2940,39 +2944,24 @@ function populateLastMonthsCombo() {
 	el.selectedIndex = (initLastMonths > 0) ? initLastMonths - 1 : 0;
 }
 
-function populateYearRangeCombo() {
-	var el1, el2, range, i, index1, index2;
+function populateDateRangeCombos(comboType) {  // comboType: m, y
+	var el1, el2, i, my, range, fmt, offset1, offset2, index1, index2;
 
-	el1 = document.getElementById('opt-date-1-year-combo');
-	el2 = document.getElementById('opt-date-2-year-combo');
-	range = getYearRange(dataFirstDate, dataLastDate);
-
-	// Save currently selected items, or apply defaults
-	index1 = (el1.selectedIndex !== -1) ? el1.selectedIndex : 0;
-	index2 = (el2.selectedIndex !== -1) ? el2.selectedIndex : range.length - 1;
-
-	// First, make sure the combo is empty
-	el1.options.length = 0;
-	el2.options.length = 0;
-
-	// Both combos will have the same years
-	for (i = 0; i < range.length; i++) {
-		el1.options[i] = new Option(range[i]);
-		el2.options[i] = new Option(range[i]);
+	if (comboType === 'y') {
+		el1 = document.getElementById('opt-date-1-year-combo');
+		el2 = document.getElementById('opt-date-2-year-combo');
+		offset1 = initYearOffsetFrom;
+		offset2 = initYearOffsetUntil;
+		fmt = 'Y';
+		range = getYearRange(dataFirstDate, dataLastDate);
+	} else {
+		el1 = document.getElementById('opt-date-1-month-combo');
+		el2 = document.getElementById('opt-date-2-month-combo');
+		offset1 = initMonthOffsetFrom;
+		offset2 = initMonthOffsetUntil;
+		fmt = 'Y-m';
+		range = getMonthRange(dataFirstDate, dataLastDate);
 	}
-
-	// Set selected items
-	el1.selectedIndex = index1;
-	el2.selectedIndex = index2;
-}
-
-function populateMonthRangeCombo() {
-	var el1, el2, range, i, y, m, thisMonth, firstMonth, index1, index2;
-
-	el1 = document.getElementById('opt-date-1-month-combo');
-	el2 = document.getElementById('opt-date-2-month-combo');
-	range = getMonthRange(dataFirstDate, dataLastDate);
-	thisMonth = getCurrentDate().toDate().format('Y-m');
 
 	// Save currently selected items
 	index1 = el1.selectedIndex;
@@ -2983,24 +2972,32 @@ function populateMonthRangeCombo() {
 	if (index1 === -1) {
 
 		// Get user defaults
-		if (typeof initMonthsOffsetFrom === 'number') {
-			firstMonth = addMonths(getCurrentDate(), initMonthsOffsetFrom);
-			firstMonth = firstMonth.toDate().format('Y-m');
-			index1 = range.indexOf(firstMonth);
+		if (typeof offset1 === 'number') {
+			offset1 = (comboType === 'y') ? offset1 * 12 : offset1;
+			index1 = range.indexOf(
+				formatDate(
+					addMonths(getCurrentDate(), offset1),  // apply offset
+					fmt));
 		}
 
-		// If unset or the month is out of range, we'll select the oldest
+		// If unset or out of range, we'll select the oldest
 		if (index1 === -1) {
 			index1 = 0;
 		}
 	}
 	if (index2 === -1) {
-		// Second combo is set to current month
-		index2 = range.indexOf(thisMonth);
 
-		// If that month is out of range, or user wants future data,
-		// we'll select the newer
-		if (index2 === -1 || defaultFuture) {
+		// Get user defaults
+		if (typeof offset2 === 'number') {
+			offset2 = (comboType === 'y') ? offset2 * 12 : offset2;
+			index2 = range.indexOf(
+				formatDate(
+					addMonths(getCurrentDate(), offset2),  // apply offset
+					fmt));
+		}
+
+		// If unset or out of range, we'll select the newer
+		if (index2 === -1) {
 			index2 = range.length - 1;
 		}
 	}
@@ -3009,13 +3006,16 @@ function populateMonthRangeCombo() {
 	el1.options.length = 0;
 	el2.options.length = 0;
 
-	// Both combos will have the same months
+	// Both combos 1 and 2 will have the same items
 	for (i = 0; i < range.length; i++) {
-		y = range[i].slice(0, 4);
-		m = range[i].slice(5, 7);
-		m = i18n.monthNames[m.replace(/^0/, '')].slice(0, 3);  // month short name
-		el1.options[i] = new Option(m + ' ' + y, range[i]);
-		el2.options[i] = new Option(m + ' ' + y, range[i]);
+		if (comboType === 'y') {
+			el1.options[i] = new Option(range[i]);
+			el2.options[i] = new Option(range[i]);			
+		} else {
+			my = (range[i] + '-01').toDate().format('b Y');  // short month name
+			el1.options[i] = new Option(my, range[i]);
+			el2.options[i] = new Option(my, range[i]);
+		}
 	}
 
 	// Set selected items
@@ -3163,15 +3163,6 @@ function changeReport(el) {
 	} else if (newType === 'd' && oldType !== 'd') {
 		sortColIndex = oldSortColIndex || 0;
 		sortColRev = oldSortColRev || false;
-	}
-
-	// From Daily/Monthly to Yearly
-	if (newType === 'y' && oldType !== 'y') {
-		populateYearRangeCombo();
-	//
-	// From Yearly to Daily/Monthly
-	} else if (oldType === 'y' && newType !== 'y') {
-		populateMonthRangeCombo();
 	}
 
 	// Always reset Rows Summary when changing reports
