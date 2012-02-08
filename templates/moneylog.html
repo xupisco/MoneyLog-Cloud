@@ -566,6 +566,14 @@ table.chart tr:hover td {
 	margin-bottom: 5px;
 }
 
+/* ---------------------------------------------- Footer */
+
+#footer-message {
+	color: #CCCCCC;
+	text-align: center;
+	margin-top: 4em;
+}
+
 /* ---------------------------------------------- Editor */
 
 /* The editor */
@@ -578,9 +586,20 @@ table.chart tr:hover td {
 	left: 0;
 	background: white;  /* content_bg */
 }
+#editor-file-name {
+	position: fixed;
+	left: 41px;
+	top: 21px;
+	line-height: 29px;  /* 50px (wrapper-top) - 21px (top) */
+	margin: 0;
+	padding: 0 11px;
+	letter-spacing: 1px;
+	color: white;  /* content_bg */
+	background-color: black;  /* _dark */
+}
 #editor-data-wrapper {  /* position:fixed so we can set textarea height:~100% */
 	position: fixed;
-	top: 30px;
+	top: 50px;  /* space for file name */
 	right: 30px;
 	bottom: 70px;  /* space for the buttons */
 	left: 30px;
@@ -634,6 +653,7 @@ table.chart tr:hover td {
 /* Dark background for active/special buttons */
 #fullscreen,
 #report th:hover,
+#editor-file-name,
 .button.active,
 a.button:active {
 	background-color: #2B97E9;
@@ -703,6 +723,7 @@ var lang = 'pt';                  // pt:Portuguese, en:English, ca:Catalan, es:S
 var reportType = 'd';             // Initial report type: d m y (daily, monthly, yearly)
 var initFullScreen = false;       // Start app in Full Screen mode?
 var checkMonthPartials = true;    // Monthly checkbox inits checked?
+var checkTagNegate = false;       // Ignore tags checkbox inits checked?
 var showRowCount = true;          // Show the row numbers at left?
 var monthlyRowCount = true;       // The row numbers are reset each month?
 var highlightWords = '';          // The words you may want to highlight (ie: 'XXX TODO')
@@ -749,6 +770,9 @@ var dataFilesDefault = '';        // Default selected file at init when using mu
 // MoneyLog Browser config
 var localStorageKey = 'moneylogData'; // Keyname for the localStorage database
 
+// Ignore old or future data - Use with care!
+var ignoreDataOlderThan = '';     // Ignore entries older than this date (ie: 2010-01-01)
+var ignoreDataNewerThan = '';     // Ignore entries newer than this date (ie: 2020-12-31)
 
 // Legacy options
 var useLegacyDateFilter = false;  // Restore old options: Future Data, Recent Only
@@ -796,8 +820,8 @@ var i18nDatabase = {
 	en: {
 		centsSeparator: '.',
 		thousandSeparator: ',',
-		dateFormat: 'm/d/y',
-		dateFormatMonth: 'm/Y',
+		dateFormat: 'b d, Y',
+		dateFormatMonth: 'B Y',
 		dateFormatYear: 'Y',
 		monthNames: ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		appUrl: 'http://aurelio.net/soft/moneylog/',
@@ -883,8 +907,8 @@ var i18nDatabase = {
 	pt: {
 		centsSeparator: ',',
 		thousandSeparator: '.',
-		dateFormat: 'd/m/Y',
-		dateFormatMonth: 'm/Y',
+		dateFormat: 'd b Y',
+		dateFormatMonth: 'B Y',
 		dateFormatYear: 'Y',
 		monthNames: ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
 		appUrl: 'http://aurelio.net/moneylog/beta.html',
@@ -1104,6 +1128,8 @@ var i18nDatabase = {
 var appVersion = '5b';
 var appName = 'MoneyLog';
 var appFlavor = '';
+var dropboxAppFolder = '/Apps/MoneyLog Cloud';
+var dropboxTxtFolder = '/txt';
 var sortColIndex = 0;
 var sortColRev = false;
 var oldSortColIndex;
@@ -1147,12 +1173,12 @@ if (!Number.prototype.toFixed) { // IE5...
 // http://ejohn.org/blog/fast-javascript-maxmin/
 if (!Array.prototype.max) {
 	Array.prototype.max = function () {
-	    return Math.max.apply(null, this);
+		return Math.max.apply(null, this);
 	};
 }
 if (!Array.prototype.min) {
 	Array.prototype.min = function () {
-	    return Math.min.apply(null, this);
+		return Math.min.apply(null, this);
 	};
 }
 // http://snippets.dzone.com/posts/show/769
@@ -1260,11 +1286,11 @@ RegExp.escape = function (str) {
 Date.prototype.getYearML = function () {  // Returns as string
 	return this.getFullYear().toString();
 }
-Date.prototype.getMonthML = function () {  // Returns as string and zero padded 
+Date.prototype.getMonthML = function () {  // Returns as string and zero padded
 	var m = this.getMonth() + 1;  // zero based
 	return (m < 10) ? '0' + m : m.toString();
 }
-Date.prototype.getDateML = function () {  // Returns as string and zero padded 
+Date.prototype.getDateML = function () {  // Returns as string and zero padded
 	var d = this.getDate();
 	return (d < 10) ? '0' + d : d.toString();
 }
@@ -1799,6 +1825,7 @@ function getOverviewTotalsRow(label, n1, n2, n3) {
 /////////////////////////////////////////////////////////////////////
 
 function editorOn() {
+	var filepath;
 
 	// Load the current data to the editor
 	// Note: already loaded when localStorage
@@ -1808,6 +1835,16 @@ function editorOn() {
 
 	// Hide content to avoid scroll bars
 	document.getElementById('content').style.display = 'none';
+
+	// Set file name
+	if (appMode === 'localStorage') {
+		filepath = 'Browser localStorage: ' + localStorageKey;
+	} else if (appMode === 'dropbox') {
+		filepath = 'Dropbox: ' + dropboxAppFolder + dropboxTxtFolder + '/' + getSelectedFile();
+	} else {
+		filepath = getSelectedFile();
+	}
+	document.getElementById('editor-file-name').innerHTML = filepath;
 
 	// Show editor
 	document.getElementById('editor').style.display = 'block';
@@ -2145,6 +2182,19 @@ function parseData() {
 			rowDescription = rowText || '&nbsp;';
 		}
 
+		/////////////////////////////////////////////////////////////
+
+		// Ignore old or future data?
+		// Note: This code *must* be here at the end of the loop,
+		//       specially after the recurring data code. If not,
+		//       recurring data could be lost.
+		if (ignoreDataOlderThan && rowDate < ignoreDataOlderThan) {
+			continue;
+		}
+		if (ignoreDataNewerThan && rowDate > ignoreDataNewerThan) {
+			continue;
+		}
+
 		// Save the validated data
 		parsedData.push([rowDate, rowAmount, rowTags, rowDescription]);
 	}
@@ -2160,13 +2210,13 @@ function parseData() {
 	if (parsedData.length > 0) {
 		dataFirstDate = parsedData[0][0];
 		dataLastDate = parsedData[parsedData.length-1][0];
+
+		// Update the date range combos
+		populateDateRangeCombos('m');
+		populateDateRangeCombos('y');
 	} else {
 		dataFirstDate = dataLastDate = undefined;
 	}
-
-	// Update the date range combos
-	populateDateRangeCombos('m');
-	populateDateRangeCombos('y');
 }
 
 function filterData() {
@@ -3010,7 +3060,7 @@ function populateDateRangeCombos(comboType) {  // comboType: m, y
 	for (i = 0; i < range.length; i++) {
 		if (comboType === 'y') {
 			el1.options[i] = new Option(range[i]);
-			el2.options[i] = new Option(range[i]);			
+			el2.options[i] = new Option(range[i]);
 		} else {
 			my = (range[i] + '-01').toDate().format('b Y');  // short month name
 			el1.options[i] = new Option(my, range[i]);
@@ -3049,7 +3099,7 @@ function updateToolbar() {
 
 	if (!showViewWidget) { add_exceptions.push('view-options-box'); }
 	if (!showTagCloud)   { add_exceptions.push('tag-cloud-box'   ); }
-	if (!showTagSummary) { add_exceptions.push('tag-summary-box' ); }	
+	if (!showTagSummary) { add_exceptions.push('tag-summary-box' ); }
 
 	// Daily
 	if (reportType === 'd') {
@@ -3518,6 +3568,14 @@ function init() {
 	// Mark current report as active (CSS)
 	addClass(document.getElementById(reportType), 'active');
 
+	// Notice the user that we're ignoring some data
+	if (ignoreDataOlderThan) {
+		document.getElementById('footer-message').innerHTML += 'ignoreDataOlderThan = ' + ignoreDataOlderThan + '<br>';
+	}
+	if (ignoreDataNewerThan) {
+		document.getElementById('footer-message').innerHTML += 'ignoreDataNewerThan = ' + ignoreDataNewerThan + '<br>';
+	}
+
 	// localStorage browser support check
 	if (appMode === 'localStorage' && !window.localStorage) {
 		document.getElementById('editor-open').style.display = 'none'; // hide button
@@ -3581,6 +3639,7 @@ function init() {
 	if (checkDateFrom)      { document.getElementById('opt-date-1-check' ).checked = true; }
 	if (checkDateUntil)     { document.getElementById('opt-date-2-check' ).checked = true; }
 	if (checkMonthPartials) { document.getElementById('opt-monthly-check').checked = true; }
+	if (checkTagNegate)     { document.getElementById('tag-cloud-opt-negate-check').checked = true; }
 	document.getElementById('filter').value = defaultSearch;
 
 	// Apply user defaults - Legacy
@@ -3706,7 +3765,7 @@ window.onload = init;
 				<select
 					id="source-file" size="1"></select>
 				<a
-				 	id="editor-open" class="button" href="#"></a><a
+					id="editor-open" class="button" href="#"></a><a
 					id="source-reload" class="button" href="#"></a>
 			</div>
 
@@ -3736,7 +3795,7 @@ window.onload = init;
 						<input
 							id="opt-negate-check" class="trigger" type="checkbox">
 						<label
-						 	id="opt-negate-label" for="opt-negate-check"></label>
+							id="opt-negate-label" for="opt-negate-check"></label>
 					</div>
 				</div>
 			</div>
@@ -3889,11 +3948,15 @@ window.onload = init;
 		<div id="rows-summary-content"></div>
 	</div>
 
+	<div id="footer-message">
+	</div>
+
 </div><!-- #content -->
 
 
 <!-- Editor -->
 <div id="editor">
+	<div id="editor-file-name"></div>
 	<div id="editor-data-wrapper">
 		<textarea rows="25" id="editor-data"></textarea>
 	</div>
