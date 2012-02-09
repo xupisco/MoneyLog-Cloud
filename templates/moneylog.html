@@ -719,6 +719,7 @@ a.button:active {
 *
 *********************************************************************/
 
+var myPassword = '';              // Set up an access password
 var lang = 'pt';                  // pt:Portuguese, en:English, ca:Catalan, es:Spanish (Argentina)
 var reportType = 'd';             // Initial report type: d m y (daily, monthly, yearly)
 var initFullScreen = false;       // Start app in Full Screen mode?
@@ -728,6 +729,7 @@ var showRowCount = true;          // Show the row numbers at left?
 var monthlyRowCount = true;       // The row numbers are reset each month?
 var highlightWords = '';          // The words you may want to highlight (ie: 'XXX TODO')
 var highlightTags = '';           // The tags you may want to highlight (ie: 'work kids')
+var ignoreTags = '';              // Ignore all entries that have one of these tags
 var showEmptyTagInSummary = true; // The EMPTY tag sum should appear in Tag Summary?
 var checkTagSummarySort = false;  // Sort by value checkbox inits checked?
 
@@ -879,6 +881,8 @@ var i18nDatabase = {
 		errorRequirements: 'Minimum requirements:',
 		msgLoading: 'Loading %s...',
 		msgSaving: 'Saving...',
+		msgTypePassword: 'Type your password:',
+		msgWrongPassword: 'Wrong password.',
 		helpFullScreen: 'Turns ON/OFF the Full Screen mode: only the report is shown, with no toolbar.',
 		helpReports: 'Daily, monthly and yearly reports, with charts, balance and totals.',
 		helpLastMonths: 'See only the latest data, ignoring oldies.',
@@ -967,6 +971,8 @@ var i18nDatabase = {
 		errorRequirements: 'Os requisitos mínimos são:',
 		msgLoading: 'Carregando %s...',
 		msgSaving: 'Salvando...',
+		msgTypePassword: 'Digite a sua senha:',
+		msgWrongPassword: 'Senha errada.',
 		helpFullScreen: 'Liga/desliga o modo tela cheia: aparece somente o extrato, sem a barra de ferramentas.',
 		helpReports: 'Extratos diário, mensal e anual, com gráficos, somatório, médias, mínimo, máximo e acumulado.',
 		helpLastMonths: 'Veja somente os dados mais recentes, ignorando os antigos.',
@@ -1225,6 +1231,17 @@ Array.prototype.hasItem = function (item) {
 	var i, leni;
 	for (i = 0, leni = this.length; i < leni; i++) {
 		if (item == this[i]) {
+			return true;
+		}
+	}
+	return false;
+};
+
+Array.prototype.hasArrayItem = function (arr) {
+	var i, leni, items;
+	items = arr.slice();  // copy to local
+	for (i = 0, leni = items.length; i < leni; i++) {
+		if (this.hasItem(items[i])) {
 			return true;
 		}
 	}
@@ -2217,6 +2234,11 @@ function parseData() {
 			continue;
 		}
 
+		// Ignore tags?
+		if (ignoreTags && rowTags.hasArrayItem(ignoreTags)) {
+			continue;
+		}
+
 		// Save the validated data
 		parsedData.push([rowDate, rowAmount, rowTags, rowDescription]);
 	}
@@ -2364,31 +2386,38 @@ function filterData() {
 	return filteredData;
 }
 
-function applyTags(theData) {
-	// This function composes the full tag menu and
-	// also filters theData if some tag is selected
-
-	var i, leni, j, lenj, rowTags, thisTag, tagMatched, tagName, tagId, checked, tagCount, tagElement, tagsMenu, selectedTags, filteredData, tagMustGroup, tagNegate;
-
-	tagsMenu = [];
-	selectedTags = [];
-	filteredData = [];
-	theData = theData.slice();  // array copy
-
-	// Get multiple selection mode (true=AND, false=OR)
-	tagMustGroup = document.getElementById('tag-cloud-opt-group-check').checked;
-	tagNegate = document.getElementById('tag-cloud-opt-negate-check').checked;
-
+function getSelectedTags() {
 	// Get currently selected tags (from interface)
+	var i, tagCount, tagElement, results = [];
 	try {
 		tagCount = parseInt(document.getElementById('tag-cloud-count').value, 10);
 		for (i = 1; i <= tagCount; i++) {
 			tagElement = document.getElementById('tag_' + i);
 			if (tagElement && tagElement.checked) {
-				selectedTags.push(tagElement.value);
+				results.push(tagElement.value);
 			}
 		}
 	} catch (e) { }
+	return results;
+}
+
+function applyTags(theData) {
+	// This function composes the full tag cloud and
+	// also filters theData if some tag is selected
+
+	var i, leni, j, lenj, rowTags, thisTag, tagMatched, tagName, tagId, checked, tagCount, tagElement, tagCloud, selectedTags, filteredData, tagMustGroup, tagNegate;
+
+	tagCloud = [];
+	selectedTags = [];
+	filteredData = [];
+	theData = theData.slice();  // array copy
+
+	// Get multiple selection mode (true=AND, false=OR) and negate (NOT)
+	tagMustGroup = document.getElementById('tag-cloud-opt-group-check').checked;
+	tagNegate = document.getElementById('tag-cloud-opt-negate-check').checked;
+
+	// Get currently selected tags (from interface)
+	selectedTags = getSelectedTags();
 
 	// Filter data to match current tags
 	for (i = 0, leni = theData.length; i < leni; i++) {
@@ -2398,8 +2427,8 @@ function applyTags(theData) {
 
 		// Populate tags array with UNIQUE row tags
 		for (j = 0, lenj = rowTags.length; j < lenj; j++) {
-			if (!tagsMenu.hasItem(rowTags[j])) {
-				tagsMenu.push(rowTags[j]);
+			if (!tagCloud.hasItem(rowTags[j])) {
+				tagCloud.push(rowTags[j]);
 			}
 		}
 
@@ -2422,46 +2451,46 @@ function applyTags(theData) {
 		}
 	}
 
-	// Make sure the menu has all the selected tags
+	// Make sure the tag cloud has all the selected tags
 	for (i = 0, leni = selectedTags.length; i < leni; i++) {
-		if (!tagsMenu.hasItem(selectedTags[i]) && selectedTags[i] !== i18n.labelTagEmpty) {
-			tagsMenu.push(selectedTags[i]);
+		if (!tagCloud.hasItem(selectedTags[i]) && selectedTags[i] !== i18n.labelTagEmpty) {
+			tagCloud.push(selectedTags[i]);
 		}
 	}
 
-	// Compose the tags menu HTML code (if we have at least one tag)
-	if (tagsMenu.length > 0) {
+	// Compose the tag cloud HTML code (if we have at least one tag)
+	if (tagCloud.length > 0) {
 
 		// Sorted tags are nice
-		tagsMenu.sort(sortIgnoreCase);
+		tagCloud.sort(sortIgnoreCase);
 
 		// Add a last empty item to match the rows with no tag
-		tagsMenu.push(i18n.labelTagEmpty);
+		tagCloud.push(i18n.labelTagEmpty);
 
 		// Save the total tag count
-		document.getElementById('tag-cloud-count').value = tagsMenu.length;
+		document.getElementById('tag-cloud-count').value = tagCloud.length;
 
 		// Add one checkbox for each tag
-		for (i = 0, leni = tagsMenu.length; i < leni; i++) {
-			tagName = tagsMenu[i];
+		for (i = 0, leni = tagCloud.length; i < leni; i++) {
+			tagName = tagCloud[i];
 			tagId = 'tag_' + (i + 1);
 
 			// Selected tags remain selected
 			checked = selectedTags.hasItem(tagName) ? 'checked="checked"' : '';
 
 			// The ugly code (but better than DOM-walking nightmares)
-			tagsMenu[i] = '<input type="checkbox" class="trigger" onClick="showReport()" ' +
+			tagCloud[i] = '<input type="checkbox" class="trigger" onClick="showReport()" ' +
 				checked + ' id="' + tagId + '" value="' + tagName + '">' +
 				'<span class="trigger" onClick="document.getElementById(\'' + tagId + '\').click()">' + tagName + '<\/span>';
 			// Note: Tried to use <label> instead <span>, but IE8 failed at CSS input:checked+label
 		}
 
 		// All tags in one single line
-		tagsMenu = tagsMenu.join('\n');
+		tagCloud = tagCloud.join('\n');
 	}
 
-	// Save the tags menu (or make it empty)
-	document.getElementById('tag-cloud-tags').innerHTML = tagsMenu;
+	// Save the tag cloud (or make it empty)
+	document.getElementById('tag-cloud-tags').innerHTML = tagCloud;
 
 	// The options box is only shown if we have at least 1 selected tag
 	document.getElementById('tag-cloud-options').style.display = (selectedTags.length > 0) ? 'block' : 'none';
@@ -3499,6 +3528,16 @@ function init() {
 	// Check app mode
 	initAppMode();
 
+	// Password protected?
+	if (myPassword) {
+		// Prompt user and check
+		if (myPassword != prompt(appName + ' ' + appFlavor + ' — ' + i18n.msgTypePassword)) {
+			// Destroy full interface and show error
+			document.getElementById('container').innerHTML = '<h2 style="padding:30px;">' + i18n.msgWrongPassword + '</h2>';
+			return;  // abort
+		}
+	}
+
 	// UI surgery for each mode
 	switch(appMode) {
 		case 'one':
@@ -3547,9 +3586,13 @@ function init() {
 		);
 	}
 
-	// Split highlight string into words
+	// Some configs may be set as strings or arrays.
+	// If user choose string, let's convert it to an array now.
 	if (typeof highlightTags === 'string') {
 		highlightTags = highlightTags.strip().split(/\s+/);
+	}
+	if (typeof ignoreTags === 'string') {
+		ignoreTags = ignoreTags.strip().split(/\s+/);
 	}
 
 	// Set interface labels
