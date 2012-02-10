@@ -352,6 +352,7 @@ a.button.active {
 #tag-cloud-tags a {
 	padding: 2px 2px;
 	color: #333;  /* text_color */
+	white-space: nowrap;
 }
 #tag-cloud-tags a.selected {
 	background: silver;  /* _light */
@@ -725,7 +726,7 @@ var highlightWords = '';          // The words you may want to highlight (ie: 'X
 var highlightTags = '';           // The tags you may want to highlight (ie: 'work kids')
 var ignoreTags = '';              // Ignore all entries that have one of these tags
 var initSelectedTags = '';        // Start app with these tags already selected
-var showEmptyTagInSummary = true; // The EMPTY tag sum should appear in Tag Summary?
+var showEmptyTagInSummary = true; // The (no tag) sum should appear in Tag Summary?
 var checkTagSummarySort = false;  // Sort by value checkbox inits checked?
 
 // Search
@@ -857,7 +858,7 @@ var i18nDatabase = {
 		labelMaximum: 'Max',
 		labelCount: 'Count',
 		labelMonths: ['month', 'months'],
-		labelTagEmpty: 'EMPTY',
+		labelTagEmpty: '(no tag)',
 		labelTagNegate: 'Ignore selected tags',
 		labelTagGroup: 'Group selected tags',
 		labelTagReset: 'Reset selection',
@@ -948,7 +949,7 @@ var i18nDatabase = {
 		labelMaximum: 'Máximo',
 		labelCount: 'Linhas',
 		labelMonths: ['mês', 'meses'],
-		labelTagEmpty: 'VAZIO',
+		labelTagEmpty: '(sem tag)',
 		labelTagNegate: 'Ignorar',
 		labelTagGroup: 'Combinar',
 		labelTagReset: 'Desmarcar todas',
@@ -1245,6 +1246,21 @@ Array.prototype.hasArrayItem = function (arr) {
 		}
 	}
 	return false;
+};
+
+Array.prototype.hasAllArrayItems = function (arr) {
+	var i, leni, items;
+	items = arr.clone();
+	leni = items.length;
+	if (leni === 0) {  // empty arr
+		return false;
+	}
+	for (i = 0; i < leni; i++) {
+		if (!this.hasItem(items[i])) {
+			return false;
+		}
+	}
+	return true;
 };
 
 // http://www.shamasis.net/2009/09/fast-algorithm-to-find-unique-items-in-javascript-array/
@@ -2285,7 +2301,7 @@ function parseData() {
 		dataFirstDate = dataLastDate = undefined;
 	}
 
-	// Compose the tag cloud: sorted, append EMPTY item
+	// Compose the tag cloud: sorted, append (no tag) item
 	tagNames = tagNames.sort(sortIgnoreCase).unique();
 	tagNames.push(i18n.labelTagEmpty);
 	createTagCloud(tagNames);
@@ -2419,19 +2435,6 @@ function filterData() {
 	return filteredData;
 }
 
-function getSelectedTags() {
-	// Get currently selected tags (from interface)
-	var i, leni, el, els, results = [];
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-		if (hasClass(el, 'selected')) {
-			results.push(el.innerHTML);
-		}
-	}
-	return results;
-}
-
 function applyTags(theData) {
 	// This function updates the tag cloud and
 	// also filters theData if some tag is selected
@@ -2519,18 +2522,22 @@ function applyTags(theData) {
 function createTagCloud(names) {
 	// Create all the <a> elements for the Tag Cloud
 	var i, leni, results = [];
+
 	for (i = 0, leni = names.length; i < leni; i++) {
 		results.push('<a class="trigger unselected" href="#" onClick="return tagClicked(this);">' + names[i] + '</a>')
 	}
+
 	document.getElementById('tag-cloud-tags').innerHTML = results.join('\n');
 }
 
 function updateTagCloud(visibleTags) {
 	// Show/hide the Tag Cloud elements, and set classes
 	var i, leni, el, els;
+
 	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
 	for (i = 0, leni = els.length; i < leni; i++) {
 		el = els[i];
+
 		if (visibleTags.hasItem(el.innerHTML)) {
 			if (el.style.display === 'none') {
 				// unhide element
@@ -2550,9 +2557,11 @@ function updateTagCloud(visibleTags) {
 function selectTheseTags(tags) {
 	// Force select some tags, used at start up or reload
 	var i, leni, el, els;
+
 	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
 	for (i = 0, leni = els.length; i < leni; i++) {
 		el = els[i];
+
 		if (tags.hasItem(el.innerHTML)) {
 			// select
 			removeClass(el, 'unselected');
@@ -2561,6 +2570,38 @@ function selectTheseTags(tags) {
 			el.style.display = '';
 		}
 	}
+}
+
+function resetTagCloud() {
+	var i, leni, els, el;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		removeClass(el, 'selected');
+		addClass(el, 'unselected');
+	}
+
+	// The calling checkbox acts like a button, with temporary ON state
+	this.checked = false;
+
+	showReport();
+}
+
+function getSelectedTags() {
+	// Get currently selected tags (from interface)
+	var i, leni, el, els, results = [];
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (hasClass(el, 'selected')) {
+			results.push(el.innerHTML);
+		}
+	}
+	return results;
 }
 
 function tagClicked(el) {
@@ -3513,21 +3554,6 @@ function valueFilterChanged() {
 	showReport();
 }
 
-function resetTagCloud() {
-	var i, leni, els, el;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-		removeClass(el, 'selected');
-		addClass(el, 'unselected');
-	}
-
-	// The calling checkbox acts like a button, with temporary ON state
-	this.checked = false;
-
-	showReport();
-}
 function showHideEditButton() {
 	var el;
 	if (appMode === 'dropbox') {
@@ -3659,6 +3685,9 @@ function init() {
 	}
 	if (typeof ignoreTags === 'string') {
 		ignoreTags = (ignoreTags) ? ignoreTags.strip().split(/\s+/) : [];
+	}
+	if (typeof initSelectedTags === 'string') {
+		initSelectedTags = (initSelectedTags) ? initSelectedTags.strip().split(/\s+/) : [];
 	}
 
 	// Set interface labels
