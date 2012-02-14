@@ -33,16 +33,15 @@ License/Licença:
 <meta name="keywords" content="Personal Finance, KISS, Simple, HTML, CSS, JavaScript">
 <meta name="description" content="MoneyLog Experience - Personal finances management made real simple. In one single editable text file you have all your transactions and the engine to query it. Alter with any text editor and view the reports on the browser. Made with HTML, CSS and JavaScript.">
 <link rel="shortcut icon" href="http://aurelio.net/moneylog/favicon.ico">
-<link rel="apple-touch-icon" href="images/ios_icon.png" />
 <link rel="apple-touch-startup-image" href="images/ios_splash.png" />
 
-<!-- iPhone settings -->
-<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+<!-- iOS icon -->
+<link rel="apple-touch-icon" href="http://aurelio.net/moneylog/img/ios-icon.png">
 
-<!--
-All the page formatting is here.
-You may change the styles if you know what you're doing.
--->
+<!-- Use fixed scale for smartphones (no zoom) -->
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1, user-scalable=0" />
+
+<!-- Styles -->
 <style type="text/css">
 /*
 	MoneyLog default CSS
@@ -149,6 +148,9 @@ tr.future:hover td {  /* explicit TD to exclude TH */
 	font-size: 30px;
 	line-height: 30px;
 	padding: 5px 0 0 20px;
+}
+#website:hover {
+	text-decoration: underline;
 }
 #app-flavor {
 	font-size: 15px;
@@ -636,6 +638,75 @@ table.chart tr:hover td {
 	display: none !important;
 }
 
+</style>
+<style type="text/css">
+/*
+	MoneyLog Cloud theme
+	by Aurelio Jargas
+	http://aurelio.net/moneylog/
+
+	Light blue: #D5EAFB
+	 Dark blue: #2B97E9
+*/
+
+
+#app-flavor {
+	color: #2B97E9;
+}
+
+/* Dark background for active/special buttons */
+#fullscreen,
+#report th:hover,
+#editor-file-name,
+.button.active,
+a.button:active {
+	background-color: #2B97E9;
+}
+
+/* Dark background for selected rows */
+#report tr.selected,
+#report tr.selected:hover td,
+#report tr.selected .neg {
+	background-color: #2B97E9;
+}
+
+/* Dark color for borders */
+#editor-data-wrapper,
+#rows-summary,
+.button.active,
+a.button:active {
+	border-color: #2B97E9;
+}
+
+/* Light background for selections */
+.hl,
+#tag-cloud-tags a.selected {
+	background-color: #D5EAFB;
+}
+
+/* Light background for totals */
+#report tr.total,
+#rows-summary {
+	background-color: #D5EAFB;
+}
+
+/* Light color for the report borders */
+#report td {
+	border-color: #D5EAFB;
+}
+
+
+/* Special: interface dark blue for the positive chart bar */
+.posbar {
+	background-color: #2B97E9;
+}
+</style>
+<style type="text/css">
+/*
+	MoneyLog mobile theme
+	by Aurelio Jargas
+	http://aurelio.net/moneylog/
+*/
 
 /* ------------------------------------------- Smarphones: width < 480px */
 
@@ -748,9 +819,6 @@ table.chart tr:hover td {
 	#report {
 		margin-top: 2em;
 	}
-	# report td {
-		border-width: 1px;  /* show vertical border */
-	}
 	td.date,
 	td.tags {
 		text-align: center;
@@ -759,72 +827,69 @@ table.chart tr:hover td {
 } /* close @media */
  
 </style>
-<style type="text/css">
+<style type="text/css" media="print">
 /*
-	MoneyLog Cloud theme
+	MoneyLog print theme
 	by Aurelio Jargas
 	http://aurelio.net/moneylog/
-
-	Light blue: #D5EAFB
-	 Dark blue: #2B97E9
 */
 
-
-#app-flavor {
-	color: #2B97E9;
+/* No toolbar */
+#toolbar {
+	display: none;
 }
 
-/* Dark background for active/special buttons */
-#fullscreen,
-#report th:hover,
-#editor-file-name,
-.button.active,
-a.button:active {
-	background-color: #2B97E9;
+/* No margin/padding */
+#content {
+	margin: 0;
+	padding: 0;
 }
 
-/* Dark background for selected rows */
-#report tr.selected,
-#report tr.selected:hover td,
-#report tr.selected .neg {
-	background-color: #2B97E9;
+/* Remove row backgrounds */
+tr.future,
+tr.total {
+	background-color: white !important;
 }
 
-/* Dark color for borders */
-#editor-data-wrapper,
-#rows-summary,
-.button.active,
-a.button:active {
-	border-color: #2B97E9;
+/* Remove minibars from monthly/yearly reports */
+th.percent,
+td.minibar {
+	display: none;
 }
 
-/* Light background for selections */
-.hl,
-#tag-cloud-tags a.selected {
-	background-color: #D5EAFB;
-}
-
-/* Light background for totals */
-#report tr.total,
-#rows-summary {
-	background-color: #D5EAFB;
-}
-
-/* Light color for the report borders */
-#report td {
-	border-color: #D5EAFB;
-}
-
-
-/* Special: interface dark blue for the positive chart bar */
+/* Remove chart bars background and use outlines instead */
 .posbar {
-	background-color: #2B97E9;
+	background-color: white;
+	border: 1px solid silver;  /* solid */
+}
+.negbar {
+	background-color: white;
+	border: 1px dashed silver;  /* dashed */
+}
+
+/* Make the SELECT button appear as plain text */
+#chart-selector {
+	-webkit-appearance: none;
+	background: white;
+	border-width: 0;
+}
+
+/* Remove (or lighten, or force B&W) colors */
+#report td {
+	border-color: #DDDDDD;
+}
+#report tr.selected,
+#report tr.selected .neg {
+	background-color: #EEEEEE;
+	color: black ;
+}
+#rows-summary {
+	border: 1px solid silver;
+	background-color: white;
 }
 </style>
-<!--[if lte IE 7]>
-    <style type="text/css">#tag-cloud-content input { display:inline; }</style>
-<![endif]-->
 
+<!-- Scripts -->
 <script type="text/javascript">
 /*global window: false, localStorage: false */
 /*jslint devel: true, regexp: true, browser: true, undef: true, continue: true, sloppy: true, eqeq: true, white: true, forin: true, plusplus: true, maxerr: 500 */
@@ -1035,7 +1100,8 @@ var i18nDatabase = {
 		helpEdit: 'Open the editor, for you to add/remove/edit your data.',
 		helpClose: 'Close the editor (without saving!)',
 		helpCancel: 'Discard changes and close the editor.',
-		helpSave: 'Save your data.'
+		helpSave: 'Save your data.',
+		helpWebsite: 'Go to the MoneyLog website.'
 
 		// helpTip: 'Tip: On the reports, click the column header to sort the results. Click again for reverse sorting.',
 		// helpInstall: 'Instructions: Save this page, use a plain text editor to add your own transactions and open it on the browser.',
@@ -1125,7 +1191,8 @@ var i18nDatabase = {
 		helpEdit: 'Abre o editor de lançamentos, para você incluir/remover/alterar os dados do extrato.',
 		helpClose: 'Fecha o editor de lançamentos (apenas fecha, não salva o texto!).',
 		helpCancel: 'Descarta as alterações e fecha o editor sem salvar nada.',
-		helpSave: 'Salva os lançamentos que você alterou.'
+		helpSave: 'Salva os lançamentos que você alterou.',
+		helpWebsite: 'Visite o website do MoneyLog.'
 
 		// helpTip: 'Dica:	Nos relatórios, clique no título da coluna para mudar a ordenação. Clicando novamente a ordem é invertida.',
 		// helpInstall: 'Instruções: Salve esta página, use um editor de textos para colocar seus lançamentos e abra no navegador. Para instruções detalhadas e várias outras dicas de uso, leia o FAQ: http://aurelio.net/moneylog/faq/'
@@ -3948,8 +4015,7 @@ function init() {
 
 	// Set interface tooltips
 	document.getElementById('fullscreen'               ).title = i18n.helpFullScreen;
-	document.getElementById('sitelink'                 ).href  = i18n.appUrl;
-	document.getElementById('sitelink'                 ).title = i18n.appDescription;
+	document.getElementById('website'                  ).title = i18n.helpWebsite;
 	document.getElementById('report-nav'               ).title = i18n.helpReports;
 	document.getElementById('opt-last-months-label'    ).title = i18n.helpLastMonths;
 	document.getElementById('opt-value-filter-label'   ).title = i18n.helpValueFilter;
@@ -4157,7 +4223,7 @@ window.onload = init;
 
 	<div id="logo-wrapper">
 		<div id="logo">
-			<div id="app-name"><a id="sitelink" href="#">MoneyLog</a></div>
+			<div id="app-name"><a id="website" href="http://aurelio.net/moneylog/">MoneyLog</a></div>
 			<div id="app-flavor"></div>
 		</div>
 
