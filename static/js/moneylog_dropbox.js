@@ -1,4 +1,4 @@
-var commit_id = '204d883323'
+var commit_id = 'f77d6c4cb4'
 
 function initDropbox(reloading) {
     reloading = reloading || false

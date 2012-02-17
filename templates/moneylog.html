@@ -240,7 +240,7 @@ a.button.active {
 
 /* ---------------------------------------------- [ boxes ] */
 
-.box-content {
+.widget-content {
 	background-color: white;
 	border: 1px solid #bbb;  /* element_border */
 	border-top-width: 0;
@@ -249,11 +249,11 @@ a.button.active {
 	line-height: 185%;
 }
 
-.box-content select,
-.box-content table {
+.widget-content select,
+.widget-content table {
 	width: 100%;
 }
-.box-options input {
+.widget-options input {
 	display: inline;
 	margin-right: 0.5em;
 }
@@ -1378,6 +1378,7 @@ var i18n;
 var rawData = '';
 var parsedData = [];
 var overviewData = [];
+var dailyData = [];  // daily report data (filtered, sorted) - not a cache (yet)
 var waitingToLoad = [];
 var selectedRows = [];
 var multiRawData = '';
@@ -1404,6 +1405,7 @@ if (isMobile) {
 	i18nDatabase.pt.dateFormatMonth = i18nDatabase.pt.dateFormatMonth.replace('B', 'b');
 	i18nDatabase.en.dateFormatMonth = i18nDatabase.en.dateFormatMonth.replace('B', 'b');
 }
+
 
 /////////////////////////////////////////////////////////////////////
 //                              PROTOTYPES
@@ -1461,6 +1463,10 @@ String.prototype.strip = function () {
 	return this.lstrip().rstrip();
 };
 
+String.prototype.replaceAll = function (from, to) {
+	return this.split(from).join(to);
+	// http://stackoverflow.com/a/542305
+};
 String.prototype.unacccent = function () {
 	if (!this.match(/[^a-z0-9 ]/)) { // no accented char
 		return this;
@@ -2264,6 +2270,7 @@ function insertTab(e) {
 
 function resetData() {
 	overviewData = [];
+	dailyData = [];
 	parsedData = [];
 	rawData = '';
 }
@@ -3453,6 +3460,9 @@ function showDetailed() {
 
 	}
 	document.getElementById('report').innerHTML = results;
+
+	// Save report data
+	dailyData = theData;
 }
 
 function showReport() {
@@ -3461,7 +3471,13 @@ function showReport() {
 	} else {
 		showOverview();
 	}
+
+	// Widget hook: showReportPost
+	for (i = 0; i < Widget.instances.length; i++) {
+		Widget.instances[i].showReportPost();
+	}
 }
+
 
 /////////////////////////////////////////////////////////////////////
 //                       INTERFACE UPDATE
@@ -3909,6 +3925,170 @@ function showHideEditButton() {
 
 
 /////////////////////////////////////////////////////////////////////
+//                            Widgets
+/////////////////////////////////////////////////////////////////////
+
+// Widget object, all widgets must use this type.
+// Ex.:
+//     var HelloWorld = new Widget('hello-world', 'Hello World', 'HelloWorld');
+//     HelloWorld.populate = function () { this.content.innerHTML = 'Hellooo!'; };
+//     console.log(HelloWorld);
+//
+function Widget(widgetId, widgetName, instanceName) {
+	this.id = widgetId;
+	this.widgetName = widgetName;
+	this.instanceName = instanceName;
+	this.created = false;
+
+	// Save the instance into a global holder
+	this.constructor.instances.push(this);
+	// this.instanceIndex = this.constructor.instances.length - 1;
+
+	// Holders for the widget's DOM elements
+	this.box = undefined;     // #widgetId-box
+	this.header = undefined;  // #widgetId-header
+	this.content = undefined; // #widgetId-content
+
+	// Widget Config
+	this.config = {};
+	this.config.active = true;
+	this.config.opened = true;
+	// Active and opened by default, so the user notices it
+
+	// Note: using inline onclick="" in templates to avoid 'this' scope problems
+	this.boxTemplate = [
+		'<div id="{widgetId}-box" class="widget-box">',
+		'	<a id="{widgetId}-header" class="button" href="#"',
+		'		onclick="return Widget.toggle(\'{widgetId}\')">{widgetName}</a>',
+		'	<div id="{widgetId}-content" class="widget-content" style="display:none;">',
+		'	</div>',
+		'</div>'
+	].join('\n');
+	this.checkboxTemplate = [
+		'	<div class="checkbox-option">',
+		'		<input id="{widgetId}-{optionId}" class="trigger" type="checkbox"',
+		'			onclick="{instanceName}.checkboxClicked(this)">',
+		'		<label for="{widgetId}-{optionId}">{label}</label>',
+		'	</div>'
+	].join('\n');
+}
+
+// Global holder that automatically save all instances
+Widget.instances = [];
+
+Widget.tidyInstances = function () {
+	// Remove inactive widgets from global namespace and Widget.instances array
+	var i;
+	for (i = 0; i < Widget.instances.length;) {
+		if (!Widget.instances[i].config.active) {
+			window[Widget.instances[i].instanceName] = undefined;
+			Widget.instances.splice(i, 1);
+		} else {
+			i++;
+		}
+	}
+};
+
+Widget.toggle = function (widgetId) {
+	// Show/hide Widget contents
+	// Static, not available in instances
+
+	var header, content;
+
+	header = document.getElementById(widgetId + '-header');
+	content = document.getElementById(widgetId + '-content');
+
+	if (content.style.display === 'block') {
+		content.style.display = 'none';
+		removeClass(header, 'active');
+	} else {
+		content.style.display = 'block';
+		addClass(header, 'active');
+	}
+	return false;  // cancel link action
+};
+
+Widget.prototype.toggle = function () {
+	// Show/hide Widget contents
+	//
+	// this = Widget instance when called directly: InstanceName.toggle();
+	// this = DOM element <a> when used in onclick: element.onclick = InstanceName.toggle;
+	//
+	// Do not use the second form. If you must, you can use this instead:
+	// element.onclick = (function () { return InstanceName.toggle(); });
+
+	return Widget.toggle(this.id);
+};
+
+Widget.prototype.init = function () {
+	// Called automatically at the end of MoneyLog start up. At his point,
+	// user config is applied and app UI is ready. But user data was not
+	// read/parsed yet.
+
+	// Create widget DIV if config allows
+	this.create();
+	if (!this.created) { return; }
+
+	// Populate widget contents
+	this.populate();
+
+	// Open the widget, if necessary
+	if (this.config.opened && this.config.active) {
+		this.toggle();
+	}
+};
+
+Widget.prototype.create = function () {
+	// Append a new widget-box to the #widgets area
+
+	if (!this.config.active) { return; }
+
+	document.getElementById('widgets').innerHTML += this.boxTemplate
+		.replace(/\{widgetId\}/g, this.id)
+		.replace(/\{widgetName\}/g, i18n[this.instanceName + 'HeaderLabel'] || this.widgetName);
+
+	this.box = document.getElementById(this.id + '-box');
+	this.header = document.getElementById(this.id + '-header');
+	this.content = document.getElementById(this.id + '-content');
+	this.created = (this.box && this.header && this.content) ? true : false;
+};
+
+Widget.prototype.populate = function () {
+	// Called right after create(), here you create the widget contents.
+	// You must implement this function in your widget.
+	return;
+};
+
+Widget.prototype.addCheckbox = function (id, label, checked) {
+	// Append a new checkbox to the widget-box contents
+
+	var template = this.checkboxTemplate;
+	if (checked) {
+		template = template.replace('<input', '<input checked="checked"');
+	}
+
+	this.content.innerHTML += template
+		.replace(/\{widgetId\}/g, this.id)
+		.replace(/\{optionId\}/g, id)
+		.replace(/\{label\}/g, label)
+		.replace(/\{instanceName\}/g, this.instanceName);
+
+	return document.getElementById(this.id + '-' + id);  // return the element
+};
+
+Widget.prototype.checkboxClicked = function (element) {  // Event handler
+	// Called when a checkbox made with addCheckbox() is clicked.
+	//   element = clicked checkbox
+	//   this = Widget instance
+	// You must implement this function in your widget.
+	return element;
+};
+
+// Hooks
+Widget.prototype.showReportPost = function () {};
+
+
+/////////////////////////////////////////////////////////////////////
 //                             INIT
 /////////////////////////////////////////////////////////////////////
 
@@ -3944,6 +4124,7 @@ function initAppMode() {
 }
 
 function init() {
+	var i;
 
 	// Load the i18n messages (must be the first)
 	i18n = i18nDatabase.getLanguage(lang);
@@ -4214,6 +4395,12 @@ function init() {
 		document.getElementById('tag-summary-box').style.display = 'none';
 	}
 
+	// Init all available Widgets one by one
+	Widget.tidyInstances();
+	for (i = 0; i < Widget.instances.length; i++) {
+		Widget.instances[i].init();
+	}
+
 	// User choose other default report, let's update the toolbar accordingly
 	if (reportType !== 'd') {
 		updateToolbar();
@@ -4311,8 +4498,8 @@ window.onload = init;
 			<hr id="toolbar-sep-2" />
 
 			<!-- Search -->
-			<div id="search-box" class="toolbar-box">
-				<div id="search-content" class="box-content">
+			<div id="search-box" class="widget-box">
+				<div id="search-content" class="widget-content">
 					<!-- Note: Not using <form> to avoid action on Enter pressing -->
 					<input id="filter" type="text">
 					<div class="checkbox-option">
@@ -4331,9 +4518,9 @@ window.onload = init;
 
 
 			<!-- View -->
-			<div id="view-options-box" class="toolbar-box">
+			<div id="view-options-box" class="widget-box">
 				<a id="view-options-header" class="button" href="#"></a>
-				<div id="view-options-content" class="box-content">
+				<div id="view-options-content" class="widget-content">
 
 					<!-- From: -->
 					<div id="opt-date-1-box" class="checkbox-option">
@@ -4404,14 +4591,14 @@ window.onload = init;
 
 
 			<!-- Tag Cloud -->
-			<div id="tag-cloud-box" class="toolbar-box">
+			<div id="tag-cloud-box" class="widget-box">
 				<a id="tag-cloud-header" class="button" href="#"></a>
-				<div id="tag-cloud-content" class="box-content">
+				<div id="tag-cloud-content" class="widget-content">
 
 					<div id="tag-cloud-tags">
 					</div>
 
-					<div id="tag-cloud-options" class="box-options">
+					<div id="tag-cloud-options" class="widget-options">
 						<hr />
 						<div id="tag-cloud-opt-reset-box" class="checkbox-option">
 							<input
@@ -4431,14 +4618,14 @@ window.onload = init;
 
 
 			<!-- Tag Summary -->
-			<div id="tag-summary-box" class="toolbar-box">
+			<div id="tag-summary-box" class="widget-box">
 				<a id="tag-summary-header" class="button" href="#"></a>
-				<div id="tag-summary-content" class="box-content">
+				<div id="tag-summary-content" class="widget-content">
 
 					<div id="tag-summary-data">
 					</div>
 
-					<div id="tag-summary-options" class="box-options">
+					<div id="tag-summary-options" class="widget-options">
 						<hr />
 						<div id="tag-summary-opt-nsort-box" class="checkbox-option">
 							<input
@@ -4448,6 +4635,10 @@ window.onload = init;
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<!-- Widgets -->
+			<div id="widgets">
 			</div>
 
 			<div id="app-version"></div>
