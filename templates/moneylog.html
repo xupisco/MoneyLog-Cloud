@@ -75,7 +75,9 @@ body {
 }
 #toolbar {
 	position: fixed;
-	height: 100%;
+	top: 57px;  /* This is the height of #logo-wrapper */
+	bottom: 0;
+	left: 0;
 	width: 217px;
 	overflow: auto;
 }
@@ -100,11 +102,11 @@ label,
 }
 .hl {  /* Highlighted words */
 	color: black;
-	background-color: silver;  /* _light */
+	background-color: #ddd;  /* _light */
 }
 tr:hover td,
 tr.future:hover td {  /* explicit TD to exclude TH */
-	background-color: #eee;  /* hover_bg */
+	background-color: #eee !important;  /* hover_bg */
 	color: black;
 }
 #toolbar input,
@@ -198,7 +200,6 @@ a.button {
 #toolbar-controls-wrapper {
 	background-color: #FAFAFA;
 	clear: both;
-	margin-top: 57px;
 	width: 200px;
 }
 
@@ -219,6 +220,7 @@ a.button {
 	border: 1px solid #bbb;  /* element_border */
 	background-color: white;
 	background-color: #F4F4F4;  /* button_bg */
+	position: relative;
 }
 .button.active,
 a.button:active {
@@ -237,6 +239,23 @@ a.button.active {
 	float: none !important;
 	width: 100% !important;
 }
+.button.naked {
+	background-color: inherit;
+	border-style: none;
+}
+
+.widget-box .button:before {
+	content: "▶";
+	position: absolute;
+	top: 0;
+	left: 8px;  /* The same as .widget-content padding-left */
+}
+.widget-box .button.active:before {
+	content: "▼";
+	position: absolute;
+	top: 0;
+	left: 8px;  /* The same as .widget-content padding-left */
+}
 
 /* ---------------------------------------------- [ boxes ] */
 
@@ -244,7 +263,6 @@ a.button.active {
 	background-color: white;
 	border: 1px solid #bbb;  /* element_border */
 	border-top-width: 0;
-	padding: 0.5em 10px;
 	padding: 8px;
 	line-height: 185%;
 }
@@ -264,6 +282,13 @@ a.button.active {
 	width: 100%;
 }
 
+#source-file-box.mini {
+	line-height: 150%;
+}
+#source-file.mini {
+	width: 140px;
+}
+
 /* ---------------------------------------------- [edit] [reload] */
 
 #source-reload,
@@ -273,6 +298,18 @@ a.button.active {
 }
 #source-reload {
 	float: right;
+}
+
+#source-reload.mini {  /* ↻ */
+	float: right;
+	margin: 0;
+	padding: 0;
+	line-height: 150%;
+	width: 1.5em;
+}
+#source-reload.mini:hover {
+	background-color: black;
+	color: white;
 }
 
 /* ---------------------------------------------- [daily] [monthly] [yearly] */
@@ -361,7 +398,7 @@ a.button.active {
 	white-space: nowrap;
 }
 #tag-cloud-tags a.selected {
-	background: silver;  /* _light */
+	background-color: #ddd;  /* _light */
 	color: black;
 }
 #tag-cloud-tags a.excluded  {
@@ -385,35 +422,37 @@ a.button.active {
 }
 
 /* Report table */
-#report table {
+.report {
 	margin: 0 auto;  /* do not use width:100% */
 }
 
 /* Table headings are also buttons */
-#report th {
+.report th {
 	text-align: center;
 	cursor: pointer;
 	padding: 0.5em;
 }
-#report th:hover {
+.report th:hover {
 	background-color: black;  /* _dark */
 	color: white;
 }
 
 /* Column sorting is not working for some columns, so undo formatting */
-#report table.daily th.balance,
-#report table.overview th.percent {
-	cursor: auto;
+th.row-count,
+table.daily th.balance,
+table.overview th.percent {
+	cursor: auto !important;
 }
-#report table.daily th.balance:hover,
-#report table.overview th.percent:hover {
-	color: #333;  /* text_color */
-	background-color: white;  /* content_bg */
+th.row-count,
+table.daily th.balance:hover,
+table.overview th.percent:hover {
+	color: #333 !important;  /* text_color */
+	background-color: white !important;  /* content_bg */
 }
 
 /* Generic cell config */
-#report td {
-	border: 1px solid silver;  /* _light */
+.report td {
+	border: 1px solid #ddd;  /* _light */
 	border-width: 1px 0;
 	vertical-align: middle;
 }
@@ -424,7 +463,7 @@ td.row-count {
 	font-size: 75%;
 	border-style: none !important;
 	background-color: white !important;  /* content_bg */
-	color: silver !important;
+	color: silver !important;  /* _light_text */
 }
 td.date {
 	white-space: nowrap;
@@ -447,58 +486,63 @@ tr.selected .neg {
 	color: white;
 }
 
-/* Total row */
-tr.total {
-	background-color: silver;  /* _light */
+/* Totals rows & cells */
+tr.totals,
+td.totals {
+	background-color: #ddd;  /* _light */
+}
+tr.total,
+td.total {
+	font-weight: bold;
 }
 
 /* Rows padding */
-#report td {
+.report td {
 	padding: 6px 10px;
 }
-#report tr.total td {
+.report tr.totals td {
 	padding: 1px 10px; /* top/bottom: td - 6px */
 }
 
 /* ---------------------------------------------- Report - Daily */
 
 /* Total row tweaks */
-#report table.daily tr.total {
+#report table.daily tr.totals {
 	font-weight: bold;
 }
-#report table.daily tr.total table.posneg {
+#report table.daily tr.totals table.posneg {
 	float: right;
 	font-size: 90%;
 	font-weight: normal;
 }
-#report table.daily tr.total table.posneg td {
+#report table.daily tr.totals table.posneg td {
 	padding: 0;
 	white-space: nowrap;
 	border-style: none;
 }
-#report table.daily tr.total td.monthtotal {
+#report table.daily tr.totals td.monthtotal {
 	text-align: left;
 	padding-left: 0;
 }
-#report table.daily tr.total td.monthtotal .arrow {
+#report table.daily tr.totals td.monthtotal .arrow {
 	margin-right: 8px;
 }
 
 /* ---------------------------------------------- Report - Monthly/Yearly */
 
-#report td.rowlabel {
+.report td.rowlabel {
 	font-weight: bold;
 }
 
 /* ---------------------------------------------- Minibars inside report table */
 
-#report table td.minibar {
+td.minibar {
 	border-style: none !important;
 }
-#report table div.minibar {
+div.minibar {
 	float: left;
 }
-#report table td.minibar .label {
+td.minibar .label {
 	float: left;
 	font-size: 75%;
 	color: white !important;
@@ -551,6 +595,40 @@ table.chart tr:hover td {
 	background-color: white;  /* content_bg */
 }
 
+/* ---------------------------------------------- Tag report */
+
+#tag-report {
+	margin-top: 4em;
+}
+#tag-report th {
+	text-align: right;
+	vertical-align: bottom;
+	padding: 6px 10px;  /* same as .report td */
+}
+#tag-report th.tagname {
+	text-align: left;
+}
+#tag-report th i {  /* obfuscate year */
+	font-weight: normal;
+	font-style: normal;
+	color: silver;  /* _light_text */
+}
+#tag-report th:hover i {
+	color: white;
+}
+#tag-report td.totals {
+	background-color: inherit;
+	font-style: italic;
+}
+#tag-report td.total {
+	padding-left: 20px;  /* separate */
+}
+#tag-report-options {
+	display: none;  /* JS will show */
+	text-align: center;
+	margin-top: 1.5em;
+}
+
 /* ---------------------------------------------- Rows summary */
 
 #rows-summary {
@@ -560,7 +638,7 @@ table.chart tr:hover td {
 	bottom: 0;
 	padding: 5px;
 	border: 8px solid black;  /* _dark */
-	background-color: silver;  /* _light */
+	background-color: #ddd;  /* _light */
 }
 #rows-summary-content td {
 	padding: 4px 10px;
@@ -576,7 +654,7 @@ table.chart tr:hover td {
 /* ---------------------------------------------- Footer */
 
 #footer-message {
-	color: #CCCCCC;
+	color: silver;  /* _light_text */
 	text-align: center;
 	margin-top: 4em;
 }
@@ -591,7 +669,7 @@ table.chart tr:hover td {
 	right: 0;
 	bottom: 0;
 	left: 0;
-	background: white;  /* content_bg */
+	background-color: white;  /* content_bg */
 }
 #editor-file-name {
 	position: fixed;
@@ -661,7 +739,7 @@ table.chart tr:hover td {
 
 /* Dark background for active/special buttons */
 #fullscreen,
-#report th:hover,
+.report th:hover,
 #editor-file-name,
 .button.active,
 a.button:active {
@@ -669,9 +747,9 @@ a.button:active {
 }
 
 /* Dark background for selected rows */
-#report tr.selected,
-#report tr.selected:hover td,
-#report tr.selected .neg {
+tr.selected,
+tr.selected:hover td,
+tr.selected .neg {
 	background-color: #2B97E9;
 }
 
@@ -690,13 +768,14 @@ a.button:active {
 }
 
 /* Light background for totals */
-#report tr.total,
+tr.totals,
+td.totals,
 #rows-summary {
 	background-color: #D5EAFB;
 }
 
 /* Light color for the report borders */
-#report td {
+.report td {
 	border-color: #D5EAFB;
 }
 
@@ -735,7 +814,7 @@ a.button:active {
 	}
 	#logo-wrapper {
 		position: static;
-	}	
+	}
 	#content {
 		margin: 0;
 		padding: 0;
@@ -753,13 +832,19 @@ a.button:active {
 	#fullscreen {
 		width: 50px;
 	}
+	#source-file.mini {
+		width: 80%;
+	}
+	#source-reload.mini {
+		width: 2em;  /* square: .button font-size*2 */
+	}
 	#report-nav a {
 		width: 30% !important;
 	}
 	.checkbox-option {
 		line-height: 250%;
 	}
-	#report table {
+	table.report {
 		width: 100%;
 	}
 	#editor-file-name {
@@ -779,13 +864,13 @@ a.button:active {
 	}
 
 	/* -------------------- Compress */
-	#report table {
+	.report {
 		font-size: 75%;		
 	}
-	#report th {
+	.report th {
 		font-size: 80%;
 	}
-	#report td {
+	.report td {
 		padding: 4px 2px !important;
 	}
 	td.date {
@@ -793,6 +878,12 @@ a.button:active {
 	}
 	#charts {
 		margin-top: 2em;
+	}
+	#tag-report {
+		margin-top: 2em;
+	}
+	#tag-report-options {
+		font-size: 75%;		
 	}
 	#rows-summary {
 		padding: 3px;
@@ -828,9 +919,9 @@ a.button:active {
 	td.tags {
 		text-align: center;
 	}
-	
+
 } /* close @media */
- 
+
 </style>
 <style type="text/css" media="print">
 /*
@@ -852,7 +943,8 @@ a.button:active {
 
 /* Remove row backgrounds */
 tr.future,
-tr.total {
+tr.totals,
+td.totals {
 	background-color: white !important;
 }
 
@@ -880,11 +972,11 @@ td.minibar {
 }
 
 /* Remove (or lighten, or force B&W) colors */
-#report td {
+.report td {
 	border-color: #DDDDDD;
 }
-#report tr.selected,
-#report tr.selected .neg {
+tr.selected,
+tr.selected .neg {
 	background-color: #EEEEEE;
 	color: black ;
 }
@@ -921,6 +1013,7 @@ var checkMonthPartials = true;    // Monthly checkbox inits checked?
 var showRowCount = true;          // Show the row numbers at left?
 var monthlyRowCount = true;       // The row numbers are reset each month?
 var highlightWords = '';          // The words you may want to highlight (ie: 'XXX TODO')
+var showBalance = true;           // Show the Balance column in reports?
 
 // Search
 var defaultSearch = '';           // Search for this text on init
@@ -939,24 +1032,22 @@ var initYearOffsetUntil;          // To:   year will be N years from now (defaul
 // Widgets
 var initViewWidgetOpen = true;    // Start app with the View widget opened?
 var initTagCloudOpen = true;      // Start app with the Tag Cloud widget opened?
-var initTagSummaryOpen = false;   // Start app with the Tag Summary widget opened?
 var showViewWidget = true;        // Show View widget in the sidebar?
 var showTagCloud = true;          // Show Tag Cloud widget in the sidebar?
-var showTagSummary = true;        // Show Tag Summary widget in the sidebar?
 
 // Tags
 var highlightTags = '';           // The tags you may want to highlight (ie: 'work kids')
 var ignoreTags = '';              // Ignore all entries that have one of these tags
 var initSelectedTags = '';        // Tag Cloud: start app with these tags already selected
 var initExcludedTags = '';        // Tag Cloud: start app with these tags already excluded
-var showEmptyTagInSummary = true; // The (no tag) sum should appear in Tag Summary?
-var checkTagSummarySort = false;  // Sort by value checkbox inits checked?
+var checkHideRelatedTags = false; // Tag Report option [ ] Hide related inits checked?
+var showTagReport = true;         // Show the Tag Report after monthly/yearly reports?
 
 // Charts
 var showMiniBars = true;          // Show the percentage bars in monthly/yearly reports?
 var showMiniBarsLabels = true;    // Show the labels inside the bars?
 var miniBarWidth = 70;            // The percentage bar width, in pixels
-var showCharts = true;            // Show the bar chart after the monthly/yearly report?
+var showCharts = true;            // Show the bar chart after the report?
 var showChartBarLabel = true;     // Show the labels above the bars?
 var initChartDaily = 3;           // Initial selected item for the daily chart [1-4]
 var initChartMonthly = 1;         // Initial selected item for the monthly chart [1-4]
@@ -985,13 +1076,21 @@ var oneFile;
 var useLocalStorage;
 var useDropboxStorage;
 
+// Default sort for all tables
+// d=daily, m=monthly, y=yearly, index=column(zero-based), reverse
+var sortData = {'d':{}, 'm':{}, 'y':{}};
+sortData.d.index = 0;
+sortData.d.rev = false;
+sortData.m.index = 0;
+sortData.m.rev = false;
+sortData.y.index = 0;
+sortData.y.rev = false;
+// Tag Report
+sortData.m.indexTag = 0;
+sortData.m.revTag = false;
+sortData.y.indexTag = 0;
+sortData.y.revTag = false;
 
-// The appMode sets the Moneylog flavor:
-// txt          HTML, CSS, JS files are separated. Read user data from local TXT files.
-// one          Full app is in a single moneylog.html file, with user data at the end.
-// dropbox      Runs online, read/save user data from/to TXT files in a Dropbox account.
-// localStorage Read/edit/save user data to the browser. Must always use the same browser.
-var appMode = 'dropbox';
 
 // Data format
 var dataFieldSeparator = '\t';  // Only used if useLegacyDataFormat=true
@@ -1082,11 +1181,9 @@ var i18nDatabase = {
 		helpTagCloudReset: 'Undo all the selections you have made in the Tag Cloud.',
 		helpTagCloudGroup: 'Only match if the entry has ALL the selected tags.',
 		// helpTags: 'Choose the desired tags for the report: food, health, education, trip, …',
-		// Tag Summary
-		labelTagSummary: 'Tag Summary',
-		labelTagSummarySort: 'Sort by value',
-		helpTagSummary: 'Show/hide the tag summary.',
-		helpTagSummarySort: 'Order the Tag Summary by values instead tag names.',
+		// Tag Report
+		labelTagReportRelated: 'Hide related tags',
+		helpTagReportRelated: 'For entries with multiple tags, ignore the tags that are not explicitly selected in Tag Cloud.',
 		// Rows Summary
 		labelRowsSummaryReset: 'Reset',
 		helpRowsSummaryReset: 'Undo all the selections you have made in the report.',
@@ -1186,11 +1283,9 @@ var i18nDatabase = {
 		helpTagCloudReset: 'Desmarca todas as tags que você selecionou, voltando ao estado inicial.',
 		helpTagCloudGroup: 'Cada lançamento deve possuir TODAS as tags selecionadas, simultaneamente.',
 		// helpTags: 'Escolha que tipo de transações você quer ver: alimentação, saúde, educação, viagem, etc.',
-		// Tag Summary
-		labelTagSummary: 'Somatório de tags',
-		labelTagSummarySort: 'Ordenar por valor',
-		helpTagSummary: 'Mostra e esconde o somatório das tags.',
-		helpTagSummarySort: 'Ordena o sumário de tags pelos valores, não pelos nomes.',
+		// Tag Report
+		labelTagReportRelated: 'Esconder as tags relacionadas',
+		helpTagReportRelated: 'Para os lançamentos com múltiplas tags, ignore as tags que não estejam explicitamente selecionadas.',
 		// Rows Summary
 		labelRowsSummaryReset: 'Limpar',
 		helpRowsSummaryReset: 'Desmarca todas as linhas que você selecionou no extrato.',
@@ -1358,7 +1453,17 @@ var i18nDatabase = {
 		return this[lang];
 	}
 };
-// End of user Config
+
+//// End of user Config
+
+
+// The appMode sets the Moneylog flavor:
+// txt          HTML, CSS, JS files are separated. Read user data from local TXT files.
+// one          Full app is in a single moneylog.html file, with user data at the end.
+// dropbox      Runs online, read/save user data from/to TXT files in a Dropbox account.
+// localStorage Read/edit/save user data to the browser. Must always use the same browser.
+//
+var appMode = 'dropbox';  // DO NOT CHANGE
 
 
 // Global vars
@@ -1367,23 +1472,22 @@ var appName = 'MoneyLog';
 var appFlavor = '';
 var dropboxAppFolder = '/Apps/MoneyLog Cloud';
 var dropboxTxtFolder = '/txt';
-var sortColIndex = 0;
-var sortColRev = false;
-var oldSortColIndex;
-var oldSortColRev;
 var dataFirstDate;
 var dataLastDate;
 var highlightRegex;
 var i18n;
 var rawData = '';
 var parsedData = [];
-var overviewData = [];
-var dailyData = [];  // daily report data (filtered, sorted) - not a cache (yet)
+var reportData = [];  // filtered by applyTags(filterData())
 var waitingToLoad = [];
 var selectedRows = [];
 var multiRawData = '';
 var isFullScreen = false;
 var isOpera = (window.opera) ? true : false;
+var initDropbox;  // to be implemented in server side
+var showReport;  // to make JSLint happy
+var Widget;
+var TagSummary;
 
 // We have special rules for tiny screens (480px or less)
 var isMobile = (document.documentElement.clientWidth && document.documentElement.clientWidth < 481);
@@ -1397,7 +1501,7 @@ if (isMobile) {
 	// Init with all widgets closed
 	initViewWidgetOpen = false;
 	initTagCloudOpen = false;
-	initTagSummaryOpen = false;
+	// Note: Tag Summary is closed at Widget definition. Search for isMobile.
 	// Save horizontal space in report table
 	showRowCount = false;
 	showMiniBars = false;
@@ -1452,6 +1556,14 @@ if (!Array.prototype.avg) {
 		return this.sum() / this.length;
 	};
 }
+// [[0,1,2], [3,4,5], [6,7,8]].getColumn(1) -> [1, 4, 7]
+Array.prototype.getColumn = function (n) {
+	var i, leni, results = [];
+	for (i = 0, leni = this.length; i < leni; i++) {
+		results.push(this[i][n]);
+	}
+	return results;
+};
 
 String.prototype.lstrip = function () {
 	return this.replace(/^\s+/, '');
@@ -1584,7 +1696,7 @@ if (!Array.prototype.indexOf) {
 			}
 		}
 		return -1;
-	}
+	};
 }
 RegExp.escape = function (str) {
 	var specials = new RegExp('[.*+?|\\^$()\\[\\]{}\\\\]', 'g');
@@ -1690,23 +1802,36 @@ function invalidData(lineno, message) {
 	alert(i18n.errorInvalidData + lineno + '\n' + message.replace(/\t/g, '<TAB>'));
 }
 
-function sortArray(a, b) {
-	a = a[sortColIndex];
-	b = b[sortColIndex];
-	try {
-		if (sortColIndex == 2) {
-			a = a.toLowerCase();
-			b = b.toLowerCase();
-		}
-	} catch (e1) { }
-	try { // IE6...
-		if (a < b) {
-			return -1;
-		} else if (a > b) {
-			return 1;
-		}
-	} catch (e2) { }
-	return 0;
+// Inspired by http://stackoverflow.com/a/979325
+function sortByIndex(index, type) {
+	switch (type) {
+	case 'n':
+		// number: int or float
+		return function (a, b) {
+			return a[index] - b[index];
+		};
+	case 'd':
+		// date: 'YYYY-MM-DD'
+		return function (a, b) {
+			a = a[index];
+			b = b[index];
+			return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+		};
+	case 't':
+		// tags: ['tag1', 'tag2', ...]
+		return function (a, b) {
+			a = a[index].join(',').toLowerCase().unacccent();
+			b = b[index].join(',').toLowerCase().unacccent();
+			return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+		};
+	default:
+		// string: 'á'
+		return function (a, b) {
+			a = a[index].toLowerCase().unacccent();
+			b = b[index].toLowerCase().unacccent();
+			return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+		};
+	}
 }
 
 function sortIgnoreCase(a, b) {
@@ -1728,10 +1853,27 @@ function getCurrentDate() {
 	return new Date().toML();
 }
 
-function getPastMonth(months) {
-	// months=0 means current month
-	// Returns: YYYY-MM-00
-	return formatDate(addMonths(getCurrentDate(), -months), 'Y-m-00');
+function formatDate(date, fmt) {
+	// date: YYYY-MM-DD, fmt: see Date.prototype.format()
+	return date.toDate().format(fmt);
+}
+
+function formatReportDate(date) {
+	// This key controls if the report date should be formatted
+	if (!showLocaleDate) {
+		return date;  // nothing to do
+	}
+
+	switch (date.length) {
+		case 10:  // YYYY-MM-DD
+			return formatDate(date, i18n.dateFormat);
+		case 7:  // YYYY-MM
+			return formatDate(date + '-01', i18n.dateFormatMonth);
+		case 4:  // YYYY
+			return formatDate(date + '-01-01', i18n.dateFormatYear);
+		default:  // unknown format
+			return date;
+	}
 }
 
 function addMonths(yyyymmdd, n) {
@@ -1743,6 +1885,12 @@ function addMonths(yyyymmdd, n) {
 	z.setDate(1);  // set day 1st
 	z.setMonthOffset(n);  // add
 	return z.toML().slice(0, 8) + yyyymmdd.slice(8, 10);  // restore original day
+}
+
+function getPastMonth(months) {
+	// months=0 means current month
+	// Returns: YYYY-MM-00
+	return formatDate(addMonths(getCurrentDate(), -months), 'Y-m-00');
 }
 
 function getDataUniqueDates(periodType) {  // periodType: d, m, y
@@ -1810,29 +1958,6 @@ function getMonthRange(date1, date2) {
 		}
 	}
 	return results;
-}
-
-function formatDate(date, fmt) {
-	// date: YYYY-MM-DD, fmt: see Date.prototype.format()
-	return date.toDate().format(fmt);
-}
-
-function formatReportDate(date) {
-	// This key controls if the report date should be formatted
-	if (!showLocaleDate) {
-		return date;  // nothing to do
-	}
-
-	switch (date.length) {
-		case 10:  // YYYY-MM-DD
-			return formatDate(date, i18n.dateFormat);
-		case 7:  // YYYY-MM
-			return formatDate(date + '-01', i18n.dateFormatMonth);
-		case 4:  // YYYY
-			return formatDate(date + '-01-01', i18n.dateFormatYear);
-		default:  // unknown format
-			return date;
-	}
 }
 
 function prettyFloat(num, noHtml) {
@@ -2044,6 +2169,197 @@ function drawChart(values, labels) {
 	return chart;
 }
 
+function computeTotals(arr) {  // arr = [1,2,3,4,5]
+	var i, leni, n, o = {};
+
+	if (!arr.length) { return; }
+
+	o.min = 0;
+	o.max = 0;
+	o.sum = 0;
+	o.average = 0;
+	o.sumPositive = 0;
+	o.sumNegative = 0;
+	o.balance = [];
+
+	for (i = 0, leni = arr.length; i < leni; i++) {
+		n = arr[i];
+
+		// sum
+		if (n < 0) {
+			o.sumNegative += n;
+		} else {
+			o.sumPositive += n;
+		}
+		o.sum += n;
+
+		// balance
+		if (i === 0) {
+			o.balance.push(n);
+		} else {
+			o.balance.push(o.balance[o.balance.length - 1] + n);
+		}
+
+		// min/max
+		if (i === 0) {
+			// First value, store it as max and min
+			o.min = o.max = n;
+		} else {
+			o.min = (n < o.min) ? n : o.min;
+			o.max = (n > o.max) ? n : o.max;
+		}
+	}
+	o.average = o.sum / arr.length;
+	o.avg = o.average;  // alias
+	return o;
+}
+
+
+/////////////////////////////////////////////////////////////////////
+//                         TAGS
+/////////////////////////////////////////////////////////////////////
+
+function getSelectedTags() {
+	// Get currently selected tags (from interface)
+	var i, leni, el, els, results = [];
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (hasClass(el, 'selected')) {
+			results.push(el.innerHTML);
+		}
+	}
+	return results;
+}
+
+function getExcludedTags() {
+	// Get currently excluded tags (from interface)
+	var i, leni, el, els, results = [];
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (hasClass(el, 'excluded')) {
+			results.push(el.innerHTML);
+		}
+	}
+	return results;
+}
+
+function createTagCloud(names) {
+	// Create all the <a> elements for the Tag Cloud
+	var i, leni, results = [];
+
+	for (i = 0, leni = names.length; i < leni; i++) {
+		results.push('<a class="trigger unselected" href="#" onClick="return tagClicked(this);">' + names[i] + '</a>');
+	}
+
+	document.getElementById('tag-cloud-tags').innerHTML = results.join('\n');
+}
+
+function updateTagCloud(visibleTags) {
+	// Show/hide the Tag Cloud elements, and set classes
+	var i, leni, el, els;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (visibleTags.hasItem(el.innerHTML)) {
+			if (el.style.display === 'none') {
+				// unhide element
+				el.style.display = '';
+			}
+		} else {
+			if (el.style.display !== 'none') {
+				// hide element and reset classes
+				el.style.display = 'none';
+				removeClass(el, 'selected');
+				removeClass(el, 'excluded');
+				addClass(el, 'unselected');
+			}
+		}
+	}
+}
+
+function selectTheseTags(tags) {
+	// Force select some tags, used at start up or reload
+	var i, leni, el, els;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (tags.hasItem(el.innerHTML)) {
+			// select
+			removeClass(el, 'unselected');
+			removeClass(el, 'excluded');
+			addClass(el, 'selected');
+			// force show
+			el.style.display = '';
+		}
+	}
+}
+
+function excludeTheseTags(tags) {
+	// Force select some tags, used at start up or reload
+	var i, leni, el, els;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (tags.hasItem(el.innerHTML)) {
+			// select
+			removeClass(el, 'unselected');
+			removeClass(el, 'selected');
+			addClass(el, 'excluded');
+			// force show
+			el.style.display = '';
+		}
+	}
+}
+
+function resetTagCloud() {
+	var i, leni, els, el;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		removeClass(el, 'selected');
+		removeClass(el, 'excluded');
+		addClass(el, 'unselected');
+	}
+
+	// The calling checkbox acts like a button, with temporary ON state
+	this.checked = false;
+
+	showReport();
+}
+
+function tagClicked(el) {
+	// Swap class: unselected -> selected -> excluded -> unselected
+	if (hasClass(el, 'unselected')) {
+		removeClass(el, 'unselected');
+		addClass(el, 'selected');
+
+	} else if (hasClass(el, 'selected')) {
+		removeClass(el, 'selected');
+		addClass(el, 'excluded');
+
+	} else if (hasClass(el, 'excluded')) {
+		removeClass(el, 'excluded');
+		addClass(el, 'unselected');
+	}
+	// Update report
+	showReport();
+	return false;  // cancel link action
+}
+
 
 /////////////////////////////////////////////////////////////////////
 //                         REPORT HELPERS
@@ -2092,9 +2408,8 @@ function getMiniBar(pos, neg) {
 }
 
 function getTotalsRow(total, monthTotal, monthNeg, monthPos) {
-	var partial, theRow;
+	var partial = [], results = [];
 
-	partial = [];
 	partial.push('<table class="posneg number"><tr>');
 	partial.push('<td> +');
 	partial.push(prettyFloat(monthPos, true) + '<br>');
@@ -2107,16 +2422,19 @@ function getTotalsRow(total, monthTotal, monthNeg, monthPos) {
 		monthTotal = '<span class="arrow">→<\/span>' + prettyFloat(monthTotal);
 	}
 
-	theRow = '<tr class="total">';
+	results.push('<tr class="totals">');
 	if (showRowCount) {
-		theRow += '<td class="row-count"><\/td>';
+		results.push('<td class="row-count"><\/td>');
 	}
-	theRow += '<td><\/td>';
-	theRow += '<td>' + partial + '<\/td>';
-	theRow += '<td class="monthtotal" colspan="2">' + monthTotal + '<\/td>';
-	theRow += '<td class="number">' + prettyFloat(total) + '<\/td>';
-	theRow += '<\/tr>';
-	return theRow;
+	results.push('<td><\/td>');
+	results.push('<td>' + partial + '<\/td>');
+	results.push('<td class="monthtotal" colspan="2">' + monthTotal + '<\/td>');
+	if (showBalance) {
+		results.push('<td class="number">' + prettyFloat(total) + '<\/td>');
+	}
+	results.push('<\/tr>');
+
+	return results.join('');
 }
 
 function getOverviewRow(theMonth, monthPos, monthNeg, monthTotal, theTotal, rowCount) {
@@ -2132,7 +2450,9 @@ function getOverviewRow(theMonth, monthPos, monthNeg, monthTotal, theTotal, rowC
 	theRow.push('<td class="number">' + prettyFloat(monthPos)  + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthNeg)  + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(monthTotal) + '<\/td>');
-	theRow.push('<td class="number">' + prettyFloat(theTotal)  + '<\/td>');
+	if (showBalance) {
+		theRow.push('<td class="number">' + prettyFloat(theTotal)  + '<\/td>');
+	}
 
 	if (showMiniBars) {
 		theRow.push(getMiniBar(monthPos, monthNeg));
@@ -2142,9 +2462,13 @@ function getOverviewRow(theMonth, monthPos, monthNeg, monthTotal, theTotal, rowC
 	return theRow.join('\n');
 }
 
-function getOverviewTotalsRow(label, n1, n2, n3) {
+function getOverviewTotalsRow(label, n1, n2, n3, extraClass) {
 	var theRow = [];
-	theRow.push('<tr class="total">');
+	if (extraClass) {
+		theRow.push('<tr class="totals ' + extraClass + '">');
+	} else {
+		theRow.push('<tr class="totals">');
+	}
 	if (showRowCount) {
 		theRow.push('<td class="row-count"><\/td>');
 	}
@@ -2152,115 +2476,172 @@ function getOverviewTotalsRow(label, n1, n2, n3) {
 	theRow.push('<td class="number">' + prettyFloat(n1) + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(n2) + '<\/td>');
 	theRow.push('<td class="number">' + prettyFloat(n3) + '<\/td>');
-	theRow.push('<td><\/td>');
+	if (showBalance) {
+		theRow.push('<td><\/td>');
+	}
 	theRow.push('<\/tr>');
 	return theRow.join('\n');
 }
 
 
 /////////////////////////////////////////////////////////////////////
-//                        DATA EDITOR
+//                       INTERFACE UPDATE
 /////////////////////////////////////////////////////////////////////
 
-function editorOn() {
-	var filepath;
-
-	// Load the current data to the editor
-	// Note: already loaded when localStorage
-	if (appMode !== 'localStorage') {
-		document.getElementById('editor-data').value = rawData;
+function populateChartColsCombo() {
+	var el = document.getElementById('chart-selector');
+	el.options[0] = new Option(i18n.labelsOverview[1], 1);  // Incoming
+	el.options[1] = new Option(i18n.labelsOverview[2], 2);  // Expense
+	el.options[2] = new Option(i18n.labelsOverview[3], 3);  // Partial
+	if (showBalance) {
+		el.options[3] = new Option(i18n.labelsOverview[4], 4);  // Balance
 	}
-
-	// Hide content to avoid scroll bars
-	document.getElementById('content').style.display = 'none';
-
-	// Set file name
-	if (appMode === 'localStorage') {
-		filepath = 'Browser localStorage: ' + localStorageKey;
-	} else if (appMode === 'dropbox') {
-		filepath = 'Dropbox: ' + dropboxAppFolder + dropboxTxtFolder + '/' + getSelectedFile();
-	} else {
-		filepath = getSelectedFile();
-	}
-	document.getElementById('editor-file-name').innerHTML = filepath;
-
-	// Show editor
-	document.getElementById('editor').style.display = 'block';
-
-	return false;  // cancel link action
 }
-function editorOff() {
 
-	// Hide editor
-	document.getElementById('editor').style.display = 'none';
-
-	// Restore content
-	document.getElementById('content').style.display = 'block';
-
-	return false;  // cancel link action
+function populateRowsSummaryCombo() {
+	var el = document.getElementById('rows-summary-index');
+	el.options[0] = new Option(i18n.labelsOverview[1], 2);  // Incoming
+	el.options[1] = new Option(i18n.labelsOverview[2], 3);  // Expense
+	el.options[2] = new Option(i18n.labelsOverview[3], 4);  // Partial
 }
-function editorSave() {
-	editorOff();
-	saveLocalData();
-	return false;  // cancel link action
-}
-function saveLocalData() {
-	var editButton = document.getElementById('editor-open');
 
-	editButton.innerHTML = i18n.msgSaving;
-	localStorage.setItem(localStorageKey, document.getElementById('editor-data').value);
-
-	// Save currently selected tags
-	initSelectedTags = getSelectedTags();
-	initExcludedTags = getExcludedTags();
-
-	// Reload report
-	resetData();
-	readData();
-	parseData();
-	showReport();
-	editButton.innerHTML = i18n.labelEditorOpen;
-}
-function loadLocalData() {
-	// first time using localStorage (or empty), load default data from #data (PRE)
-	if (!localStorage.getItem(localStorageKey) || localStorage.getItem(localStorageKey).strip() === "") {
-		localStorage.setItem(localStorageKey, document.getElementById('data').innerHTML);
-	}
-	document.getElementById('editor-data').value = localStorage.getItem(localStorageKey);
-}
-// Allows to insert TABs inside textarea
-// Opera bug: needs to be attached to onkeypress instead onkeydown
-// Original from: http://pallieter.org/Projects/insertTab/ (see <script> at page source)
-function insertTab(e) {
-	var kC, oS, sS, sE, o = this; // aurelio: make jslint happy
-
-	if (!e) { e = window.event; } // IE - aurelio: removed event on calling
-	o = this; // aurelio: removed this on calling
-
-	kC = e.keyCode ? e.keyCode : e.charCode ? e.charCode : e.which;
-	if (kC == 9 && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-		oS = o.scrollTop; // Set the current scroll position.
-		if (o.setSelectionRange) {
-			// For: Opera + FireFox + Safari
-			sS = o.selectionStart;
-			sE = o.selectionEnd;
-			o.value = o.value.substring(0, sS) + '\t' + o.value.substr(sE);
-			o.setSelectionRange(sS + 1, sS + 1);
-			o.focus();
-		} else if (o.createTextRange) {
-			// For: MSIE
-			document.selection.createRange().text = '\t'; // String.fromCharCode(9)
-			// o.onblur = function() { o.focus(); o.onblur = null; };
+function populateDataFilesCombo() {
+	var el, i, leni;
+	if (appMode === 'txt' || appMode === 'dropbox') {
+		el = document.getElementById('source-file');
+		for (i = 0, leni = dataFiles.length; i < leni; i++) {
+			el.options[i] = new Option(dataFiles[i]);
 		}
-		o.scrollTop = oS; // Return to the original scroll position.
-		if (e.preventDefault) {  // aurelio change
-			e.preventDefault();
-		} else {
-			e.returnValue = false;
-		}
-		return false; // Not needed, but good practice.
 	}
-	return true;
+}
+
+function populateLastMonthsCombo() {
+	var el, label, i;
+	el = document.getElementById('opt-last-months-combo');
+	label = i18n.labelMonths[0];
+	for (i = 1; i <= maxLastMonths; i++) {
+		if (i > 1) {
+			label = i18n.labelMonths[1];
+		}
+		el.options[i - 1] = new Option(i + ' ' + label, i);
+	}
+	el.selectedIndex = (initLastMonths > 0) ? initLastMonths - 1 : 0;
+}
+
+function populateDateRangeCombos() {
+	var el1, el2, i, leni, my, range, fmt, offset1, offset2, index1, index2;
+
+	el1 = document.getElementById('opt-date-1-month-combo');
+	el2 = document.getElementById('opt-date-2-month-combo');
+	offset1 = initMonthOffsetFrom;
+	offset2 = initMonthOffsetUntil;
+	fmt = 'Y-m';
+	range = getDataUniqueDates('m');
+
+	//// Let's choose which items to select by default.
+	//
+	// Get user defaults
+	if (typeof offset1 === 'number') {
+		index1 = range.indexOf(
+			formatDate(
+				addMonths(getCurrentDate(), offset1),  // apply offset
+				fmt));
+	}
+	if (typeof offset2 === 'number') {
+		index2 = range.indexOf(
+			formatDate(
+				addMonths(getCurrentDate(), offset2),  // apply offset
+				fmt));
+	}
+	//
+	// If unset or out of range, we'll select the oldest and newer
+	if (index1 === -1) {
+		index1 = 0;
+	}
+	if (index2 === -1) {
+		index2 = range.length - 1;
+	}
+
+	// First, make sure the combo is empty
+	el1.options.length = 0;
+	el2.options.length = 0;
+
+	// Both combos 1 and 2 will have the same items
+	for (i = 0, leni = range.length; i < leni; i++) {
+		my = (range[i] + '-01').toDate().format('b Y');  // short month name
+		el1.options[i] = new Option(my, range[i]);
+		el2.options[i] = new Option(my, range[i]);
+	}
+
+	// Set selected items
+	el1.selectedIndex = index1;
+	el2.selectedIndex = index2;
+}
+
+function populateValueFilterCombo() {
+	var el;
+	el = document.getElementById('opt-value-filter-combo');
+	el.options[0] = new Option('+ ' + i18n.labelPositive, '+');
+	el.options[1] = new Option('- ' + i18n.labelNegative, '-');
+	el.options[2] = new Option('> ' + i18n.labelGreaterThan, '>');
+	el.options[3] = new Option('< ' + i18n.labelLessThan, '<');
+}
+
+function updateToolbar() {
+	var i, leni, add, remove, hide, unhide;
+
+	// Visibility On/Off
+	// Monthly/Yearly report hides some controls from the toolbar.
+	//
+	// Some fields are just hidden to preserve the page layout.
+	// Others must be removed to free vertical space.
+
+	add = [];
+	remove = [];
+	hide = [];
+	unhide = [];
+
+	// Daily
+	if (reportType === 'd') {
+		unhide = [
+			'opt-monthly-box'
+		];
+
+	// Monthly
+	} else if (reportType === 'm') {
+		hide = [
+			'opt-monthly-box'
+		];
+
+	// Yearly
+	} else if (reportType === 'y') {
+		hide = [
+			'opt-monthly-box'
+		];
+	}
+
+	// In Mobile toolbar we always add/remove, there's no hide.
+	// We save vertical space, and the report jump is not an issue.
+	if (isMobile) {
+		add = add.concat(unhide);
+		remove = remove.concat(hide);
+		hide = [];
+		unhide = [];
+	}
+
+	// Show/hide toolbar elements
+	for (i = 0, leni = add.length; i < leni; i++) {
+		document.getElementById(add[i]).style.display = 'block';
+	}
+	for (i = 0, leni = remove.length; i < leni; i++) {
+		document.getElementById(remove[i]).style.display = 'none';
+	}
+	for (i = 0, leni = hide.length; i < leni; i++) {
+		document.getElementById(hide[i]).style.visibility = 'hidden';
+	}
+	for (i = 0, leni = unhide.length; i < leni; i++) {
+		document.getElementById(unhide[i]).style.visibility = 'visible';
+	}
 }
 
 
@@ -2269,8 +2650,7 @@ function insertTab(e) {
 /////////////////////////////////////////////////////////////////////
 
 function resetData() {
-	overviewData = [];
-	dailyData = [];
+	reportData = [];
 	parsedData = [];
 	rawData = '';
 }
@@ -2309,13 +2689,13 @@ function getSelectedFile() {
 	return dataFiles[document.getElementById('source-file').selectedIndex];
 	// Note: IE7/8 fail at <select>.value, so we must use selectedIndex
 }
-function reloadSelectedFile() {
-	// Save currently selected tags
-	initSelectedTags = getSelectedTags();
-	initExcludedTags = getExcludedTags();
-	// Reload
-	loadSelectedFile();
-	return false;  // cancel link action
+function showHideEditButton() {
+	var el;
+	if (appMode === 'dropbox') {
+		// Hide Edit button when current file is '*'
+		el = document.getElementById('editor-open');
+		el.style.visibility = (getSelectedFile() === '*') ? 'hidden' : 'visible';
+	}
 }
 function loadSelectedFile() {
 	var filePath;
@@ -2339,6 +2719,22 @@ function loadSelectedFile() {
 	}
 	return false;  // cancel link action
 }
+function reloadSelectedFile() {
+	// Save currently selected tags
+	initSelectedTags = getSelectedTags();
+	initExcludedTags = getExcludedTags();
+	// Reload
+	loadSelectedFile();
+	return false;  // cancel link action
+}
+
+function loadLocalData() {
+	// first time using localStorage (or empty), load default data from #data (PRE)
+	if (!localStorage.getItem(localStorageKey) || localStorage.getItem(localStorageKey).strip() === "") {
+		localStorage.setItem(localStorageKey, document.getElementById('data').innerHTML);
+	}
+	document.getElementById('editor-data').value = localStorage.getItem(localStorageKey);
+}
 
 function readData() {
 	var iframeDoc;
@@ -2347,7 +2743,7 @@ function readData() {
 	if (appMode === 'localStorage') {
 		loadLocalData();
 		rawData = document.getElementById('editor-data').value;
-	} else if (appMode === 'one' || appMode === 'dropbox') {
+	} else if (appMode === 'portable' || appMode === 'dropbox') {
 		rawData = document.getElementById('data').innerHTML;
 	} else {
 		// Note: Firefox/Camino won't read if the TXT file is in a parent folder.
@@ -2357,7 +2753,7 @@ function readData() {
 }
 
 function parseData() {
-	var i, j, lenj, rows, thisRow, rowDate, rowAmount, rowText, rowTagsDescription, rowTags, rowDescription, recurrentAmount, recValue, recTimes, recOperator, lineno, fields, rowAmountErrorMsg, oldSort, trash, tagNames;
+	var i, j, lenj, rows, thisRow, rowDate, rowAmount, rowText, rowTagsDescription, rowTags, rowDescription, recurrentAmount, recValue, recTimes, recOperator, lineno, fields, rowAmountErrorMsg, trash, tagNames;
 
 	// Reset the data holders
 	parsedData = [];
@@ -2567,11 +2963,7 @@ function parseData() {
 	}
 
 	// Sort by date
-	// Note: save/restore the global var contents
-	oldSort = sortColIndex;
-	sortColIndex = 0;
-	parsedData.sort(sortArray);
-	sortColIndex = oldSort;
+	parsedData.sort(sortByIndex(0, 'd'));
 
 	// Save first and last date as globals
 	if (parsedData.length > 0) {
@@ -2579,8 +2971,7 @@ function parseData() {
 		dataLastDate = parsedData[parsedData.length-1][0];
 
 		// Update the date range combos
-		populateDateRangeCombos('m');
-		populateDateRangeCombos('y');
+		populateDateRangeCombos();
 	} else {
 		dataFirstDate = dataLastDate = undefined;
 	}
@@ -2615,25 +3006,17 @@ function filterData() {
 	if (!useLegacyDateFilter) {
 
 		if (document.getElementById('opt-date-1-check').checked) {
-			if (reportType === 'y') {
-				firstDate = document.getElementById('opt-date-1-year-combo').value + '-00-00';
-			} else {
-				firstDate = document.getElementById('opt-date-1-month-combo').value + '-00';
-			}
+			firstDate = document.getElementById('opt-date-1-month-combo').value + '-00';
 		}
 		if (document.getElementById('opt-date-2-check').checked) {
-			if (reportType === 'y') {
-				lastDate = document.getElementById('opt-date-2-year-combo').value + '-99-99';
-			} else {
-				lastDate = document.getElementById('opt-date-2-month-combo').value + '-99';
-			}
+			lastDate = document.getElementById('opt-date-2-month-combo').value + '-99';
 		}
 
 	// Old style date options
 	} else {
 
 		// [X] Recent Only, works for daily/monthly
-		if (document.getElementById('opt-last-months-check').checked && reportType !== 'y') {
+		if (document.getElementById('opt-last-months-check').checked) {
 			firstDate = getPastMonth(parseInt(document.getElementById('opt-last-months-combo').value, 10) - 1);  // 1 = current
 		}
 		// [X] Future Data, works for all reports
@@ -2644,25 +3027,23 @@ function filterData() {
 	}
 
 
-	// Get filters data for the detailed report
-	if (reportType === 'd') {
-		filter = document.getElementById('filter').value;
-		isRegex = document.getElementById('opt-regex-check').checked;
-		isNegated = document.getElementById('opt-negate-check').checked;
+	// Get filters data for the report
+	filter = document.getElementById('filter').value;
+	isRegex = document.getElementById('opt-regex-check').checked;
+	isNegated = document.getElementById('opt-negate-check').checked;
 
-		if (document.getElementById('opt-value-filter-check').checked) {
-			valueFilter = document.getElementById('opt-value-filter-combo').value;
-			valueFilterArg = parseInt(document.getElementById('opt-value-filter-number').value, 10) || 0;
-		}
+	if (document.getElementById('opt-value-filter-check').checked) {
+		valueFilter = document.getElementById('opt-value-filter-combo').value;
+		valueFilterArg = parseInt(document.getElementById('opt-value-filter-number').value, 10) || 0;
+	}
 
-		// Hack: Value filtering on the search box!
-		// Examples: v:+  v:-  v:=50  v:>100  v:<=-100
-		temp = filter.match(/^v:([\-+>=<][=]?)([+\-]?\d*)$/);
-		if (temp) {
-			valueFilter = temp[1];
-			valueFilterArg = temp[2] || 0;
-			filter = ''; // The filter was (ab)used, now we can discard it
-		}
+	// Hack: Value filtering on the search box!
+	// Examples: v:+  v:-  v:=50  v:>100  v:<=-100
+	temp = filter.match(/^v:([\-+>=<][=]?)([+\-]?\d*)$/);
+	if (temp) {
+		valueFilter = temp[1];
+		valueFilterArg = temp[2] || 0;
+		filter = ''; // The filter was (ab)used, now we can discard it
 	}
 
 	// Prepare filter contents as /regex/ or string, always ignore case
@@ -2810,145 +3191,45 @@ function applyTags(theData) {
 	}
 }
 
-function createTagCloud(names) {
-	// Create all the <a> elements for the Tag Cloud
-	var i, leni, results = [];
+function groupByPeriod(arr, periodType) {  // m, y
+	// Group data by months/years, returning an object.
+	// Note: the input array may be unsorted
+	//
+	// groupByPeriod(
+	//     [
+	//         ['2012-02-15', '1.50', 'foo1'],
+	//         ['2012-02-18', '7.00', 'foo2'],
+	//         ['2012-03-04', '-4.44', 'bar1'],
+	//         ['2012-03-18', '-5.55', 'bar2'],
+	//     ], 'm')
+	// 
+	// returns:
+	// {
+	//     '2012-02': [
+	//         ['2012-02-15', '1.50', 'foo1'],
+	//         ['2012-02-18', '7.00', 'foo2'],
+	//     ],
+	//     '2012-03': [
+	//         ['2012-03-04', '-4.44', 'bar1'],
+	//         ['2012-03-18', '-5.55', 'bar2']
+	//     ],
+	//     keys: ['2012-02', '2012-03']  // always sorted
+	// }
 
-	for (i = 0, leni = names.length; i < leni; i++) {
-		results.push('<a class="trigger unselected" href="#" onClick="return tagClicked(this);">' + names[i] + '</a>');
-	}
+	var i, leni, item, slices, results = {};
 
-	document.getElementById('tag-cloud-tags').innerHTML = results.join('\n');
-}
-
-function updateTagCloud(visibleTags) {
-	// Show/hide the Tag Cloud elements, and set classes
-	var i, leni, el, els;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		if (visibleTags.hasItem(el.innerHTML)) {
-			if (el.style.display === 'none') {
-				// unhide element
-				el.style.display = '';
-			}
-		} else {
-			if (el.style.display !== 'none') {
-				// hide element and reset classes
-				el.style.display = 'none';
-				removeClass(el, 'selected');
-				removeClass(el, 'excluded');
-				addClass(el, 'unselected');
-			}
+	results.keys = [];
+	slices = { 'y': 4, 'm': 7, 'd': 10 };
+	for (i = 0, leni = arr.length; i < leni; i++) {
+		item = arr[i][0].slice(0, slices[periodType]);  // get date
+		if (!results[item]) {
+			results[item] = [];
+			results.keys.push(item);
 		}
+		results[item].push(arr[i]);
 	}
-}
-
-function selectTheseTags(tags) {
-	// Force select some tags, used at start up or reload
-	var i, leni, el, els;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		if (tags.hasItem(el.innerHTML)) {
-			// select
-			removeClass(el, 'unselected');
-			removeClass(el, 'excluded');
-			addClass(el, 'selected');
-			// force show
-			el.style.display = '';
-		}
-	}
-}
-
-function excludeTheseTags(tags) {
-	// Force select some tags, used at start up or reload
-	var i, leni, el, els;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		if (tags.hasItem(el.innerHTML)) {
-			// select
-			removeClass(el, 'unselected');
-			removeClass(el, 'selected');
-			addClass(el, 'excluded');
-			// force show
-			el.style.display = '';
-		}
-	}
-}
-
-function resetTagCloud() {
-	var i, leni, els, el;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		removeClass(el, 'selected');
-		removeClass(el, 'excluded');
-		addClass(el, 'unselected');
-	}
-
-	// The calling checkbox acts like a button, with temporary ON state
-	this.checked = false;
-
-	showReport();
-}
-
-function getSelectedTags() {
-	// Get currently selected tags (from interface)
-	var i, leni, el, els, results = [];
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		if (hasClass(el, 'selected')) {
-			results.push(el.innerHTML);
-		}
-	}
+	results.keys.sort();
 	return results;
-}
-
-function getExcludedTags() {
-	// Get currently excluded tags (from interface)
-	var i, leni, el, els, results = [];
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		if (hasClass(el, 'excluded')) {
-			results.push(el.innerHTML);
-		}
-	}
-	return results;
-}
-
-function tagClicked(el) {
-	// Swap class: unselected -> selected -> excluded -> unselected
-	if (hasClass(el, 'unselected')) {
-		removeClass(el, 'unselected');
-		addClass(el, 'selected');
-
-	} else if (hasClass(el, 'selected')) {
-		removeClass(el, 'selected');
-		addClass(el, 'excluded');
-
-	} else if (hasClass(el, 'excluded')) {
-		removeClass(el, 'excluded');
-		addClass(el, 'unselected');
-	}
-	// Update report
-	showReport();
-	return false;  // cancel link action
 }
 
 
@@ -3039,221 +3320,88 @@ function updateSelectedRowsSummary() {
 	}
 }
 
-function updateTagSummary(theData) {
-	var i, leni, j, lenj, tag, results, tagNames, tagData, tableData, rowAmount, rowTags, noTagSum, valueSort, oldSort;
+function periodReport() {
+	var i, leni, z, len, theData, overviewData, groupedData, balance, period, periods, periodValues, totals, results, allPos, allNeg, allTotal, sortIndex, sortRev, chart, chartCol, chartValues, chartLabels, colTypes;
 
 	results = [];
-	tagNames = [];
-	tagData = {};
-	tableData = [];
-	valueSort = document.getElementById('tag-summary-opt-nsort-check').checked;
-	noTagSum = undefined;  // Do not use 0. The final result may be zero.
-	theData = theData.clone();
+	overviewData = [];
+	balance = 0;
+	allNeg = [];
+	allPos = [];
+	allTotal = [];
+	theData = applyTags(filterData());
+	reportData = theData.clone();
+	sortIndex = sortData[reportType].index;
+	sortRev = sortData[reportType].rev;
 
-	// Scan report rows
-	for (i = 0, leni = theData.length; i < leni; i++) {
-		// rowDate        = theData[i][0];
-		rowAmount      = theData[i][1];
-		rowTags        = theData[i][2].clone();
-		// rowDescription = theData[i][3];
+	if (theData.length) {
 
-		if (rowTags.length === 0) {
-			// No tag in this row
-			if (noTagSum === undefined) {
-				noTagSum = 0;
-			}
-			noTagSum += rowAmount;
+		// Group report data by period (month or year), to make things easier
+		groupedData = groupByPeriod(theData, reportType);
+		periods = groupedData.keys.clone();
 
-		} else {
-			// Sum all values for the same tag
-			for (j = 0, lenj = rowTags.length; j < lenj; j++) {
-				tag = rowTags[j];
+		// Scan and calculate everything
+		for (i = 0, leni = periods.length; i < leni; i++) {
+			period = periods[i];
+			periodValues = groupedData[period].getColumn(1);  // date, amount, tags, desc
+			totals = computeTotals(periodValues);
+			balance += totals.sum;
 
-				// New tag?
-				if (!tagNames.hasItem(tag)) {
-					tagData[tag] = 0;
-					tagNames.push(tag);
-				}
-				tagData[tag] = tagData[tag] + rowAmount;
-			}
+			// Save period totals for the grand total rows
+			allNeg.push(totals.sumNegative);
+			allPos.push(totals.sumPositive);
+			allTotal.push(totals.sum);
+
+			overviewData.push([period, totals.sumPositive, totals.sumNegative, totals.sum, balance]);
 		}
-	}
-
-	// We have tags?
-	if (tagNames.length || noTagSum !== undefined) {
-
-		// Sort tag names
-		tagNames.sort(sortIgnoreCase);
-
-		// Append no-tag data to the end of the table
-		if (noTagSum !== undefined && showEmptyTagInSummary) {
-			tagNames.push(i18n.labelTagCloudEmpty);
-			tagData[i18n.labelTagCloudEmpty] = noTagSum;
-		}
-
-		// Save table data, sorted by tag name
-		for (i = 0, leni = tagNames.length; i < leni; i++) {
-			tag = tagNames[i];
-			tableData.push([tag, tagData[tag]]);
-		}
-
-		// Sort by value?
-		if (valueSort) {
-			// Note: save/restore the global var contents
-			oldSort = sortColIndex;
-			sortColIndex = 1;
-			tableData.sort(sortArray);
-			sortColIndex = oldSort;
-		}
-
-		// Compose the HTML table
-		results.push('<table>');
-		for (i = 0, leni = tableData.length; i < leni; i++) {
-			results.push(
-				'<tr>' +
-				'<td>' + tableData[i][0] +  '<\/td>' +
-				'<td class="number"> ' + prettyFloat(tableData[i][1]) + '<\/td>' +
-				'<\/tr>'
-			);
-		}
-		results.push('<\/table>');
-	}
-
-	// Save results to the respective DIV
-	results = results.join('\n');
-	document.getElementById('tag-summary-data').innerHTML = results;
-
-	// The options box is only shown if we have at least 2 tags
-	document.getElementById('tag-summary-options').style.display = (tableData.length > 1) ? 'block' : 'none';
-}
-
-function showOverview() {
-	var i, leni, z, len, rowDate, rowAmount, theData, thead, results, grandTotal, dateSize, rangeDate, rangeTotal, rangePos, rangeNeg, sumPos, sumNeg, sumTotal, currSortIndex, minPos, minNeg, minPartial, minBalance, maxPos, maxNeg, maxPartial, maxBalance, maxNumbers, minNumbers, chart, chartCol, chartValues, chartLabels;
-
-
-	results = [];
-	grandTotal = rangeTotal = rangePos = rangeNeg = sumPos = sumNeg = sumTotal = 0;
-	minPos = minNeg = minPartial = minBalance = maxPos = maxNeg = maxPartial = maxBalance = 0;
-	currSortIndex = sortColIndex;
-
-	// Table headings
-	thead = '<th onClick="sortCol(0)">' + i18n.labelsOverview[0] + '<\/th>';
-	thead += '<th onClick="sortCol(1)">' + i18n.labelsOverview[1] + '<\/th>';
-	thead += '<th onClick="sortCol(2)">' + i18n.labelsOverview[2] + '<\/th>';
-	thead += '<th onClick="sortCol(3)">' + i18n.labelsOverview[3] + '<\/th>';
-	thead += '<th onClick="sortCol(4)">' + i18n.labelsOverview[4] + '<\/th>';
-	if (showMiniBars) {
-		thead += '<th class="percent">%<\/th>';
-	}
-	if (showRowCount) {
-		thead = '<th class="row-count"><\/th>' + thead;
-	}
-
-	if (!overviewData.length) { // Data not cached
-		theData = filterData();
-	}
-
-	if (overviewData.length || theData.length) {
-		results.push('<table class="overview">');
-		results.push('<tr>' + thead + '<\/tr>');
-
-		// The cache is empty. Scan and calculate everything.
-		if (!overviewData.length) {
-
-			for (i = 0, leni = theData.length; i < leni; i++) {
-				rowDate        = theData[i][0];
-				rowAmount      = theData[i][1];
-				// rowTags        = theData[i][2].clone();
-				// rowDescription = theData[i][3];
-
-				// rowDate.slice() size, to extract 2000 or 2000-01
-				dateSize = (reportType === 'y') ? 4 : 7;
-
-				// First row, just save the month/year date
-				if (i === 0) {
-					rangeDate = rowDate.slice(0, dateSize);
-				}
-
-				// Other rows, detect if this is a new month/year
-				if (i > 0 &&
-						rowDate.slice(0, dateSize) !=
-						theData[i - 1][0].slice(0, dateSize)) {
-
-					// Send old month/year totals to the report
-					overviewData.push([rangeDate, rangePos, rangeNeg, rangeTotal, grandTotal]);
-					// Reset totals
-					rangeTotal = rangePos = rangeNeg = 0;
-					// Save new month/year date
-					rangeDate = rowDate.slice(0, dateSize);
-				}
-
-				// Common processing for all rows: update totals
-				grandTotal += rowAmount;
-				rangeTotal += rowAmount;
-				if (rowAmount < 0) {
-					rangeNeg += rowAmount;
-				} else {
-					rangePos += rowAmount;
-				}
-			}
-			// No more rows. Send the last range totals to the report.
-			overviewData.push([rangeDate, rangePos, rangeNeg, rangeTotal, grandTotal]);
-		}
-		// End of cache filling
 
 		//// Report data is OK inside overviewData array
 		//// Now we must compose the report table
 
 		// Perform the user-selected sorting column and order
-		sortColIndex = currSortIndex;
-		overviewData.sort(sortArray);
-		if (sortColRev) {
+		colTypes = ['d', 'n', 'n', 'n', 'n'];
+		overviewData.sort(sortByIndex(sortIndex, colTypes[sortIndex]));
+		if (sortRev) {
 			overviewData.reverse();
 		}
 
+		results.push('<table class="report overview">');
+
+		// Table headings
+		results.push('<tr>');
+		if (showRowCount) {
+			results.push('<th class="row-count"><\/th>');
+		}
+		results.push('<th onClick="sortCol(0)">' + i18n.labelsOverview[0] + '<\/th>');
+		results.push('<th onClick="sortCol(1)">' + i18n.labelsOverview[1] + '<\/th>');
+		results.push('<th onClick="sortCol(2)">' + i18n.labelsOverview[2] + '<\/th>');
+		results.push('<th onClick="sortCol(3)">' + i18n.labelsOverview[3] + '<\/th>');
+		if (showBalance) {
+			results.push('<th onClick="sortCol(4)">' + i18n.labelsOverview[4] + '<\/th>');
+		}
+		if (showMiniBars) {
+			results.push('<th class="percent">%<\/th>');
+		}
+		results.push('<\/tr>');
+
 		// Array2Html
 		for (i = 0, leni = overviewData.length; i < leni; i++) {
-
-			// Calculate overall totals
 			z = overviewData[i].clone();
-			sumPos   += z[1];
-			sumNeg   += z[2];
-			sumTotal += z[3];
-
-			// Store min/max values
-			if (i === 0) {
-				// First value, store it as max and min
-				minPos     = maxPos     = z[1];
-				minNeg     = maxNeg     = z[2];
-				minPartial = maxPartial = z[3];
-				minBalance = maxBalance = z[4];
-			} else {
-				// Minimum
-				minPos     = (z[1] < minPos)     ? z[1] : minPos;
-				minNeg     = (z[2] < minNeg)     ? z[2] : minNeg;
-				minPartial = (z[3] < minPartial) ? z[3] : minPartial;
-				minBalance = (z[4] < minBalance) ? z[4] : minBalance;
-				// Maximum
-				maxPos     = (z[1] > maxPos)     ? z[1] : maxPos;
-				maxNeg     = (z[2] > maxNeg)     ? z[2] : maxNeg;
-				maxPartial = (z[3] > maxPartial) ? z[3] : maxPartial;
-				maxBalance = (z[4] > maxBalance) ? z[4] : maxBalance;
-			}
-
 			// Save this row to the report table
 			results.push(getOverviewRow(z[0], z[1], z[2], z[3], z[4], i + 1));
 		}
-		maxNumbers = [0, maxPos, maxNeg, maxPartial, maxBalance];
-		minNumbers = [0, minPos, minNeg, minPartial, minBalance];
 
 		// Compose the final rows: total, avg, min, max
 		len = overviewData.length;
 		if (len > 1) {
-			results.push(getOverviewTotalsRow(i18n.labelTotal, sumPos, sumNeg, sumPos + sumNeg));
-			results.push(getOverviewTotalsRow(i18n.labelAverage, sumPos / len, sumNeg / len, sumTotal / len));
-			results.push(getOverviewTotalsRow(i18n.labelMinimum, minPos, maxNeg, minPartial));
-			results.push(getOverviewTotalsRow(i18n.labelMaximum, maxPos, minNeg, maxPartial, maxBalance));
-			// Note: Yes, maxNeg and minNeg are swapped for better reading
+			allNeg = computeTotals(allNeg);
+			allPos = computeTotals(allPos);
+			allTotal = computeTotals(allTotal);
+			results.push(getOverviewTotalsRow(i18n.labelTotal, allPos.sum, allNeg.sum, allTotal.sum, 'total'));
+			results.push(getOverviewTotalsRow(i18n.labelAverage, allPos.avg, allNeg.avg, allTotal.avg));
+			results.push(getOverviewTotalsRow(i18n.labelMinimum, allPos.min, allNeg.max, allTotal.min));
+			results.push(getOverviewTotalsRow(i18n.labelMaximum, allPos.max, allNeg.min, allTotal.max));
+			// Note: Yes, allNeg.max and allNeg.min are swapped for better reading
 		}
 
 		// And we're done on the report table
@@ -3266,16 +3414,10 @@ function showOverview() {
 
 		// Now charts!
 		if (showCharts) {
-
-			chartValues = [];
-			chartLabels = [];
-
 			// Get all values for the selected column
 			chartCol = parseInt(document.getElementById('chart-selector').value, 10) || 1;
-			for (i = 0, leni = overviewData.length; i < leni; i++) {
-				chartValues.push(overviewData[i][chartCol]);
-				chartLabels.push(overviewData[i][0]);  // month or year
-			}
+			chartValues = overviewData.getColumn(chartCol);
+			chartLabels = overviewData.getColumn(0);  // month or year
 
 			// Get chart and show it
 			chart = drawChart(chartValues, chartLabels);
@@ -3294,41 +3436,51 @@ function showOverview() {
 	document.getElementById('report').innerHTML = results;
 }
 
-function showDetailed() {
-	var thead, i, leni, j, lenj, k, lenk, rowDate, rowAmount, rowTags, rowDescription, monthTotal, monthPos, monthNeg, rowCount, results, monthPartials, theData, sumPos, sumNeg, sumTotal, chart, chartCol, chartLabels, chartValues, chartValuesSelected, currentDate;
+function dailyReport() {
+	var i, leni, j, lenj, k, lenk, rowDate, rowAmount, rowTags, rowDescription, monthTotal, monthPos, monthNeg, rowCount, results, monthPartials, theData, sumPos, sumNeg, sumTotal, chart, chartCol, chartLabels, chartValues, chartValuesSelected, currentDate, colTypes, sortIndex, sortRev;
 
 	sumTotal = sumPos = sumNeg = monthTotal = monthPos = monthNeg = rowCount = 0;
 	results = [];
 	chartValues = [];
 	chartLabels = [];
-
+	sortIndex = sortData.d.index;
+	sortRev = sortData.d.rev;
 	monthPartials = document.getElementById('opt-monthly-check');
+
 	theData = applyTags(filterData());
+	reportData = theData.clone();
 
 	if (theData.length > 0) {
 
 		currentDate = getCurrentDate();
 
-		// Data sorting procedures
-		if (sortColIndex !== 0 || sortColRev) {
+		// If not the default sort (0, asc), turn OFF partials
+		if (sortIndex !== 0 || sortRev) {
 			monthPartials.checked = false;
 		}
-		theData.sort(sortArray);
-		if (sortColRev) {
+
+		// Perform the user-selected sorting column and order
+		colTypes = ['d', 'n', 't', 's', 'n'];
+		theData.sort(sortByIndex(sortIndex, colTypes[sortIndex]));
+		if (sortRev) {
 			theData.reverse();
 		}
 
+		results.push('<table class="report daily">');
+
 		// Compose table headings
-		thead = '<th onClick="sortCol(0)">' + i18n.labelsDetailed[0] + '<\/th>';
-		thead += '<th onClick="sortCol(1)">' + i18n.labelsDetailed[1] + '<\/th>';
-		thead += '<th onClick="sortCol(2)" class="tags">' + i18n.labelsDetailed[2] + '<\/th>';
-		thead += '<th onClick="sortCol(3)">' + i18n.labelsDetailed[3] + '<\/th>';
-		thead += '<th class="balance">' + i18n.labelsDetailed[4] + '<\/th>';
+		results.push('<tr>');
 		if (showRowCount) {
-			thead = '<th class="row-count"><\/th>' + thead;
+			results.push('<th class="row-count"><\/th>');
 		}
-		results.push('<table class="daily">');
-		results.push('<tr>' + thead + '<\/tr>');
+		results.push('<th onClick="sortCol(0)">' + i18n.labelsDetailed[0] + '<\/th>');
+		results.push('<th onClick="sortCol(1)">' + i18n.labelsDetailed[1] + '<\/th>');
+		results.push('<th onClick="sortCol(2)" class="tags">' + i18n.labelsDetailed[2] + '<\/th>');
+		results.push('<th onClick="sortCol(3)">' + i18n.labelsDetailed[3] + '<\/th>');
+		if (showBalance) {
+			results.push('<th class="balance">' + i18n.labelsDetailed[4] + '<\/th>');
+		}
+		results.push('<\/tr>');
 
 		// Compose table rows
 		for (i = 0, leni = theData.length; i < leni; i++) {
@@ -3400,13 +3552,15 @@ function showDetailed() {
 			results.push('<td class="number">' + prettyFloat(rowAmount)    + '<\/td>');
 			results.push('<td class="tags">'   + rowTags.join(', ')        + '<\/td>');
 			results.push('<td>'                + rowDescription            + '<\/td>');
-			results.push('<td class="number">' + prettyFloat(sumTotal)     + '<\/td>');
+			if (showBalance) {
+				results.push('<td class="number">' + prettyFloat(sumTotal)     + '<\/td>');
+			}
 			results.push('<\/tr>');
 
 		}
 
 		// Should we show the full month partials at the last row?
-		if (monthPartials.checked) {
+		if (monthPartials.checked || !showBalance) {
 			results.push(getTotalsRow(sumTotal, monthTotal, monthNeg, monthPos));
 		} else {
 			results.push(getTotalsRow(sumTotal, '', sumNeg, sumPos));
@@ -3422,10 +3576,6 @@ function showDetailed() {
 		// Real dirty hack to insert totals row at the table beginning (UGLY!)
 		// results = results.replace('<\/th><\/tr>', '<\/th><\/tr>' + getTotalsRow(sumTotal, '', sumNeg, sumPos));
 
-
-		// Tag Summary
-		updateTagSummary(theData);
-
 		// Always reset Rows Summary when generating reports
 		selectedRows = [];
 		updateSelectedRowsSummary();
@@ -3435,11 +3585,8 @@ function showDetailed() {
 		if (showCharts && monthPartials.checked) {
 
 			// Get all values for the selected column
-			chartValuesSelected = [];
 			chartCol = parseInt(document.getElementById('chart-selector').value, 10) || 1;
-			for (i = 0, leni = chartValues.length; i < leni; i++) {
-				chartValuesSelected.push(chartValues[i][chartCol]);
-			}
+			chartValuesSelected = chartValues.getColumn(chartCol);
 
 			// Get chart and show it
 			chart = drawChart(chartValuesSelected, chartLabels);
@@ -3452,25 +3599,255 @@ function showDetailed() {
 	} else {
 		results = '<p>' + i18n.labelNoData + '<\/p>';
 
-		// Clear Tag Summary contents
-		updateTagSummary([]);
-
 		// Hide charts when there's no data
 		document.getElementById('charts').style.display = 'none';
 
 	}
 	document.getElementById('report').innerHTML = results;
+}
 
-	// Save report data
-	dailyData = theData;
+function tagReport() {
+	var i, leni, j, lenj, results, hasRelated, hideRelated, tagNames, tagName, selectedTags, tagData, tableData, theData, groupedData, content, options, firstDate, lastDate, allDates, nDates, period, periodData, periodName, rowAmount, rowTags, index, total, tagless, tdClass, sortIndex, sortRev;
+
+	results = [];
+	tagNames = [];
+	tagData = {};
+	tableData = [];
+	theData = reportData.clone();
+	sortIndex = sortData[reportType].indexTag;
+	sortRev = sortData[reportType].revTag;
+	selectedTags = getSelectedTags();
+	hasRelated = false;
+	content = document.getElementById('tag-report-content');
+	options = document.getElementById('tag-report-options');
+	hideRelated = document.getElementById('tag-report-opt-related-check').checked;
+
+	// Hide the Tag report when in Daily report
+	if (!showTagReport || reportType === 'd') {
+		document.getElementById('tag-report').style.display = 'none';
+		return false;
+	} else {
+		document.getElementById('tag-report').style.display = 'block';
+	}
+
+	// Group report data by period (month or year), to make things easier
+	groupedData = groupByPeriod(theData, reportType);
+
+	/////////////////////////////////////////////////// MONTHS / YEARS
+
+	// Compose the list of all months/years in the period
+	// Note: can't use groupedData.keys because there may be gaps
+	firstDate = groupedData.keys[0];
+	lastDate = groupedData.keys[groupedData.keys.length - 1];
+
+	if (reportType === 'm') {
+		allDates = getMonthRange(firstDate + '-01', lastDate + '-01');
+	} else {
+		allDates = getYearRange(firstDate + '-01-01', lastDate + '-01-01');
+	}
+	nDates = allDates.length;
+
+	/////////////////////////////////////////////////// TAG TOTALS
+
+	// tagData = {
+	//     tag1: {
+	//         2012-01: 55,
+	//         2012-02: 26,
+	//         total: 81
+	//     },
+	//     tag2: {
+	//         2012-01: 34,
+	//         2012-02: 27,
+	//         2012-05: 25,
+	//         total: 86
+	//     }
+	// }
+
+	// Loop each month/year
+	for (period in groupedData) {
+		periodData = groupedData[period];
+
+		if (period === 'keys') { continue; }  // ignore
+
+		// Scan report rows for this period
+		for (i = 0, leni = periodData.length; i < leni; i++) {
+			// rowDate        = periodData[i][0];
+			rowAmount         = periodData[i][1];
+			rowTags           = periodData[i][2].clone();
+			// rowDescription = periodData[i][3];
+
+			// No tags in this row? Add a fake one
+			if (rowTags.length === 0) {
+				rowTags = [i18n.labelTagCloudEmpty];
+			}
+
+			// Scan tags and sum
+			for (j = 0, lenj = rowTags.length; j < lenj; j++) {
+				tagName = rowTags[j];
+
+				// New tag?
+				if (!tagNames.hasItem(tagName)) {
+
+					// Is this a related tag?
+					if (selectedTags.length > 0 && !selectedTags.hasItem(tagName)) {
+						hasRelated = true;
+						if (hideRelated) {
+							continue;  // ignore
+						}
+					}
+
+					tagNames.push(tagName);
+					tagData[tagName] = {};
+					tagData[tagName].total = 0;
+				}
+
+				// First tag in this period?
+				if (!tagData[tagName][period]) {
+					tagData[tagName][period] = 0;
+				}
+
+				// Sum
+				tagData[tagName][period] += rowAmount;
+				tagData[tagName].total += rowAmount;
+			}
+		}
+	}
+
+	/////////////////////////////////////////////////// TABLE DATA
+
+	// tableData = [
+	//     ['tag1', 55, 26, 0, 0, 123, ...],
+	//     ['tag2', 34, 27, 0, 0, 25, ...]
+	// ]
+
+	// Save the table array, grouped by tag names
+	// This array will become the HTML table
+	for (i = 0, leni = tagNames.length; i < leni; i++) {
+		tagName = tagNames[i];
+		tableData.push([tagName]);
+		index = tableData.length - 1;
+		for (j = 0, lenj = nDates; j < lenj; j++) {
+			period = allDates[j];
+			total = tagData[tagName][period];
+			tableData[index].push(total || 0);
+		}
+		if (nDates > 1) {
+			// total & average
+			tableData[index].push(tagData[tagName].total);
+			tableData[index].push(tagData[tagName].total / nDates);
+		}
+	}
+
+	/////////////////////////////////////////////////// SORT
+
+	if (sortIndex === 0) {
+		// Sort by tag name, ignoring case and accents
+		tableData.sort(sortByIndex(0, 's'));
+
+		// Make sure the (no tag) row is always the last
+		if (tableData.length > 1 && tableData[0][0] === i18n.labelTagCloudEmpty) {
+			tagless = tableData.shift();
+			tableData.push(tagless);
+		}
+	} else {
+		// Sort by value
+		tableData.sort(sortByIndex(sortIndex, 'n'));
+	}
+	if (sortRev) {
+		tableData.reverse();
+	}
+
+	/////////////////////////////////////////////////// HTML
+
+	results.push('<table class="report">');
+
+	//// Table heading
+	results.push('<tr>');
+
+	// tag column
+	results.push(
+		'<th class="tagname" onClick="sortColTag(0)">' +
+		i18n.labelsDetailed[2] +
+		'<\/th>'
+	);
+	// dates
+	for (i = 0, leni = nDates; i < leni; i++) {
+		periodName = allDates[i];
+
+		// Month names get special formatting
+		if (reportType === 'm') {
+			periodName = (allDates[i] + '-01').toDate().format('Y-b');
+			periodName = periodName.
+				replace(/^(....)/, '<i>$1<\/i>').
+				replace('-', '<br>');
+		}
+
+		results.push(
+			'<th onClick="sortColTag(' + (i+1) +  ')">' +
+			periodName +
+			'<\/th>'
+		);
+	}
+	// total & average
+	if (nDates > 1) {
+		results.push(
+			'<th onClick="sortColTag(' + (i+1) + ')" class="totals">' +
+			i18n.labelTotal +
+			'<\/th>'
+		);
+		results.push(
+			'<th onClick="sortColTag(' + (i+2) + ')" class="totals">' +
+			i18n.labelAverage +
+			'<\/th>'
+		);
+	}
+	results.push('<\/tr>');
+
+	// Compose table body, one tag per row
+	for (i = 0, leni = tableData.length; i < leni; i++) {
+		results.push('<tr>');
+		results.push('<td>' + tableData[i][0] +  '<\/td>');  // tag name
+
+		// Now the numbers (Note: j=1)
+		for (j = 1, lenj = tableData[i].length; j < lenj; j++) {
+
+			// Mark the Totals columns
+			if (nDates > 1 && j === lenj - 2) {  // penultimate
+				tdClass = "number totals total";
+			} else if (nDates > 1 && j === lenj - 1) {  // last
+				tdClass = "number totals average";
+			} else {
+				tdClass = "number";
+			}
+
+			results.push(
+				'<td class="' + tdClass + '">' +
+				((tableData[i][j]) ? prettyFloat(tableData[i][j]) : '0') +
+				'<\/td>'
+			);
+			// Note: empty cells become 0 and not 0.00 to make the report less polluted
+		}
+		results.push('<\/tr>');
+	}
+
+	results.push('<\/table>');
+
+	// Show report (if we have tags)
+	content.innerHTML = (tagNames.length > 0) ? results.join('\n') : '';
+
+	// Show/hide options
+	options.style.display = (hasRelated) ? 'block' : 'none';
 }
 
 function showReport() {
+	var i;
+
 	if (reportType === 'd') {
-		showDetailed();
+		dailyReport();
 	} else {
-		showOverview();
+		periodReport();
 	}
+	tagReport();
 
 	// Widget hook: showReportPost
 	for (i = 0; i < Widget.instances.length; i++) {
@@ -3480,230 +3857,101 @@ function showReport() {
 
 
 /////////////////////////////////////////////////////////////////////
-//                       INTERFACE UPDATE
+//                        DATA EDITOR
 /////////////////////////////////////////////////////////////////////
 
-function populateChartColsCombo() {
-	var el = document.getElementById('chart-selector');
-	el.options[0] = new Option(i18n.labelsOverview[1], 1);  // Incoming
-	el.options[1] = new Option(i18n.labelsOverview[2], 2);  // Expense
-	el.options[2] = new Option(i18n.labelsOverview[3], 3);  // Partial
-	el.options[3] = new Option(i18n.labelsOverview[4], 4);  // Balance
-}
+function editorOn() {
+	var filepath;
 
-function populateRowsSummaryCombo() {
-	var el = document.getElementById('rows-summary-index');
-	el.options[0] = new Option(i18n.labelsOverview[1], 2);  // Incoming
-	el.options[1] = new Option(i18n.labelsOverview[2], 3);  // Expense
-	el.options[2] = new Option(i18n.labelsOverview[3], 4);  // Partial
-}
-
-function populateDataFilesCombo() {
-	var el, i, leni;
-	if (appMode === 'txt' || appMode === 'dropbox') {
-		el = document.getElementById('source-file');
-		for (i = 0, leni = dataFiles.length; i < leni; i++) {
-			el.options[i] = new Option(dataFiles[i]);
-		}
+	// Load the current data to the editor
+	// Note: already loaded when localStorage
+	if (appMode !== 'localStorage') {
+		document.getElementById('editor-data').value = rawData;
 	}
-}
 
-function populateLastMonthsCombo() {
-	var el, label, i;
-	el = document.getElementById('opt-last-months-combo');
-	label = i18n.labelMonths[0];
-	for (i = 1; i <= maxLastMonths; i++) {
-		if (i > 1) {
-			label = i18n.labelMonths[1];
-		}
-		el.options[i - 1] = new Option(i + ' ' + label, i);
-	}
-	el.selectedIndex = (initLastMonths > 0) ? initLastMonths - 1 : 0;
-}
+	// Hide content to avoid scroll bars
+	document.getElementById('content').style.display = 'none';
 
-function populateDateRangeCombos(comboType) {  // comboType: m, y
-	var el1, el2, i, leni, my, range, fmt, offset1, offset2, index1, index2;
-
-	if (comboType === 'y') {
-		el1 = document.getElementById('opt-date-1-year-combo');
-		el2 = document.getElementById('opt-date-2-year-combo');
-		offset1 = initYearOffsetFrom;
-		offset2 = initYearOffsetUntil;
-		fmt = 'Y';
-		range = getDataUniqueDates('y');
+	// Set file name
+	if (appMode === 'localStorage') {
+		filepath = 'Browser localStorage: ' + localStorageKey;
+	} else if (appMode === 'dropbox') {
+		filepath = 'Dropbox: ' + dropboxAppFolder + dropboxTxtFolder + '/' + getSelectedFile();
 	} else {
-		el1 = document.getElementById('opt-date-1-month-combo');
-		el2 = document.getElementById('opt-date-2-month-combo');
-		offset1 = initMonthOffsetFrom;
-		offset2 = initMonthOffsetUntil;
-		fmt = 'Y-m';
-		range = getDataUniqueDates('m');
+		filepath = getSelectedFile();
 	}
+	document.getElementById('editor-file-name').innerHTML = filepath;
 
-	//// Let's choose which items to select by default.
-	//
-	// Get user defaults
-	if (typeof offset1 === 'number') {
-		offset1 = (comboType === 'y') ? offset1 * 12 : offset1;
-		index1 = range.indexOf(
-			formatDate(
-				addMonths(getCurrentDate(), offset1),  // apply offset
-				fmt));
-	}
-	if (typeof offset2 === 'number') {
-		offset2 = (comboType === 'y') ? offset2 * 12 : offset2;
-		index2 = range.indexOf(
-			formatDate(
-				addMonths(getCurrentDate(), offset2),  // apply offset
-				fmt));
-	}
-	//
-	// If unset or out of range, we'll select the oldest and newer
-	if (index1 === -1) {
-		index1 = 0;
-	}
-	if (index2 === -1) {
-		index2 = range.length - 1;
-	}
+	// Show editor
+	document.getElementById('editor').style.display = 'block';
 
-	// First, make sure the combo is empty
-	el1.options.length = 0;
-	el2.options.length = 0;
+	return false;  // cancel link action
+}
+function editorOff() {
 
-	// Both combos 1 and 2 will have the same items
-	for (i = 0, leni = range.length; i < leni; i++) {
-		if (comboType === 'y') {
-			el1.options[i] = new Option(range[i]);
-			el2.options[i] = new Option(range[i]);
+	// Hide editor
+	document.getElementById('editor').style.display = 'none';
+
+	// Restore content
+	document.getElementById('content').style.display = 'block';
+
+	return false;  // cancel link action
+}
+function saveLocalData() {
+	var editButton = document.getElementById('editor-open');
+
+	editButton.innerHTML = i18n.msgSaving;
+	localStorage.setItem(localStorageKey, document.getElementById('editor-data').value);
+
+	// Save currently selected tags
+	initSelectedTags = getSelectedTags();
+	initExcludedTags = getExcludedTags();
+
+	// Reload report
+	resetData();
+	readData();
+	parseData();
+	showReport();
+	editButton.innerHTML = i18n.labelEditorOpen;
+}
+function editorSave() {
+	editorOff();
+	saveLocalData();
+	return false;  // cancel link action
+}
+// Allows to insert TABs inside textarea
+// Opera bug: needs to be attached to onkeypress instead onkeydown
+// Original from: http://pallieter.org/Projects/insertTab/ (see <script> at page source)
+function insertTab(e) {
+	var kC, oS, sS, sE, o = this; // aurelio: make jslint happy
+
+	if (!e) { e = window.event; } // IE - aurelio: removed event on calling
+	o = this; // aurelio: removed this on calling
+
+	kC = e.keyCode ? e.keyCode : e.charCode ? e.charCode : e.which;
+	if (kC == 9 && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+		oS = o.scrollTop; // Set the current scroll position.
+		if (o.setSelectionRange) {
+			// For: Opera + FireFox + Safari
+			sS = o.selectionStart;
+			sE = o.selectionEnd;
+			o.value = o.value.substring(0, sS) + '\t' + o.value.substr(sE);
+			o.setSelectionRange(sS + 1, sS + 1);
+			o.focus();
+		} else if (o.createTextRange) {
+			// For: MSIE
+			document.selection.createRange().text = '\t'; // String.fromCharCode(9)
+			// o.onblur = function() { o.focus(); o.onblur = null; };
+		}
+		o.scrollTop = oS; // Return to the original scroll position.
+		if (e.preventDefault) {  // aurelio change
+			e.preventDefault();
 		} else {
-			my = (range[i] + '-01').toDate().format('b Y');  // short month name
-			el1.options[i] = new Option(my, range[i]);
-			el2.options[i] = new Option(my, range[i]);
+			e.returnValue = false;
 		}
+		return false; // Not needed, but good practice.
 	}
-
-	// Set selected items
-	el1.selectedIndex = index1;
-	el2.selectedIndex = index2;
-}
-
-function populateValueFilterCombo() {
-	var el;
-	el = document.getElementById('opt-value-filter-combo');
-	el.options[0] = new Option('+ ' + i18n.labelPositive, '+');
-	el.options[1] = new Option('- ' + i18n.labelNegative, '-');
-	el.options[2] = new Option('> ' + i18n.labelGreaterThan, '>');
-	el.options[3] = new Option('< ' + i18n.labelLessThan, '<');
-}
-
-function updateToolbar() {
-	var i, leni, add, remove, hide, unhide, add_exceptions;
-
-	// Visibility On/Off
-	// Monthly/Yearly report hides some controls from the toolbar.
-	//
-	// Some fields are just hidden to preserve the page layout.
-	// Others must be removed to free vertical space.
-
-	add = [];
-	remove = [];
-	hide = [];
-	unhide = [];
-	add_exceptions = [];
-
-	if (!showViewWidget) { add_exceptions.push('view-options-box'); }
-	if (!showTagCloud)   { add_exceptions.push('tag-cloud-box'   ); }
-	if (!showTagSummary) { add_exceptions.push('tag-summary-box' ); }
-
-	// Daily
-	if (reportType === 'd') {
-		unhide = [
-			'search-box',
-			'opt-monthly-box',
-			'opt-value-filter-box',
-			'tag-cloud-box',
-			'tag-summary-box'
-		];
-		add = [
-			'opt-date-1-month-combo',
-			'opt-date-2-month-combo'
-		];
-		remove = [
-			'opt-date-1-year-combo',
-			'opt-date-2-year-combo'
-		];
-		if (useLegacyDateFilter) {
-			unhide.push('opt-last-months-box');
-		}
-
-	// Monthly
-	} else if (reportType === 'm') {
-		hide = [
-			'search-box',
-			'opt-monthly-box',
-			'opt-value-filter-box',
-			'tag-cloud-box',
-			'tag-summary-box'
-		];
-		add = [
-			'opt-date-1-month-combo',
-			'opt-date-2-month-combo'
-		];
-		remove = [
-			'opt-date-1-year-combo',
-			'opt-date-2-year-combo'
-		];
-		if (useLegacyDateFilter) {
-			unhide.push('opt-last-months-box');
-		}
-
-	// Yearly
-	} else if (reportType === 'y') {
-		hide = [
-			'search-box',
-			'opt-monthly-box',
-			'opt-value-filter-box',
-			'tag-cloud-box',
-			'tag-summary-box'
-		];
-		add = [
-			'opt-date-1-year-combo',
-			'opt-date-2-year-combo'
-		];
-		remove = [
-			'opt-date-1-month-combo',
-			'opt-date-2-month-combo'
-		];
-		if (useLegacyDateFilter) {
-			// Recent *months* doesn't make sense in yearly report
-			hide.push('opt-last-months-box');
-		}
-	}
-
-	// In Mobile toolbar we always add/remove, there's no hide.
-	// We save vertical space, and the report jump is not an issue.
-	if (isMobile) {
-		add = add.concat(unhide);
-		remove = remove.concat(hide);
-		hide = [];
-		unhide = [];
-	}
-
-	// Show/hide toolbar elements
-	for (i = 0, leni = add.length; i < leni; i++) {
-		if (!add_exceptions.hasItem(add[i])) {
-			document.getElementById(add[i]).style.display = 'block';
-		}
-	}
-	for (i = 0, leni = remove.length; i < leni; i++) {
-		document.getElementById(remove[i]).style.display = 'none';
-	}
-	for (i = 0, leni = hide.length; i < leni; i++) {
-		document.getElementById(hide[i]).style.visibility = 'hidden';
-	}
-	for (i = 0, leni = unhide.length; i < leni; i++) {
-		document.getElementById(unhide[i]).style.visibility = 'visible';
-	}
+	return true;
 }
 
 
@@ -3712,14 +3960,31 @@ function updateToolbar() {
 /////////////////////////////////////////////////////////////////////
 
 function sortCol(index) {
-	// if the same, flip reverse state
-	sortColRev = (sortColIndex == index) ? !sortColRev : false;
-	sortColIndex = index;
+	// If the same index, flip current reverse state, else reverse=false
+	sortData[reportType].rev =
+		(sortData[reportType].index == index) ?
+		!sortData[reportType].rev :
+		false;
+	// Save new index
+	sortData[reportType].index = index;
+	// Refresh table
 	showReport();
 }
 
-function changeReport(el) {
-	var oldType, newType;
+function sortColTag(index) {
+	// If the same index, flip current reverse state, else reverse=false
+	sortData[reportType].revTag =
+		(sortData[reportType].indexTag === index) ?
+		!sortData[reportType].revTag :
+		false;
+	// Save new index
+	sortData[reportType].indexTag = index;
+	// Refresh table
+	tagReport();
+}
+
+function changeReport() {
+	var el, oldType, newType;
 
 	el = this;
 	oldType = reportType;
@@ -3729,27 +3994,11 @@ function changeReport(el) {
 	removeClass(document.getElementById(oldType), 'active');
 	addClass(el, 'active');
 
-	//// Save / restore information
-
-	// From Daily to Monthly/Yearly
-	if (oldType === 'd' && newType !== 'd') {
-		oldSortColIndex = sortColIndex;
-		oldSortColRev = sortColRev;
-		sortColIndex = 0; // Default by date
-		sortColRev = false;
-	//
-	// From Monthly/Yearly to Daily
-	} else if (newType === 'd' && oldType !== 'd') {
-		sortColIndex = oldSortColIndex || 0;
-		sortColRev = oldSortColRev || false;
-	}
-
 	// Always reset Rows Summary when changing reports
 	selectedRows = [];
 	updateSelectedRowsSummary();
 
 	reportType = newType;
-	overviewData = [];
 	updateToolbar();
 	showReport();
 
@@ -3788,13 +4037,12 @@ function iframeLoaded(el) {
 
 function lastMonthsChanged() {
 	document.getElementById('opt-last-months-check').checked = true;
-	overviewData = [];
 	showReport();
 }
 
 function dateRangeComboChanged() {
 	document.getElementById(this.id.replace(/(month|year)-combo/, 'check')).checked = true;
-	toggleDateRange();
+	showReport();
 }
 
 function toggleFullScreen() {
@@ -3818,16 +4066,6 @@ function toggleFullScreen() {
 	return false;  // cancel link action
 }
 
-function toggleFuture() {
-	overviewData = [];  // clear cache
-	showReport();
-}
-
-function toggleDateRange() {
-	overviewData = [];  // clear cache
-	showReport();
-}
-
 function toggleToolbarBox(header_id, content_id) {
 	// Handle toolbar box header clicking: show/hide contents
 	var header, content;
@@ -3842,19 +4080,25 @@ function toggleToolbarBox(header_id, content_id) {
 	}
 	return false;  // cancel link action
 }
+
+function toggleCheckboxOptionExtra(checkbox) {
+	// Show/hide the "*-extra" DIV with aditional options
+	var extra = document.getElementById(checkbox.id.replace('-check', '-extra'));
+	if (hasClass(extra, 'auto-hide')) {
+		extra.style.display = (checkbox.checked) ? 'block' : 'none';
+	}
+}
+
 function toggleViewOptions() {
 	return toggleToolbarBox('view-options-header', 'view-options-content');
 }
+
 function toggleTagCloud() {
 	return toggleToolbarBox('tag-cloud-header', 'tag-cloud-content');
-}
-function toggleTagSummary() {
-	return toggleToolbarBox('tag-summary-header', 'tag-summary-content');
 }
 
 function toggleLastMonths() {
 	toggleCheckboxOptionExtra(this);
-	overviewData = [];  // clear cache
 	showReport();
 }
 
@@ -3865,18 +4109,11 @@ function toggleValueFilter() {
 
 function toggleMonthly() {
 	if (document.getElementById('opt-monthly-check').checked === true) {
-		sortColIndex = 0;
-		sortColRev = false;
+		// Restore default sort when activating Partials
+		sortData.d.index = 0;
+		sortData.d.rev = false;
 	}
 	showReport();
-}
-
-function toggleCheckboxOptionExtra(checkbox) {
-	// Show/hide the "*-extra" DIV with aditional options
-	var extra = document.getElementById(checkbox.id.replace('-check', '-extra'));
-	if (hasClass(extra, 'auto-hide')) {
-		extra.style.display = (checkbox.checked) ? 'block' : 'none';
-	}
 }
 
 function toggleRowHighlight(el) {
@@ -3899,8 +4136,6 @@ function toggleRowHighlight(el) {
 }
 
 function valueFilterChanged() {
-	overviewData = [];
-
 	// autocheck checkbox
 	document.getElementById('opt-value-filter-check').checked = true;
 
@@ -3914,13 +4149,9 @@ function valueFilterChanged() {
 	showReport();
 }
 
-function showHideEditButton() {
-	var el;
-	if (appMode === 'dropbox') {
-		// Hide Edit button when current file is '*'
-		el = document.getElementById('editor-open');
-		el.style.visibility = (getSelectedFile() === '*') ? 'hidden' : 'visible';
-	}
+function resetRowsSummary() {
+	showReport();
+	return false;  // cancel link action
 }
 
 
@@ -3938,6 +4169,7 @@ function Widget(widgetId, widgetName, instanceName) {
 	this.id = widgetId;
 	this.widgetName = widgetName;
 	this.instanceName = instanceName;
+	this.initDone = false;
 	this.created = false;
 
 	// Save the instance into a global holder
@@ -3966,9 +4198,9 @@ function Widget(widgetId, widgetName, instanceName) {
 	].join('\n');
 	this.checkboxTemplate = [
 		'	<div class="checkbox-option">',
-		'		<input id="{widgetId}-{optionId}" class="trigger" type="checkbox"',
+		'		<input id="{widgetId}-{idSuffix}" class="trigger" type="checkbox"',
 		'			onclick="{instanceName}.checkboxClicked(this)">',
-		'		<label for="{widgetId}-{optionId}">{label}</label>',
+		'		<label id="{widgetId}-{idSuffix}-label" for="{widgetId}-{idSuffix}">{label}</label>',
 		'	</div>'
 	].join('\n');
 }
@@ -4025,6 +4257,8 @@ Widget.prototype.init = function () {
 	// user config is applied and app UI is ready. But user data was not
 	// read/parsed yet.
 
+	if (this.initDone) { return; }  // already done
+
 	// Create widget DIV if config allows
 	this.create();
 	if (!this.created) { return; }
@@ -4036,12 +4270,15 @@ Widget.prototype.init = function () {
 	if (this.config.opened && this.config.active) {
 		this.toggle();
 	}
+
+	this.initDone = true;
 };
 
 Widget.prototype.create = function () {
 	// Append a new widget-box to the #widgets area
 
 	if (!this.config.active) { return; }
+	if (this.created) { return; }  // already done
 
 	document.getElementById('widgets').innerHTML += this.boxTemplate
 		.replace(/\{widgetId\}/g, this.id)
@@ -4051,6 +4288,9 @@ Widget.prototype.create = function () {
 	this.header = document.getElementById(this.id + '-header');
 	this.content = document.getElementById(this.id + '-content');
 	this.created = (this.box && this.header && this.content) ? true : false;
+
+	// Set header tooltip
+	this.header.title = i18n[this.instanceName + 'HeaderHelp'];
 };
 
 Widget.prototype.populate = function () {
@@ -4059,7 +4299,7 @@ Widget.prototype.populate = function () {
 	return;
 };
 
-Widget.prototype.addCheckbox = function (id, label, checked) {
+Widget.prototype.addCheckbox = function (idSuffix, label, checked) {
 	// Append a new checkbox to the widget-box contents
 
 	var template = this.checkboxTemplate;
@@ -4069,11 +4309,11 @@ Widget.prototype.addCheckbox = function (id, label, checked) {
 
 	this.content.innerHTML += template
 		.replace(/\{widgetId\}/g, this.id)
-		.replace(/\{optionId\}/g, id)
+		.replace(/\{idSuffix\}/g, idSuffix)
 		.replace(/\{label\}/g, label)
 		.replace(/\{instanceName\}/g, this.instanceName);
 
-	return document.getElementById(this.id + '-' + id);  // return the element
+	return document.getElementById(this.id + '-' + idSuffix);  // return the element
 };
 
 Widget.prototype.checkboxClicked = function (element) {  // Event handler
@@ -4089,13 +4329,160 @@ Widget.prototype.showReportPost = function () {};
 
 
 /////////////////////////////////////////////////////////////////////
+////
+//// Tag Summary Widget
+
+TagSummary = new Widget('tag-summary', 'Tag Summary', 'TagSummary');
+
+// Widget config
+TagSummary.config.active = true;       // Is this widget active?
+TagSummary.config.opened = false;      // Start app with this widget opened?
+TagSummary.config.checkSort = false;   // [X] Sort by value checkbox inits checked?
+TagSummary.config.showTagless = true;  // The (no tag) sum should appear?
+
+if (isMobile) { TagSummary.config.opened = false; }  // In mobile, always closed
+
+// UI strings
+i18nDatabase.en.TagSummaryHeaderLabel = 'Tag Summary';
+i18nDatabase.en.TagSummaryHeaderHelp = 'Show/hide the tag summary.';
+i18nDatabase.en.TagSummarySortLabel = 'Sort by value';
+i18nDatabase.en.TagSummarySortHelp = 'Order the Tag Summary by values instead tag names.';
+//
+i18nDatabase.pt.TagSummaryHeaderLabel = 'Somatório de tags';
+i18nDatabase.pt.TagSummaryHeaderHelp = 'Mostra e esconde o somatório das tags.';
+i18nDatabase.pt.TagSummarySortLabel = 'Ordenar por valor';
+i18nDatabase.pt.TagSummarySortHelp = 'Ordena o sumário de tags pelos valores, não pelos nomes.';
+
+// Create elements
+TagSummary.populate = function () {
+
+	this.content.innerHTML = [
+		'<div id="tag-summary-data"></div>',
+		'',
+		'<div id="tag-summary-options" class="widget-options">',
+		'	<hr />',
+		'	<div id="tag-summary-opt-nsort-box" class="checkbox-option">',
+		'		<input id="tag-summary-opt-nsort-check" type="checkbox" class="trigger">',
+		'		<label id="tag-summary-opt-nsort-label" for="tag-summary-opt-nsort-check"></label>',
+		'	</div>',
+		'</div>'
+	].join('\n');
+
+	// Set option label & tooltip
+	document.getElementById('tag-summary-opt-nsort-label').title = i18n.TagSummarySortHelp;
+	document.getElementById('tag-summary-opt-nsort-label').innerHTML = i18n.TagSummarySortLabel;
+
+	// Save checkbox element for later use
+	this.sortCheckbox = document.getElementById('tag-summary-opt-nsort-check');
+
+	// Set checkbox action handler
+	this.sortCheckbox.onclick = showReport;
+
+	// Maybe the option should init checked?
+	if (this.config.checkSort) {
+		this.sortCheckbox.checked = true;
+	}
+};
+
+// hook
+TagSummary.showReportPost = function () {
+	this.update();
+};
+
+// Updates the summary with the current report information
+TagSummary.update = function () {
+	var i, leni, j, lenj, tag, results, tagNames, tagData, theData, tableData, rowAmount, rowTags, noTagSum, valueSort;
+
+	results = [];
+	tagNames = [];
+	tagData = {};
+	tableData = [];
+	valueSort = this.sortCheckbox.checked;
+	noTagSum = undefined;  // Do not use 0. The final result may be zero.
+	theData = reportData.clone();
+
+	// Scan report rows
+	for (i = 0, leni = theData.length; i < leni; i++) {
+		// rowDate        = theData[i][0];
+		rowAmount      = theData[i][1];
+		rowTags        = theData[i][2].clone();
+		// rowDescription = theData[i][3];
+
+		if (rowTags.length === 0) {
+			// No tag in this row
+			if (noTagSum === undefined) {
+				noTagSum = 0;
+			}
+			noTagSum += rowAmount;
+
+		} else {
+			// Sum all values for the same tag
+			for (j = 0, lenj = rowTags.length; j < lenj; j++) {
+				tag = rowTags[j];
+
+				// New tag?
+				if (!tagNames.hasItem(tag)) {
+					tagData[tag] = 0;
+					tagNames.push(tag);
+				}
+				tagData[tag] = tagData[tag] + rowAmount;
+			}
+		}
+	}
+
+	// We have tags?
+	if (tagNames.length || noTagSum !== undefined) {
+
+		// Sort tag names
+		tagNames.sort(sortIgnoreCase);
+
+		// Append no-tag data to the end of the table
+		if (noTagSum !== undefined && this.config.showTagless) {
+			tagNames.push(i18n.labelTagCloudEmpty);
+			tagData[i18n.labelTagCloudEmpty] = noTagSum;
+		}
+
+		// Save table data, sorted by tag name
+		for (i = 0, leni = tagNames.length; i < leni; i++) {
+			tag = tagNames[i];
+			tableData.push([tag, tagData[tag]]);
+		}
+
+		// Sort by value?
+		if (valueSort) {
+			tableData.sort(sortByIndex(1, 'n'));
+		}
+
+		// Compose the HTML table
+		results.push('<table>');
+		for (i = 0, leni = tableData.length; i < leni; i++) {
+			results.push(
+				'<tr>' +
+				'<td>' + tableData[i][0] +  '<\/td>' +
+				'<td class="number"> ' + prettyFloat(tableData[i][1]) + '<\/td>' +
+				'<\/tr>'
+			);
+		}
+		results.push('<\/table>');
+	}
+
+	// Save results to the respective DIV
+	results = results.join('\n');
+	document.getElementById('tag-summary-data').innerHTML = results;
+
+	// The options box is only shown if we have at least 2 tags
+	document.getElementById('tag-summary-options').style.display = (tableData.length > 1) ? 'block' : 'none';
+};
+
+
+/////////////////////////////////////////////////////////////////////
 //                             INIT
 /////////////////////////////////////////////////////////////////////
 
 function initAppMode() {
 	switch(appMode) {
 
-		case 'one':
+		case 'portable':
 			appFlavor = 'Portable';
 			i18n.appUrl = 'http://aurelio.net/moneylog/moneylog5.html';
 			break;
@@ -4132,7 +4519,7 @@ function init() {
 	// Legacy: discover app mode using obsoleted settings
 	if (!appMode) {
 		if (oneFile) {
-			appMode = 'one';
+			appMode = 'portable';
 		} else if (useLocalStorage) {
 			appMode = 'localStorage';
 		} else if (useDropboxStorage) {
@@ -4157,7 +4544,7 @@ function init() {
 
 	// UI surgery for each mode
 	switch(appMode) {
-		case 'one':
+		case 'portable':
 			// Remove all file-related options
 			document.getElementById('source-file-box').style.display = 'none';
 			document.getElementById('toolbar-sep-1').style.display = 'none';
@@ -4179,8 +4566,13 @@ function init() {
 		case 'txt':
 			// Hide Edit button. Not functional.
 			document.getElementById('editor-open').style.display = 'none';
-			// Stretch Reload button
-			addClass(document.getElementById('source-reload'), 'wide');
+			// Inline mini reload button: [ file.txt ] ↻
+			// i18n.labelReload = '<b>⟳</b>';  // missing in Opera, Safari Mac/iOS
+			i18n.labelReload = '<b>↻</b>';  // missing in Opera
+			addClass(document.getElementById('source-file-box'), 'mini');
+			addClass(document.getElementById('source-file'), 'mini');
+			addClass(document.getElementById('source-reload'), 'mini');
+			addClass(document.getElementById('source-reload'), 'naked');
 			break;
 	}
 
@@ -4236,7 +4628,6 @@ function init() {
 	document.getElementById('opt-negate-label'         ).innerHTML = i18n.labelSearchNegate;
 	document.getElementById('tag-cloud-opt-group-label').innerHTML = i18n.labelTagCloudGroup;
 	document.getElementById('tag-cloud-opt-reset-label').innerHTML = i18n.labelTagCloudReset;
-	document.getElementById('tag-summary-opt-nsort-label').innerHTML = i18n.labelTagSummarySort;
 	document.getElementById('source-reload'            ).innerHTML = i18n.labelReload;
 	document.getElementById('editor-open'              ).innerHTML = i18n.labelEditorOpen;
 	document.getElementById('editor-close'             ).innerHTML = i18n.labelEditorCancel;
@@ -4245,7 +4636,7 @@ function init() {
 	document.getElementById('opt-date-1-label'         ).innerHTML = i18n.labelDateFrom + ':';
 	document.getElementById('opt-date-2-label'         ).innerHTML = i18n.labelDateUntil + ':';
 	document.getElementById('tag-cloud-header'         ).innerHTML = i18n.labelTagCloud;
-	document.getElementById('tag-summary-header'       ).innerHTML = i18n.labelTagSummary;
+	document.getElementById('tag-report-opt-related-label').innerHTML = i18n.labelTagReportRelated;
 	document.getElementById('rows-summary-reset'       ).innerHTML = i18n.labelRowsSummaryReset;
 
 	// Set interface tooltips
@@ -4262,10 +4653,9 @@ function init() {
 	document.getElementById('source-reload'            ).title = i18n.helpReload;
 	document.getElementById('tag-cloud-opt-group-label').title = i18n.helpTagCloudGroup;
 	document.getElementById('tag-cloud-opt-reset-label').title = i18n.helpTagCloudReset;
-	document.getElementById('tag-summary-opt-nsort-label').title = i18n.helpTagSummarySort;
 	document.getElementById('view-options-header'      ).title = i18n.helpViewOptions;
 	document.getElementById('tag-cloud-header'         ).title = i18n.helpTagCloud;
-	document.getElementById('tag-summary-header'       ).title = i18n.helpTagSummary;
+	document.getElementById('tag-report-opt-related-label').title = i18n.helpTagReportRelated;
 	document.getElementById('rows-summary-reset'       ).title = i18n.helpRowsSummaryReset;
 	document.getElementById('editor-open'              ).title = i18n.helpEditorOpen;
 	document.getElementById('editor-close'             ).title = i18n.helpEditorCancel;
@@ -4315,28 +4705,25 @@ function init() {
 	document.getElementById('opt-value-filter-check' ).onclick  = toggleValueFilter;
 	document.getElementById('opt-value-filter-combo' ).onchange = valueFilterChanged;
 	document.getElementById('opt-value-filter-number').onkeyup  = showReport;
-	document.getElementById('opt-future-check'       ).onclick  = toggleFuture;
+	document.getElementById('opt-future-check'       ).onclick  = showReport;
 	document.getElementById('opt-monthly-check'      ).onclick  = toggleMonthly;
 	document.getElementById('filter'                 ).onkeyup  = showReport;
 	document.getElementById('opt-regex-check'        ).onclick  = showReport;
 	document.getElementById('opt-negate-check'       ).onclick  = showReport;
 	document.getElementById('source-file'            ).onchange = loadSelectedFile;
 	document.getElementById('source-reload'          ).onclick  = reloadSelectedFile;
-	document.getElementById('opt-date-1-check'       ).onclick  = toggleDateRange;
-	document.getElementById('opt-date-2-check'       ).onclick  = toggleDateRange;
+	document.getElementById('opt-date-1-check'       ).onclick  = showReport;
+	document.getElementById('opt-date-2-check'       ).onclick  = showReport;
 	document.getElementById('opt-date-1-month-combo' ).onchange = dateRangeComboChanged;
 	document.getElementById('opt-date-2-month-combo' ).onchange = dateRangeComboChanged;
-	document.getElementById('opt-date-1-year-combo'  ).onchange = dateRangeComboChanged;
-	document.getElementById('opt-date-2-year-combo'  ).onchange = dateRangeComboChanged;
 	document.getElementById('tag-cloud-opt-group-check' ).onclick  = showReport;
 	document.getElementById('tag-cloud-opt-reset-check' ).onclick  = resetTagCloud;
-	document.getElementById('tag-summary-opt-nsort-check').onclick  = showReport;
 	document.getElementById('chart-selector'         ).onchange = showReport;
+	document.getElementById('tag-report-opt-related-check').onclick = tagReport;
 	document.getElementById('rows-summary-index'     ).onchange = updateSelectedRowsSummary;
-	document.getElementById('rows-summary-reset'     ).onclick  = showReport;
+	document.getElementById('rows-summary-reset'     ).onclick  = resetRowsSummary;
 	document.getElementById('view-options-header'    ).onclick  = toggleViewOptions;
 	document.getElementById('tag-cloud-header'       ).onclick  = toggleTagCloud;
-	document.getElementById('tag-summary-header'     ).onclick  = toggleTagSummary;
 	document.getElementById('editor-open'            ).onclick  = editorOn;
 	document.getElementById('editor-close'           ).onclick  = editorOff;
 	document.getElementById('editor-save'            ).onclick  = editorSave;
@@ -4349,7 +4736,9 @@ function init() {
 	if (checkDateFrom)      { document.getElementById('opt-date-1-check' ).checked = true; }
 	if (checkDateUntil)     { document.getElementById('opt-date-2-check' ).checked = true; }
 	if (checkMonthPartials) { document.getElementById('opt-monthly-check').checked = true; }
-	if (checkTagSummarySort){ document.getElementById('tag-summary-opt-nsort-check').checked = true; }
+	if (checkHideRelatedTags) {
+		document.getElementById('tag-report-opt-related-check').checked = true;
+	}
 	document.getElementById('filter').value = defaultSearch;
 
 	// Apply user defaults - Legacy
@@ -4382,7 +4771,6 @@ function init() {
 	// Always show these toolbar boxes opened at init
 	if (initViewWidgetOpen)  { toggleViewOptions(); }
 	if (initTagCloudOpen)    {    toggleTagCloud(); }
-	if (initTagSummaryOpen)  {  toggleTagSummary(); }
 
 	// Maybe hide some widgets?
 	if (!showViewWidget) {
@@ -4390,9 +4778,6 @@ function init() {
 	}
 	if (!showTagCloud) {
 		document.getElementById('tag-cloud-box').style.display = 'none';
-	}
-	if (!showTagSummary) {
-		document.getElementById('tag-summary-box').style.display = 'none';
 	}
 
 	// Init all available Widgets one by one
@@ -4423,7 +4808,7 @@ function init() {
 		} else {
 			initDropbox();
 		}
-	} else if (appMode === 'one' || appMode === 'localStorage') {
+	} else if (appMode === 'portable' || appMode === 'localStorage') {
 		readData();
 		parseData();
 		showReport();
@@ -4529,7 +4914,6 @@ window.onload = init;
 						<label
 							id="opt-date-1-label" for="opt-date-1-check"></label>
 						<select id="opt-date-1-month-combo"></select>
-						<select id="opt-date-1-year-combo"></select>
 					</div>
 
 					<!-- Until: -->
@@ -4539,7 +4923,6 @@ window.onload = init;
 						<label
 							id="opt-date-2-label" for="opt-date-2-check"></label>
 						<select id="opt-date-2-month-combo"></select>
-						<select id="opt-date-2-year-combo"></select>
 					</div>
 
 					<!-- Monthly -->
@@ -4617,26 +5000,6 @@ window.onload = init;
 			</div>
 
 
-			<!-- Tag Summary -->
-			<div id="tag-summary-box" class="widget-box">
-				<a id="tag-summary-header" class="button" href="#"></a>
-				<div id="tag-summary-content" class="widget-content">
-
-					<div id="tag-summary-data">
-					</div>
-
-					<div id="tag-summary-options" class="widget-options">
-						<hr />
-						<div id="tag-summary-opt-nsort-box" class="checkbox-option">
-							<input
-								id="tag-summary-opt-nsort-check" type="checkbox" class="trigger">
-							<label
-								id="tag-summary-opt-nsort-label" for="tag-summary-opt-nsort-check"></label>
-						</div>
-					</div>
-				</div>
-			</div>
-
 			<!-- Widgets -->
 			<div id="widgets">
 			</div>
@@ -4667,6 +5030,18 @@ window.onload = init;
 		<div id="chart-content"></div>
 	</div>
 
+	<!-- Tag Report -->
+	<div id="tag-report">
+		<div id="tag-report-content"></div>
+
+		<div id="tag-report-options">
+			<input
+				id="tag-report-opt-related-check" type="checkbox" class="trigger">
+			<label
+				id="tag-report-opt-related-label" for="tag-report-opt-related-check"></label>
+		</div>
+	</div>
+
 	<!-- Rows Summary -->
 	<div id="rows-summary">
 		<select id="rows-summary-index" size="1"></select>
@@ -4695,11 +5070,11 @@ window.onload = init;
 
 <!-- Data - local TXT mode -->
 <iframe id="data-frame" onload="iframeLoaded(this)">
-	<p>Sorry. No iframes support detected, please use the all-in-one version.</p>
-	<p>Ops! Seu navegador não entende iframes. Use a versão tudo-em-um.</p>
+	<p>Sorry. No iframes support detected, please use the Portable version.</p>
+	<p>Ops! Seu navegador não entende iframes. Use a versão Portable.</p>
 </iframe>
 
-<!-- Data - all-in-one mode -->
+<!-- Data - Portable mode -->
 <pre id="data">
 # Troque estes dados pelos seus, separados por TABs ou espaços
 # A data é no formato ANO-MES-DIA

@@ -97,19 +97,15 @@
 // checkDateFrom = true         ;// Iniciar marcando a opção [X] De:?
 // checkDateUntil = true        ;// Iniciar marcando a opção [X] Até:?
 //
-// As quatro opções seguintes servem para escolher qual será o valor padrão
-// que já virá escolhido nos seletores de data De: e Até:, sendo as duas
-// primeiras para os extratos Diário e Mensal, e as outras para o Anual.
-// Coloque um número, positivo ou negativo, que indicará o número de meses
-// (ou anos) à partir da data atual. Números positivos para meses/anos
-// futuros e negativos para os passados. Por exemplo, para dizer "três meses
-// atrás", use -3. Para dizer mês/ano seguinte, use 1. Zero significa o
-// mês/ano corrente.
+// As duas opções seguintes servem para escolher qual será o valor padrão
+// que virá escolhido nos seletores de data De: e Até:. Coloque um número,
+// positivo ou negativo, que indicará o número de meses à partir da data
+// atual. Use números positivos para meses futuros e negativos para os
+// passados. Por exemplo, para dizer "três meses atrás", use -3. Para dizer
+// mês seguinte, use 1. Zero significa o mês corrente.
 //
-// initMonthOffsetFrom = -2     ;// Mensal: valor inicial da opção [X] De:
-// initMonthOffsetUntil = 0     ;// Mensal: valor inicial da opção [X] Até:
-// initYearOffsetFrom = -5      ;// Anual : valor inicial da opção [X] De:
-// initYearOffsetUntil = 5      ;// Anual : valor inicial da opção [X] Até:
+// initMonthOffsetFrom = -2     ;// Valor inicial da opção [X] De:
+// initMonthOffsetUntil = 0     ;// Valor inicial da opção [X] Até:
 
 
 ////// PARCIAIS MENSAIS
@@ -125,19 +121,32 @@
 ////// WIDGETS
 //
 // initViewWidgetOpen = true    ;// Iniciar com a caixa Visualizar aberta?
-// initTagCloudOpen = true      ;// Iniciar com a nuvem de Tags aberta?
-// initTagSummaryOpen = false   ;// Iniciar com Somatório de tags aberto?
-// showTagCloud = true          ;// Usar o widget Nuvem de tags?
-// showTagSummary = true        ;// Usar o widget Somatório de tags?
+// initTagCloudOpen = true      ;// Iniciar com a Nuvem de Tags aberta?
+// showTagCloud = true          ;// Usar o widget Nuvem de Tags?
+
+
+////// WIDGET: SOMATÓRIO DE TAGS
+// TagSummary.config.active = true      ;// Usar o widget Somatório de tags?
+// TagSummary.config.opened = true      ;// Iniciar com este widget já aberto?
+// TagSummary.config.showTagless = true ;// Mostrar o item (sem tag)?
+// TagSummary.config.checkSort = false  ;// Iniciar marcando a opção [X] Ordenar por valor?
 
 
 ////// TABELA DO EXTRATO
 //
+// showBalance = true           ;// Mostrar a coluna Acumulado?
 // showRowCount = true          ;// Mostrar o número da linha à esquerda?
 // monthlyRowCount = true       ;// O número da linha recomeça a cada mês?
 //
 // highlightWords = 'XXX TODO'  ;// Destacar estas palavras na Descrição
 // highlightTags = 'luz água'   ;// Destacar estas tags no extrato
+//
+// sortData.d.index = 0         ;// Diário: iniciar ordenando por esta coluna (0-3)
+// sortData.m.index = 0         ;// Mensal: iniciar ordenando por esta coluna (0-4)
+// sortData.y.index = 0         ;// Anual : iniciar ordenando por esta coluna (0-4)
+// sortData.d.rev = false       ;// Diário: iniciar com a ordem inversa?
+// sortData.m.rev = false       ;// Mensal: iniciar com a ordem inversa?
+// sortData.y.rev = false       ;// Anual : iniciar com a ordem inversa?
 
 
 ////// GRÁFICO DE BARRAS
@@ -159,11 +168,11 @@
 
 ////// TAGS
 //
+// showTagReport = true         ;// Mostrar o relatório de tags?
 // ignoreTags = 'poupança'      ;// Ignorar todos os lançamentos com estas tags
 // initSelectedTags = 'água'    ;// Iniciar já com estas tags marcadas
 // initExcludedTags = 'luz'     ;// Iniciar já com estas tags riscadas
-// showEmptyTagInSummary = true ;// Mostrar o item (sem tag) no somatório de tags?
-// checkTagSummarySort = false  ;// Iniciar marcando a opção [X] Ordenar por valor?
+// checkHideRelatedTags = false ;// Iniciar marcando a opção [X] Esconder relacionadas?
 
 
 ////// FORMATO DA DATA
