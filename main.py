@@ -21,7 +21,7 @@ APP_KEY = DB_APPKEY # in conf.py
 APP_SECRET = DB_APPSECRET # in conf.py
 ACCESS_TYPE = 'app_folder' # should be 'dropbox' or 'app_folder' as configured for your app
 
-HOST = 'moneylog-cloud.aurelio.net' if not _DEBUG else 'localhost:8087'
+HOST = 'moneylog-cloud.appspot.com' if not _DEBUG else 'localhost:8087'
 MONEYLOG_FOLDER = '/MoneyLog Cloud/'
 MONEYLOG_DATA_FOLDER = 'txt/'
 MONEYLOG_PLUGINS_FOLDER = 'plugins/'
