@@ -996,6 +996,11 @@ tr.selected .neg {
 	http://aurelio.net/moneylog/
 */
 
+/* shortcuts for config */
+var Y = S = true;
+var N = false;
+
+
 /*********************************************************************
 * User Config
 * -----------
@@ -1072,24 +1077,33 @@ var maxLastMonths = 12;           // Number of months on the last months combo
 var initLastMonths = 3;           // Initial value for last months combo
 var defaultLastMonths = false;    // Last months combo inits checked?
 var defaultFuture = false;        // Show future checkbox inits checked?
-var oneFile;
-var useLocalStorage;
-var useDropboxStorage;
 
 // Default sort for all tables
-// d=daily, m=monthly, y=yearly, index=column(zero-based), reverse
+// d=daily, m=monthly, y=yearly, index=column(one-based), reverse
 var sortData = {'d':{}, 'm':{}, 'y':{}};
-sortData.d.index = 0;
+sortData.d.index = 1;
 sortData.d.rev = false;
-sortData.m.index = 0;
+sortData.m.index = 1;
 sortData.m.rev = false;
-sortData.y.index = 0;
+sortData.y.index = 1;
 sortData.y.rev = false;
-// Tag Report
-sortData.m.indexTag = 0;
+
+// Tag Report, DO NOT CHANGE
+sortData.m.indexTag = 1;
 sortData.m.revTag = false;
-sortData.y.indexTag = 0;
+sortData.y.indexTag = 1;
 sortData.y.revTag = false;
+
+// Sort index limits, DO NOT CHANGE
+sortData.d.min = 1;
+sortData.m.min = 1;
+sortData.y.min = 1;
+sortData.d.max = 4;
+sortData.m.max = 5;
+sortData.y.max = 5;
+sortData.m.minTag = 1;
+sortData.y.minTag = 1;
+// sortData.*.maxTag is variable
 
 
 // Data format
@@ -2219,6 +2233,60 @@ function computeTotals(arr) {  // arr = [1,2,3,4,5]
 //                         TAGS
 /////////////////////////////////////////////////////////////////////
 
+function createTagCloud(names) {
+	// Create all the <a> elements for the Tag Cloud
+	var i, leni, results = [];
+
+	for (i = 0, leni = names.length; i < leni; i++) {
+		results.push('<a class="trigger unselected" href="#" onClick="return tagClicked(this);">' + names[i] + '</a>');
+	}
+
+	document.getElementById('tag-cloud-tags').innerHTML = results.join('\n');
+}
+
+function resetTagCloud() {
+	var i, leni, els, el;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		removeClass(el, 'selected');
+		removeClass(el, 'excluded');
+		addClass(el, 'unselected');
+	}
+
+	// The calling checkbox acts like a button, with temporary ON state
+	this.checked = false;
+
+	showReport();
+}
+
+function updateTagCloud(visibleTags) {
+	// Show/hide the Tag Cloud elements, and set classes
+	var i, leni, el, els;
+
+	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
+	for (i = 0, leni = els.length; i < leni; i++) {
+		el = els[i];
+
+		if (visibleTags.hasItem(el.innerHTML)) {
+			if (el.style.display === 'none') {
+				// unhide element
+				el.style.display = '';
+			}
+		} else {
+			if (el.style.display !== 'none') {
+				// hide element and reset classes
+				el.style.display = 'none';
+				removeClass(el, 'selected');
+				removeClass(el, 'excluded');
+				addClass(el, 'unselected');
+			}
+		}
+	}
+}
+
 function getSelectedTags() {
 	// Get currently selected tags (from interface)
 	var i, leni, el, els, results = [];
@@ -2249,43 +2317,7 @@ function getExcludedTags() {
 	return results;
 }
 
-function createTagCloud(names) {
-	// Create all the <a> elements for the Tag Cloud
-	var i, leni, results = [];
-
-	for (i = 0, leni = names.length; i < leni; i++) {
-		results.push('<a class="trigger unselected" href="#" onClick="return tagClicked(this);">' + names[i] + '</a>');
-	}
-
-	document.getElementById('tag-cloud-tags').innerHTML = results.join('\n');
-}
-
-function updateTagCloud(visibleTags) {
-	// Show/hide the Tag Cloud elements, and set classes
-	var i, leni, el, els;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		if (visibleTags.hasItem(el.innerHTML)) {
-			if (el.style.display === 'none') {
-				// unhide element
-				el.style.display = '';
-			}
-		} else {
-			if (el.style.display !== 'none') {
-				// hide element and reset classes
-				el.style.display = 'none';
-				removeClass(el, 'selected');
-				removeClass(el, 'excluded');
-				addClass(el, 'unselected');
-			}
-		}
-	}
-}
-
-function selectTheseTags(tags) {
+function setSelectedTags(tags) {
 	// Force select some tags, used at start up or reload
 	var i, leni, el, els;
 
@@ -2304,7 +2336,7 @@ function selectTheseTags(tags) {
 	}
 }
 
-function excludeTheseTags(tags) {
+function setExcludedTags(tags) {
 	// Force select some tags, used at start up or reload
 	var i, leni, el, els;
 
@@ -2321,24 +2353,6 @@ function excludeTheseTags(tags) {
 			el.style.display = '';
 		}
 	}
-}
-
-function resetTagCloud() {
-	var i, leni, els, el;
-
-	els = document.getElementById('tag-cloud-tags').getElementsByTagName('a');
-	for (i = 0, leni = els.length; i < leni; i++) {
-		el = els[i];
-
-		removeClass(el, 'selected');
-		removeClass(el, 'excluded');
-		addClass(el, 'unselected');
-	}
-
-	// The calling checkbox acts like a button, with temporary ON state
-	this.checked = false;
-
-	showReport();
 }
 
 function tagClicked(el) {
@@ -2983,11 +2997,11 @@ function parseData() {
 
 	// Already select some tags now?
 	if (initSelectedTags.length > 0) {
-		selectTheseTags(initSelectedTags);
+		setSelectedTags(initSelectedTags);
 	}
 	// Already exclude some tags now?
 	if (initExcludedTags.length > 0) {
-		excludeTheseTags(initExcludedTags);
+		setExcludedTags(initExcludedTags);
 	}
 }
 
@@ -3331,7 +3345,7 @@ function periodReport() {
 	allTotal = [];
 	theData = applyTags(filterData());
 	reportData = theData.clone();
-	sortIndex = sortData[reportType].index;
+	sortIndex = sortData[reportType].index - 1;  // config is one-based
 	sortRev = sortData[reportType].rev;
 
 	if (theData.length) {
@@ -3443,7 +3457,7 @@ function dailyReport() {
 	results = [];
 	chartValues = [];
 	chartLabels = [];
-	sortIndex = sortData.d.index;
+	sortIndex = sortData.d.index - 1;  // config is one-based
 	sortRev = sortData.d.rev;
 	monthPartials = document.getElementById('opt-monthly-check');
 
@@ -3614,7 +3628,7 @@ function tagReport() {
 	tagData = {};
 	tableData = [];
 	theData = reportData.clone();
-	sortIndex = sortData[reportType].indexTag;
+	sortIndex = sortData[reportType].indexTag - 1;  // config is one-based
 	sortRev = sortData[reportType].revTag;
 	selectedTags = getSelectedTags();
 	hasRelated = false;
@@ -3960,25 +3974,29 @@ function insertTab(e) {
 /////////////////////////////////////////////////////////////////////
 
 function sortCol(index) {
+	// Note: sortData config is one-based, sortCol() is zero-based
+
 	// If the same index, flip current reverse state, else reverse=false
 	sortData[reportType].rev =
-		(sortData[reportType].index == index) ?
+		(sortData[reportType].index == (index + 1)) ?
 		!sortData[reportType].rev :
 		false;
 	// Save new index
-	sortData[reportType].index = index;
+	sortData[reportType].index = index + 1;
 	// Refresh table
 	showReport();
 }
 
 function sortColTag(index) {
+	// Note: sortData config is one-based, sortColTag() is zero-based
+
 	// If the same index, flip current reverse state, else reverse=false
 	sortData[reportType].revTag =
-		(sortData[reportType].indexTag === index) ?
+		(sortData[reportType].indexTag === (index + 1)) ?
 		!sortData[reportType].revTag :
 		false;
 	// Save new index
-	sortData[reportType].indexTag = index;
+	sortData[reportType].indexTag = index + 1;
 	// Refresh table
 	tagReport();
 }
@@ -4110,7 +4128,7 @@ function toggleValueFilter() {
 function toggleMonthly() {
 	if (document.getElementById('opt-monthly-check').checked === true) {
 		// Restore default sort when activating Partials
-		sortData.d.index = 0;
+		sortData.d.index = 1;
 		sortData.d.rev = false;
 	}
 	showReport();
@@ -4496,7 +4514,7 @@ function initAppMode() {
 			// Can't use the word Dropbox in app name
 			// https://www.dropbox.com/developers/reference/branding
 			appFlavor = 'Cloud';
-			i18n.appUrl = 'http://moneylog-cloud.appspot.com';
+			i18n.appUrl = 'http://moneylog-cloud.aurelio.net';
 			break;
 
 		case 'txt':
@@ -4515,19 +4533,6 @@ function init() {
 
 	// Load the i18n messages (must be the first)
 	i18n = i18nDatabase.getLanguage(lang);
-
-	// Legacy: discover app mode using obsoleted settings
-	if (!appMode) {
-		if (oneFile) {
-			appMode = 'portable';
-		} else if (useLocalStorage) {
-			appMode = 'localStorage';
-		} else if (useDropboxStorage) {
-			appMode = 'dropbox';
-		} else {  // local TXT
-			appMode = 'txt';
-		}
-	}
 
 	// Check app mode
 	initAppMode();
@@ -4799,6 +4804,16 @@ function init() {
 			document.getElementById('source-file').selectedIndex = 0;
 		}
 	}
+
+	// Validate the sort data config
+	if (sortData.d.index < sortData.d.min) { sortData.d.index = sortData.d.min; }
+	if (sortData.m.index < sortData.m.min) { sortData.m.index = sortData.m.min; }
+	if (sortData.y.index < sortData.y.min) { sortData.y.index = sortData.y.min; }
+	if (sortData.d.index > sortData.d.max) { sortData.d.index = sortData.d.max; }
+	if (sortData.m.index > sortData.m.max) { sortData.m.index = sortData.m.max; }
+	if (sortData.y.index > sortData.y.max) { sortData.y.index = sortData.y.max; }
+	if (sortData.m.index < sortData.m.minTag) { sortData.m.index = sortData.m.minTag; }
+	if (sortData.y.index < sortData.y.minTag) { sortData.y.index = sortData.y.minTag; }
 
 	// Everything is ok, time to read/parse/show the user data
 	if (appMode === 'dropbox') {
@@ -5076,56 +5091,6 @@ window.onload = init;
 
 <!-- Data - Portable mode -->
 <pre id="data">
-# Troque estes dados pelos seus, separados por TABs ou espaços
-# A data é no formato ANO-MES-DIA
-
-2011-09-01    -100,00    Saldo inicial da conta :(
-2011-09-15     -74,23    mercado|
-2011-09-15      -1,99    nerd| Prestação do mouse 10/12
-2011-09-23     -39,90    presente, livro| Livro "Horóscopo dos Duendes"
-
-2011-10-03    -342,59    presente| Um Shrubbery
-2011-10-11     +30,00    Ganhei a aposta com o Zé
-2011-10-12     -35,00    presente, nerd| Poster colorido 3D do Tux em Ascii Art
-2011-10-15      -1,99    nerd| Prestação do mouse 11/12
-2011-10-29     -95,67    mercado|
-
-2011-11-12    -199,90    presente| Segway usado no Mercado Livre
-2011-11-15      -1,99    nerd| Prestação do mouse 12/12 (acabou!)
-
-2011-12-20     -10,00    Carnê do Baú
-
-# A ordem não importa, é possível deixar juntas as transações periódicas
-
-2011-09-05     500       salário|
-2011-10-05     500       salário|
-2011-11-05     500       salário|
-2011-12-05     500       salário|
-2012-01-05     500       salário|
-
-2011-09-07     -25,00    luz|
-2011-10-07     -20,00    luz|
-2011-11-07     -29,00    luz|
-2011-12-07     -25,00    luz|
-
-2011-09-07     -20,00    água|
-2011-10-07     -17,80    água|
-2011-11-07     -32,37    água|
-2011-12-07     -30,00    água|
-
-# Transações futuras!
-
-2012-07-31     +99,99    salário| Bônus
-
-# Pagamentos e ganhos parcelados: use uma / e o número de meses
-
-2011-12-05    -500/5     nerd| Netbook usado comprado parcelado
-2011-11-25     100/2     presente| Presente de Natal, metade Nov, metade Dez
-
-# Pagamentos e ganhos recorrentes: use um * e o número de meses
-
-2011-09-05    -200*6     aluguel| Aluguel da casa (seis meses)
-2011-09-10     100*4     presente| O Zé vai me dar 100 pilas por mês até o fim do ano
 </pre>
 
 </div><!-- #container -->
