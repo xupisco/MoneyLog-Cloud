@@ -28,6 +28,7 @@ function editorSave() {
         showReport();
         editorOff();
     });
+    return false;  // cancel link action
 }
 
 function loadSelectedFile() {
