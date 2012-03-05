@@ -1497,7 +1497,7 @@ var appMode = 'dropbox';  // DO NOT CHANGE
 var appVersion = '5b';
 var appName = 'MoneyLog';
 var appFlavor = '';
-var appRevision = '$Revision: 591 $'.replace(/[^0-9]/g, '');  // automatic, from SVN
+var appRevision = '$Revision: 594 $'.replace(/[^0-9]/g, '');  // automatic, from SVN
 var dropboxAppFolder = '/Apps/MoneyLog Cloud';
 var dropboxTxtFolder = '/txt';
 var dataFirstDate;
@@ -4588,7 +4588,10 @@ AboutWidget.populate = function () {
 		html.push('<div id="about-dropbox">');
 		html.push('Dropbox backend by');
 		html.push(linkme('http://twitter.com/xupisco', '@xupisco'));
-		html.push('(<a id="about-dropbox-version" href="#">GitHub</a>)');
+		html.push('(' + linkme('https://github.com/xupisco/MoneyLog-Cloud', 'GitHub') + ')');
+		html.push('<br>');
+		html.push('commit:');
+		html.push('<a id="about-dropbox-version" href="#"></a>');  // filled in initDropbox()
 		html.push('</div>');
 	}
 

@@ -5,8 +5,8 @@
 {% block content %}
 <script type="text/javascript">
 $(function() {
-    var commit_id = '###REPLACE_HERE###'
-    $("#about-dropbox-version").attr('href', 'http://github.com/xupisco/MoneyLog-Cloud/commit/' + commit_id);
+    var commit_id = '82016ee85b'
+    $("#about-dropbox-version").html('<a href=http://github.com/xupisco/MoneyLog-Cloud/commit/' + commit_id + '>' + commit_id + '</a>');
 });
 </script>
 
@@ -25,6 +25,6 @@ $(function() {
 
         <a href="http://aurelio.net/moneylog/" class="login_btn" target="_blank">Sobre</a><a href="http://www.dropbox.com" class="login_btn" style="margin-right: 0;" target="_blank">Dropbox?</a>
     </div>
-    <p class="commit">Source: <a id="about-dropbox-version" href="#" title="Alguma dúvida? Veja o source...">Github</a></p>
+    <p class="commit">Source: <a href="http://github.com/xupisco/MoneyLog-Cloud/" title="Alguma dúvida? Veja o source...">Github</a> (<a href="#" id="about-dropbox-version"></a>)</p>
 </div>
 {% endblock %}
