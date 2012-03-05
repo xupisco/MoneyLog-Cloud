@@ -53,6 +53,9 @@ class CoreHandler(webapp2.RequestHandler):
             return val.value if val else None
         return None
 
+    def getLastCommitID(self):
+        return open('commit.txt', 'r').read() # Read last commit id
+
     def generate(self, template_name, template_values={}):
         values = {
             'request': self.request,
@@ -223,8 +226,24 @@ class Main(CoreHandler):
             self.response.out.write(ml_data.decode('utf-8'))
 
 
+class UpdateCommitID(CoreHandler):
+    def post(self):
+        pl = self.request.POST.get('payload', False)
+
+        if pl:
+            import json
+            payload = json.loads(pl)
+
+            cmm = open('commit.txt', 'w')
+            cmm.write(payload['after'][:10])
+            cmm.close()
+            self.response.out.write('done')
+
+
+
 app = webapp2.WSGIApplication([('/', Main),
                                ('/connect', Connect),
                                ('/login', Login),
-                               ('/update', Update)],
+                               ('/update', Update),
+                               ('/updateCommitID', UpdateCommitID)],
                               debug=_DEBUG)

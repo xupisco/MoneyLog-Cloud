@@ -1,5 +1,3 @@
-var commit_id = '82016ee85b'
-
 function initDropbox(reloading) {
     reloading = reloading || false
     $("#report").html('<p style=\'text-align: left;\'> ' + i18n.msgLoading.replace('%s', '&lt;Dropbox home&gt;/Apps/MoneyLog Cloud/txt/' + getSelectedFile())   + '</p>');
@@ -34,4 +32,3 @@ function editorSave() {
 function loadSelectedFile() {
     initDropbox(true);
 }
-
