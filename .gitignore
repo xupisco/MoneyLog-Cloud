@@ -1,12 +1,8 @@
 *.pyc
 .DS_Store
-_matrix/
-static/uploads/
-static/_versions/
-static/saraiva/
+static/js/commit_id.js
 .svn
 *.db
 .project
-.pydevproject
 settings.py
 conf.py
