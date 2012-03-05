@@ -3,6 +3,13 @@
 {% block title %}MoneyLog Cloud{% endblock %}
 
 {% block content %}
+<script type="text/javascript">
+$(function() {
+    var commit_id = '###REPLACE_HERE###'
+    $("#about-dropbox-version").attr('href', 'http://github.com/xupisco/MoneyLog-Cloud/commit/' + commit_id);
+});
+</script>
+
 <div id="login_container">
     <div id="login_logo">
         MoneyLog:<span style="color: #2b97e9;">cloud</span>
@@ -18,6 +25,6 @@
 
         <a href="http://aurelio.net/moneylog/" class="login_btn" target="_blank">Sobre</a><a href="http://www.dropbox.com" class="login_btn" style="margin-right: 0;" target="_blank">Dropbox?</a>
     </div>
-    <p class="commit">commit: <a href="http://github.com/xupisco/MoneyLog-Cloud" title="Alguma dúvida? Veja o source...">fa1b724ae8</a></p>
+    <p class="commit">Source: <a id="about-dropbox-version" href="#" title="Alguma dúvida? Veja o source...">Github</a></p>
 </div>
 {% endblock %}

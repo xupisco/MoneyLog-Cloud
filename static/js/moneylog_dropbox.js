@@ -1,9 +1,9 @@
-var commit_id = 'fa1b724ae8'
+var commit_id = '###REPLACE_HERE###'
 
 function initDropbox(reloading) {
     reloading = reloading || false
     $("#report").html('<p style=\'text-align: left;\'> ' + i18n.msgLoading.replace('%s', '&lt;Dropbox home&gt;/Apps/MoneyLog Cloud/txt/' + getSelectedFile())   + '</p>');
-    $("#app-version").html('commit: <a href="http://github.com/xupisco/MoneyLog-Cloud" target="_blank">' + commit_id + '</a>');
+    $("#about-dropbox-version").attr('href', 'http://github.com/xupisco/MoneyLog-Cloud/commit/' + commit_id);
 
     $("#charts").hide();
     
