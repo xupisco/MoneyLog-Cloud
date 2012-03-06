@@ -12,19 +12,15 @@ $(function() {
 
 <div id="login_container">
     <div id="login_logo">
-        MoneyLog:<span style="color: #2b97e9;">cloud</span>
+        MoneyLog <span style="color: #2b97e9;">Cloud</span>
     </div>
     <div id="login_text">
-        <p>Utilize o seu querido e conhecido <a href="http://aurelio.net/moneylog/">MoneyLog</a> de qualquer lugar ou computador.</p>
-        <p style="margin: 13px 0;">Basta acessar utilizando sua conta no Dropbox e pronto!</p>
+		<p style="margin-bottom: 13px;">Esta é a versão online do <a href="http://aurelio.net/moneylog/">MoneyLog</a>, que usa o <a href="http://www.dropbox.com">Dropbox</a> para ler e salvar os seus dados, assim você pode acessar de qualquer lugar!</p>
 
-        <a href="{{ auth_url }}" class="login_connect">Acesse agora!</a>
-        <p class="about">Será criada uma pasta "Moneylog Cloud" dentro da pasta /Apps do seu Dropbox. O aplicativo tem acesso somente aos arquivos dentro desta pasta.</p>
+        <a href="{{ auth_url }}" class="login_connect">Conectar</a>
 
-        <hr class="line_sep" />
-
-        <a href="http://aurelio.net/moneylog/" class="login_btn" target="_blank">Sobre</a><a href="http://www.dropbox.com" class="login_btn" style="margin-right: 0;" target="_blank">Dropbox?</a>
+        <p class="about">Será criada uma pasta "Moneylog Cloud" dentro da pasta /Apps do seu Dropbox. O aplicativo tem acesso somente aos arquivos dentro desta pasta. <a href="http://aurelio.net/moneylog/dropbox/">Saiba mais...</a></p>
     </div>
-    <p class="commit">Source: <a href="http://github.com/xupisco/MoneyLog-Cloud/" title="Alguma dúvida? Veja o source...">Github</a> (<a href="#" id="about-dropbox-version"></a>)</p>
+    <p class="commit">Source: <a href="http://github.com/xupisco/MoneyLog-Cloud/" title="Alguma dúvida? Veja o source...">GitHub</a> (<a href="#" id="about-dropbox-version"></a>)</p>
 </div>
 {% endblock %}
