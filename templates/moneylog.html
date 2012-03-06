@@ -1497,7 +1497,7 @@ var appMode = 'dropbox';  // DO NOT CHANGE
 var appVersion = '5b';
 var appName = 'MoneyLog';
 var appFlavor = '';
-var appRevision = '$Revision: 598 $'.replace(/[^0-9]/g, '');  // automatic, from SVN
+var appRevision = '$Revision: 600 $'.replace(/[^0-9]/g, '');  // automatic, from SVN
 var dropboxAppFolder = '/Apps/MoneyLog Cloud';
 var dropboxTxtFolder = '/txt';
 var dataFirstDate;
@@ -4643,6 +4643,7 @@ function initAppMode() {
 			// Can't use the word Dropbox in app name
 			// https://www.dropbox.com/developers/reference/branding
 			appFlavor = 'Cloud';
+			appVersion = 'r' + appRevision;
 			i18n.appUrl = 'http://moneylog-cloud.aurelio.net';
 			break;
 
