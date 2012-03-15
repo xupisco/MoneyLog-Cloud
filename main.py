@@ -77,10 +77,9 @@ class Login(CoreHandler):
         callback = "http://%s/connect" % (HOST)
         url = sess.build_authorize_url(request_token, oauth_callback=callback)
         data = {
-            'auth_url': url,
-            'file': 'arquivo_salame.txt'
+            'auth_url': url
         }
-        self.generate('error_charset.html', data)
+        self.generate('login.html', data)
 
 
 class Connect(CoreHandler):
