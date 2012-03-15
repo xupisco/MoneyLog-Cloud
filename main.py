@@ -77,9 +77,10 @@ class Login(CoreHandler):
         callback = "http://%s/connect" % (HOST)
         url = sess.build_authorize_url(request_token, oauth_callback=callback)
         data = {
-            'auth_url': url
+            'auth_url': url,
+            'file': 'arquivo_salame.txt'
         }
-        self.generate('login.html', data)
+        self.generate('error_charset.html', data)
 
 
 class Connect(CoreHandler):
@@ -213,12 +214,15 @@ class Main(CoreHandler):
         config_script = "<script type='text/javascript'>\n%s\n\n%s\n\n// Plugins%s</script>" % (ml_config.decode("utf-8"), ml_files_js, plugins)
 
         if not reloading:
-            data = {
-                'ml_data': ml_data.decode('utf-8'),
-                'user_config': config_script,
-                'ml_files': ml_files,
-            }
-            self.generate('moneylog.html', data)
+            try:
+                data = {
+                    'ml_data': ml_data.decode('utf-8'),
+                    'user_config': config_script,
+                    'ml_files': ml_files,
+                }
+                self.generate('moneylog.html', data)
+            except:
+                self.generate('error_charset.html', { 'file': filename} )
         else:
             self.response.out.write(ml_data.decode('utf-8'))
 

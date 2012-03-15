@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}MoneyLog Cloud - Erro{% endblock %}
+
+{% block content %}
+<div id="login_container">
+    <div id="login_logo">
+        MoneyLog <span style="color: #2b97e9;">Cloud</span>
+    </div>
+    <div id="login_text">
+		<p style="margin-bottom: 1px; color: red; font-weight: bold;">Erro de codificação</p>
+		<p style="margin-bottom: 13px;">Todos os seus arquivos TXT devem usar a codificação UTF-8.</p>
+		<p style="margin-bottom: 13px; color: #222;">{{ file }}</p>
+</div>
+{% endblock %}
