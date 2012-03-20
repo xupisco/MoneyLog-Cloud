@@ -6,7 +6,7 @@ function initDropbox(reloading) {
     $("#charts").hide();
 
     // Add logout link...
-    $('#toolbar').append('<p><a id="logout" href="/logout">Logout</a></p>');
+    $('#toolbar-controls-wrapper').append('<div id="logout" style="margin-left: 17px; position: relative; height: 30px;"><a href="/logout">Logout</a></div>');
     
     $.get('/', { reloading: reloading, filename: getSelectedFile() }, function(data) {
         $("#editordata").val(data);
