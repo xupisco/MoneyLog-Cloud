@@ -53,6 +53,7 @@ class CoreHandler(webapp2.RequestHandler):
             return val.value if val else None
         return None
 
+
     def generate(self, template_name, template_values={}):
         values = {
             'request': self.request,
@@ -80,6 +81,12 @@ class Login(CoreHandler):
             'auth_url': url
         }
         self.generate('login.html', data)
+
+
+class Logout(CoreHandler):
+    def get(self):
+        self.set_cookie('access_token_key', False)
+        self.redirect('/')
 
 
 class Connect(CoreHandler):
@@ -229,5 +236,6 @@ class Main(CoreHandler):
 app = webapp2.WSGIApplication([('/', Main),
                                ('/connect', Connect),
                                ('/login', Login),
+                               ('/logout', Logout),
                                ('/update', Update)],
                               debug=_DEBUG)
