@@ -4,6 +4,9 @@ function initDropbox(reloading) {
     $("#about-dropbox-version").html('<a href=http://github.com/xupisco/MoneyLog-Cloud/commit/' + commit_id + '>' + commit_id.slice(0, 6) + '</a>');
 
     $("#charts").hide();
+
+    // Add logout link...
+    $('#toolbar-controls-wrapper').append('<p><a id="logout" href="/logout">Logout</a></p>');
     
     $.get('/', { reloading: reloading, filename: getSelectedFile() }, function(data) {
         $("#editordata").val(data);
