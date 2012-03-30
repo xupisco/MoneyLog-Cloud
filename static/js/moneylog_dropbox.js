@@ -1,3 +1,5 @@
+var db_inited = false
+
 function initDropbox(reloading) {
     reloading = reloading || false
     $("#report").html('<p style=\'text-align: left;\'> ' + i18n.msgLoading.replace('%s', '&lt;Dropbox home&gt;/Apps/MoneyLog Cloud/txt/' + getSelectedFile())   + '</p>');
@@ -6,7 +8,10 @@ function initDropbox(reloading) {
     $("#charts").hide();
 
     // Add logout link...
-    $('#toolbar-controls-wrapper').append('<div id="logout" style="margin-left: 17px; position: relative; height: 30px;"><a href="/logout" style="color: #2B97E9">Logout</a></div>');
+    if(!db_inited) {
+        $('#toolbar-controls-wrapper').append('<div id="logout" style="margin-left: 17px; position: relative; height: 30px;"><a href="/logout" style="color: #2B97E9">Logout</a></div>');
+        db_inited = true;
+    }
     
     $.get('/', { reloading: reloading, filename: getSelectedFile() }, function(data) {
         $("#editordata").val(data);
