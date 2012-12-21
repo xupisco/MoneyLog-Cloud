@@ -10,7 +10,7 @@ Utilize seu querido MoneyLog de qualquer lugar.
 - DB_APPKEY = 'xxxxxxxx'  
 - DB_APPSECRET = 'xxxxxxxx'
 
-Plugins @ [http://github.com/oreio/moneylog-plugins]
+Plugins @ [http://github.com/aureliojargas/moneylog-plugins]
 
 Issaê... thanks ao Aurelio!  
 Hugs!
